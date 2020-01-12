@@ -9,6 +9,6 @@ Digital Pin 9 is audio (PWM) out. Digital 2 and 3 are buttons (2 being used to s
 
 The sketch here is still rough are electrical questions (modulate on the pots directly?) are being explored.
 
-A fritzing sketch is coming.
+A fritzing sketch is included to illustrate the basics.
 
 
