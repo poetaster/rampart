@@ -142,9 +142,9 @@ void updateControl(){
 }
 
 void updateFM() {
-  int note0 = map(kAverageF.next( mozziAnalogRead(FUNDAMENTAL_PIN)), 0, 1023, 24, 68);
-  int noteM = map(kAverageM1.next(mozziAnalogRead(A5)), 0, 1023, 1, 16);
-  int target_note = Q7n0_to_Q7n8(note0 - noteM);
+  int note0 = map(kAverageF.next( mozziAnalogRead(FUNDAMENTAL_PIN)), 0, 1023, 32, 72);
+  int noteM = map(kAverageM1.next(mozziAnalogRead(A5)), 0, 1023, 1, 32);
+  int target_note = Q7n0_to_Q7n8(note0 - noteM)+1;
 /*  Serial.println(note0);
   Serial.println(noteM);
   Serial.println(target_note);*/
@@ -173,8 +173,8 @@ void updateFM() {
     kNoteChangeDelay.start();
   }
   */
-  int modulate = kAverageBw.next(mozziAnalogRead(BANDWIDTH_PIN) ) + kAverageM2.next(mozziAnalogRead(A6)) / 2;
-  int modI = map(modulate, 0,1023,100,450);
+  int modulate = ( kAverageBw.next(mozziAnalogRead(BANDWIDTH_PIN) ) + kAverageM2.next(mozziAnalogRead(A6)) ) / 2;
+  int modI = map(modulate, 0,1023,100,550);
   
   // vary the modulation index
   mod_index = (Q8n8)modI+kModIndex.next();
@@ -192,7 +192,7 @@ void setFreqs(Q8n8 midi_note){
   
   //int dev = map( kAverageM3.next(mozziAnalogRead(A7)), 0,1023,0,mod_index);
 
-  int dev = map(kAverageCf.next(mozziAnalogRead(CENTREFREQ_PIN)) + kAverageM3.next(mozziAnalogRead(A7)) / 2, 0,1023,0,mod_index); 
+  int dev = map( ( kAverageCf.next(mozziAnalogRead(CENTREFREQ_PIN)) + kAverageM3.next(mozziAnalogRead(A7)) / 2 ), 0,1023,0,mod_index); 
   
   mod_freq = ((carrier_freq>>8) * mod_to_carrier_ratio)  ; // (Q16n16>>8)   Q8n8 = Q16n16, beware of overflow
   
