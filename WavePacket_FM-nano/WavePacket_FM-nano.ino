@@ -201,6 +201,7 @@ void setFreqs(Q8n8 midi_note){
   aCarrier.setFreq_Q16n16(carrier_freq);
   aModulator.setFreq_Q16n16(mod_freq);
 
+  Serial.println(mozziAnalogRead(A7));
 
 /*  Serial.println("Mo");
   Serial.println(mod_mod);
