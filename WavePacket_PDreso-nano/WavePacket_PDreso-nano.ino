@@ -45,8 +45,8 @@ EventDelay endNote;
 #define Y A1
 unsigned int x_axis = 512; // give a static value for test without midi
 unsigned int y_axis = 512;
-const IntMap kmapX(0, 1023, 0, 1000); // A
-const IntMap kmapY(0, 1023, 0, 3000); //D
+const IntMap kmapX(0, 1023, 0, 500); // A
+const IntMap kmapY(0, 1023, 0, 1000); //D
 
 // analog freq pins
 #define FUNDAMENTAL_PIN 0
@@ -151,9 +151,9 @@ void fakeMidiRead(int target){
   if(startNote.ready()){
     //
     HandleNoteOn(1,curr_note,127);
-    startNote.set(2000);
+    startNote.set(kmapX(x_axis));
     startNote.start();
-    endNote.set(1000);
+    endNote.set(kmapY(y_axis));
     endNote.start();
   }
   if(endNote.ready()){
