@@ -134,7 +134,7 @@ void updateControl(){
 void updateReso() {
 
   int note0 = map(kAverageF.next( mozziAnalogRead(FUNDAMENTAL_PIN)), 0, 1023, 32, 72);
-  int noteM = map(kAverageM1.next(mozziAnalogRead(A5)), 0, 1023, 1, 32);
+  int noteM = map(kAverageM1.next(mozziAnalogRead(A5)), 0, 1023, 16, 32);
   int target_note = note0 - noteM;
   
   x_axis = ( kAverageCf.next(mozziAnalogRead(CENTREFREQ_PIN)) + kAverageM3.next(mozziAnalogRead(A6)) / 2 );
@@ -151,9 +151,9 @@ void fakeMidiRead(int target){
   if(startNote.ready()){
     //
     HandleNoteOn(1,curr_note,127);
-    startNote.set(kmapX(x_axis));
+    startNote.set(mozziAnalogRead(A6));
     startNote.start();
-    endNote.set(kmapY(y_axis));
+    endNote.set(mozziAnalogRead(A7));
     endNote.start();
   }
   if(endNote.ready()){
