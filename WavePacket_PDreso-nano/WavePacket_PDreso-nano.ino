@@ -140,17 +140,17 @@ void updateReso() {
   x_axis = ( kAverageCf.next(mozziAnalogRead(CENTREFREQ_PIN)) + kAverageM3.next(mozziAnalogRead(A6)) / 2 );
   y_axis = ( kAverageBw.next(mozziAnalogRead(BANDWIDTH_PIN) ) + kAverageM2.next(mozziAnalogRead(A7)) ) / 2;
 
-  fakeMidiRead(target_note);
-
+  //fakeMidiRead(target_note);
+  fakeMidiRead(target_note,x_axis);
   voice.update();
 }
 
-void fakeMidiRead(int target){
+void fakeMidiRead(int target, int velocity){
   static char curr_note;
   curr_note = target;
   if(startNote.ready()){
     //
-    HandleNoteOn(1,curr_note,127);
+    HandleNoteOn(1,curr_note,velocity);
     startNote.set(mozziAnalogRead(A6));
     startNote.start();
     endNote.set(mozziAnalogRead(A7));
