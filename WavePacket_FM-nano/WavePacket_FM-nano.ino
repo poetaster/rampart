@@ -111,7 +111,7 @@ void setup(){
 void updateControl(){  
   
   int knob = mozziAnalogRead(FLT_PIN);
-  byte cutoff_freq = knob>>2;
+  byte cutoff_freq = knob>>4;
 
   lpf.setCutoffFreq(cutoff_freq);
   
@@ -142,9 +142,9 @@ void updateControl(){
 }
 
 void updateFM() {
-  int note0 = map(kAverageF.next( mozziAnalogRead(FUNDAMENTAL_PIN)), 0, 1023, 32, 72);
-  int noteM = map(kAverageM1.next(mozziAnalogRead(A5)), 0, 1023, 1, 32);
-  int target_note = Q7n0_to_Q7n8(note0 - noteM)+1;
+  int note0 = map(mozziAnalogRead(FUNDAMENTAL_PIN), 0, 1023, 200, 10000);
+  int noteM = map(mozziAnalogRead(A5), 0, 1023, 100, 10000);
+  int target_note = note0 + noteM /2;
 /*  Serial.println(note0);
   Serial.println(noteM);
   Serial.println(target_note);*/
@@ -173,8 +173,8 @@ void updateFM() {
     kNoteChangeDelay.start();
   }
   */
-  int modulate = ( kAverageBw.next(mozziAnalogRead(BANDWIDTH_PIN) ) + kAverageM2.next(mozziAnalogRead(A6)) ) / 2;
-  int modI = map(modulate, 0,1023,100,550);
+  int modulate = ( mozziAnalogRead(BANDWIDTH_PIN)  + mozziAnalogRead(A6) ) / 2;
+  int modI = map(modulate, 0,1023,200,2800);
   
   // vary the modulation index
   mod_index = (Q8n8)modI+kModIndex.next();
@@ -192,7 +192,7 @@ void setFreqs(Q8n8 midi_note){
   
   //int dev = map( kAverageM3.next(mozziAnalogRead(A7)), 0,1023,0,mod_index);
 
-  int dev = map( ( kAverageCf.next(mozziAnalogRead(CENTREFREQ_PIN)) + kAverageM3.next(mozziAnalogRead(A7)) / 2 ), 0,1023,0,mod_index); 
+  int dev = map( ( mozziAnalogRead(CENTREFREQ_PIN) + mozziAnalogRead(A7) / 2 ), 0,1023,0,mod_index); 
   
   mod_freq = ((carrier_freq>>8) * mod_to_carrier_ratio)  ; // (Q16n16>>8)   Q8n8 = Q16n16, beware of overflow
   
@@ -223,9 +223,9 @@ void updateWavePacket(){
   Serial.println(mozziAnalogRead(A7));
  */ 
   wavey.set( 
-     (kAverageF.next( mozziAnalogRead(FUNDAMENTAL_PIN)) + kAverageM1.next(mozziAnalogRead(A5) ) / 2) -100 >>1  ,
-     kAverageBw.next(mozziAnalogRead(BANDWIDTH_PIN) ) + kAverageM2.next(mozziAnalogRead(A6)) /2 -100  , 
-     kAverageCf.next(2*mozziAnalogRead(CENTREFREQ_PIN)) + kAverageM3.next(mozziAnalogRead(A7)>>1) / 2 -100
+     (mozziAnalogRead(FUNDAMENTAL_PIN) + mozziAnalogRead(A5)  / 2) -10 >>1  ,
+     (mozziAnalogRead(BANDWIDTH_PIN)  + mozziAnalogRead(A6) /2 ) -10  , 
+     (2*mozziAnalogRead(CENTREFREQ_PIN) + mozziAnalogRead(A7)>>1 / 2) -10
   );
 }
 
