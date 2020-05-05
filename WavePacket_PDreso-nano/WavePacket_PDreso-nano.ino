@@ -133,7 +133,7 @@ void updateControl(){
 
 void updateReso() {
 
-  int note0 = map(kAverageF.next( mozziAnalogRead(FUNDAMENTAL_PIN)), 0, 1023, 32, 72);
+  int note0 = map(kAverageF.next( mozziAnalogRead(FUNDAMENTAL_PIN)), 0, 1023, 24, 72);
   int noteM = map(kAverageM1.next(mozziAnalogRead(A5)), 0, 1023, 16, 32);
   int target_note = note0 - noteM;
   

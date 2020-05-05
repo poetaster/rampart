@@ -223,9 +223,9 @@ void updateWavePacket(){
   Serial.println(mozziAnalogRead(A7));
  */ 
   wavey.set( 
-     (kAverageF.next( mozziAnalogRead(FUNDAMENTAL_PIN)) + kAverageM1.next(mozziAnalogRead(A5) ) / 2)>>1  ,
-     kAverageBw.next(mozziAnalogRead(BANDWIDTH_PIN) ) + kAverageM2.next(mozziAnalogRead(A6)) /2  , 
-     kAverageCf.next(2*mozziAnalogRead(CENTREFREQ_PIN)) + kAverageM3.next(mozziAnalogRead(A7)>>1) / 2 
+     (kAverageF.next( mozziAnalogRead(FUNDAMENTAL_PIN)) + kAverageM1.next(mozziAnalogRead(A5) ) / 2) -100 >>1  ,
+     kAverageBw.next(mozziAnalogRead(BANDWIDTH_PIN) ) + kAverageM2.next(mozziAnalogRead(A6)) /2 -100  , 
+     kAverageCf.next(2*mozziAnalogRead(CENTREFREQ_PIN)) + kAverageM3.next(mozziAnalogRead(A7)>>1) / 2 -100
   );
 }
 
