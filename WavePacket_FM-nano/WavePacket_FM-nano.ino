@@ -80,7 +80,7 @@ Q8n8 mod_to_carrier_ratio = float_to_Q8n8(3.f);
 EventDelay kNoteChangeDelay;
 
 // for note changes
-Q7n8 target_note, note0, note1, note_upper_limit, note_lower_limit, note_change_step, smoothed_note;
+Q7n8 last_note, target_note, note0, note1, note_upper_limit, note_lower_limit, note_change_step, smoothed_note;
 
 // Inefficient, but...until there is a better Smooth....
 Smooth <int> kSmoothNote(0.95f);
@@ -102,6 +102,7 @@ void setup(){
   kNoteChangeDelay.set(768); // ms countdown, taylored to resolution of CONTROL_RATE
   kModIndex.setFreq(.768f); // sync with kNoteChangeDelay
   target_note = note0;
+  last_note = target_note;
   note_change_step = Q7n0_to_Q7n8(3);
   note_upper_limit = Q7n0_to_Q7n8(72);
   note_lower_limit = Q7n0_to_Q7n8(24);
@@ -139,34 +140,40 @@ void updateControl(){
 
 void updateFM() {
 
-  int knob = map(mozziAnalogRead(FLT_PIN),0,1023,1,255);
+  int knob = map(mozziAnalogRead(FLT_PIN),0,1023,8,512);
   byte cutoff_freq = knob>>4;
   //kAverageF.next( mozziAnalogRead(FUNDAMENTAL_PIN)>>1 ) + kAverageM1.next(mozziAnalogRead(A5)>>1 ) / 2  ,
   int note0 = map(mozziAnalogRead(FUNDAMENTAL_PIN), 0, 1023, 200, 10000);
   int noteM = map(mozziAnalogRead(A5), 0, 1023, 100, 10000);
   int target_note = note0 + noteM /2;
-    
+  
+  
+  
   if(kNoteChangeDelay.ready()){
 
-
+    
     // choose envelope levels
-    byte attack_level = rand(knob)+127;
-    byte decay_level = rand(knob)+64;
+    byte attack_level = knob+256;
+    byte decay_level = knob+127;
     envelope.setADLevels(attack_level,decay_level);
     unsigned int new_value = knob;
        attack = new_value;
-       decay = map(new_value,1,255,8,127) ;
-       sustain = map(new_value,1,255,8,127);
-       release_ms = 255 - new_value;
+       decay = attack + 64; //map(new_value,1,255,64,256) ;
+       sustain = decay; //map(new_value,1,255,64,256);
+       release_ms = attack;
 
-     envelope.setTimes(attack,decay,sustain,release_ms);    
-     envelope.noteOn();
+     envelope.setTimes(attack,decay,sustain,release_ms);
+          
+      //envelope.noteOff();
+      envelope.noteOn();
+
 
     // reset eventdelay
     kNoteChangeDelay.start(attack+decay+sustain+release_ms);
   }
 
   envelope.update();
+  last_note = target_note;
   //Serial.println(target_note);
   int modulate = ( mozziAnalogRead(BANDWIDTH_PIN)  + mozziAnalogRead(A6) ) / 2;
   int modI = map(modulate, 0,1023,200,2800);
@@ -176,6 +183,7 @@ void updateFM() {
   
   //smoothed_note = kSmoothNote.next(target_note);
   setFreqs(target_note);
+  
   
 }
 
