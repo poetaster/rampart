@@ -122,10 +122,10 @@ void updateControl(){
 
    if (buttonState == 1) {
     // turn LED on:
-    digitalWrite(13, HIGH);
+    digitalWrite(13, LOW);
   } else {
     // turn LED off:
-    digitalWrite(13, LOW);
+    digitalWrite(13, HIGH);
   }
   
 }
