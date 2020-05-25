@@ -205,9 +205,9 @@ void setFreqs(Q8n8 midi_note){
 
 void updateWavePacket(){
   wavey.set( 
-     (mozziAnalogRead(FUNDAMENTAL_PIN) + mozziAnalogRead(A5)  / 2) -10   ,
-     (mozziAnalogRead(BANDWIDTH_PIN)  + mozziAnalogRead(A6) /2 ) -10  , 
-     (2*mozziAnalogRead(CENTREFREQ_PIN) + mozziAnalogRead(A7)>>1 / 2) -10
+     (mozziAnalogRead(FUNDAMENTAL_PIN) + mozziAnalogRead(A5)  / 2) +1   ,
+     (mozziAnalogRead(BANDWIDTH_PIN)  + mozziAnalogRead(A6) /2 )  , 
+     (2*mozziAnalogRead(CENTREFREQ_PIN) + mozziAnalogRead(A7)>>1 / 2)
   );
 }
 
