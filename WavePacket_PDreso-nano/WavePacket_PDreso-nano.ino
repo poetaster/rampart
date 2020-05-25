@@ -102,15 +102,18 @@ void updateControl(){
   
   //int knob = mozziAnalogRead(FLT_PIN);
   //byte cutoff_freq = knob>>2;
-
-  
-  if (digitalRead(B2_PIN) == HIGH && buttonState < 2) {
+  static int previous2;
+  int current2 = digitalRead(B2_PIN);
+  if (previous2 == LOW && current2 == HIGH) {
     if(buttonState == 1) {
-       buttonState -= 1;
+       buttonState = 0;
     } else {
-      buttonState +=1;
+      buttonState = 1;
     }
   }
+  previous2 = current2;  
+
+  
   
   //Serial.println(buttonState);
   //Serial.println(digitalRead(B2_PIN));

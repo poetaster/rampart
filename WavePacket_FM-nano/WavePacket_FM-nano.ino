@@ -116,13 +116,16 @@ void setup(){
 
 void updateControl(){  
 
-  if (digitalRead(B2_PIN) == HIGH && buttonState < 2) {
+  static int previous2;
+  int current2 = digitalRead(B2_PIN);
+  if (previous2 == LOW && current2 == HIGH) {
     if(buttonState == 1) {
-       buttonState -= 1;
+       buttonState = 0;
     } else {
-      buttonState +=1;
+      buttonState = 1;
     }
-  }  
+  }
+  previous2 = current2; 
   if ( buttonState == 0 ) {
     updateWavePacket();   
   } else if ( buttonState == 1 ) {
