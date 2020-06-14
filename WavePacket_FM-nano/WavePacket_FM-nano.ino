@@ -146,9 +146,9 @@ void updateFM() {
   int knob = map(mozziAnalogRead(FLT_PIN),0,1023,8,512);
   byte cutoff_freq = knob>>4;
   //kAverageF.next( mozziAnalogRead(FUNDAMENTAL_PIN)>>1 ) + kAverageM1.next(mozziAnalogRead(A5)>>1 ) / 2  ,
-  int note0 = map(mozziAnalogRead(FUNDAMENTAL_PIN), 0, 1023, 200, 10000);
-  int noteM = map(mozziAnalogRead(A5), 0, 1023, 100, 10000);
-  int target_note = note0 + noteM /2;
+  int note0 = map(mozziAnalogRead(FUNDAMENTAL_PIN), 0, 1023, 24, 96);
+  int noteM = map(mozziAnalogRead(A5), 0, 1023, 0, 12);
+  int target_note = note0 - noteM ;
   
   
   
@@ -178,7 +178,7 @@ void updateFM() {
   envelope.update();
   last_note = target_note;
   //Serial.println(target_note);
-  int modulate = ( mozziAnalogRead(BANDWIDTH_PIN)  + mozziAnalogRead(A6) ) / 2;
+  int modulate = ( mozziAnalogRead(BANDWIDTH_PIN) + mozziAnalogRead(A6) ) / 2 ;
   int modI = map(modulate, 0,1023,200,2800);
   
   // vary the modulation index
@@ -195,7 +195,7 @@ void setFreqs(Q8n8 midi_note){
 
   carrier_freq = Q16n16_mtof(Q8n8_to_Q16n16(midi_note)); // convert midi note to fractional frequency  
   //int dev = map( kAverageM3.next(mozziAnalogRead(A7)), 0,1023,0,mod_index);
-  int dev = map( ( mozziAnalogRead(CENTREFREQ_PIN) + mozziAnalogRead(A7) / 2 ), 0,1023,0,mod_index);  
+  int dev =  map( mozziAnalogRead(A7),0,1023,0,mod_index) + mod_index /2;  
   mod_freq = ((carrier_freq>>8) * mod_to_carrier_ratio)  ; // (Q16n16>>8)   Q8n8 = Q16n16, beware of overflow  
   deviation = ((mod_freq>>16) * dev); // (Q16n16>>16)   Q8n8 = Q24n8, beware of overflow was * mod_index  
   aCarrier.setFreq_Q16n16(carrier_freq);
@@ -205,8 +205,8 @@ void setFreqs(Q8n8 midi_note){
 
 void updateWavePacket(){
   wavey.set( 
-     (mozziAnalogRead(FUNDAMENTAL_PIN) + mozziAnalogRead(A5)  / 2) +1   ,
-     (mozziAnalogRead(BANDWIDTH_PIN)  + mozziAnalogRead(A6) /2 )  , 
+     (mozziAnalogRead(FUNDAMENTAL_PIN) - map(mozziAnalogRead(A5),  0,1023,0,255) )+1   ,
+     (mozziAnalogRead(BANDWIDTH_PIN)  - map(mozziAnalogRead(A6),  0,1023,10,255) )+10  , 
      (2*mozziAnalogRead(CENTREFREQ_PIN) + mozziAnalogRead(A7)>>1 / 2)
   );
 }
