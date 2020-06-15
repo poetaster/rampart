@@ -1,17 +1,7 @@
-/*  Example of Wavepacket synthesis, using Mozzi sonification library.
-    This sketch draws on Miller Puckette's 
-    Pure Data example, F14.wave.packet.pd, with
-    two overlapping streams of wave packets.
-  
-    Circuit:
-      Audio output on DAC/A14 on Teensy 3.0, 3.1, 
-      or digital pin 9 on a Uno or similar, or 
-      check the README or http://sensorium.github.com/Mozzi/
-  
-    Mozzi help/discussion/announcements:
-    https://groups.google.com/forum/#!forum/mozzi-users
-  
-    Tim Barrass 2013, CC by-nc-sa.
+/*   This program is based on the Mozzi examples WavePacket_Double and FMsynth
+*    Mark Washeim <blueprint@poetaster.de) 2020, public domain. 
+*    
+*    Tim Barrass 2013, CC by-nc-sa.
 */
  
 //#include <ADC.h>  // Teensy 3.0/3.1 uncomment this line and install http://github.com/pedvide/ADC
@@ -35,9 +25,9 @@
 #define CENTREFREQ_PIN 2
 
 // modulation pins analog
-#define M1_PIN 5
-#define M1_PIN 6
-#define M1_PIN 7
+#define M1P 5
+#define M2P 6
+#define M3P 7
 #define FLT_PIN 3
 
 // button pins digita
@@ -148,14 +138,14 @@ void updateFM() {
   //byte cutoff_freq = knob>>4;
   //kAverageF.next( mozziAnalogRead(FUNDAMENTAL_PIN)>>1 ) + kAverageM1.next(mozziAnalogRead(A5)>>1 ) / 2  ,
   int note0 = map(mozziAnalogRead(FUNDAMENTAL_PIN), 0, 1023, 200, 10000);
-  int noteM = map(mozziAnalogRead(A5), 0, 1023, 200, 10000);
+  int noteM = map(mozziAnalogRead(M1P), 0, 1023, 200, 10000);
   int target_note = note0 + noteM /2;
   
   
   if(kNoteChangeDelay.ready()){
      int attack = map(mozziAnalogRead(A3),0,1023,8,384);
      unsigned int duration = map(mozziAnalogRead(A2),0,1023,attack,768);
-     duration = duration + map(mozziAnalogRead(A7), 0, 1023, 0, 192);
+     duration = duration + map(mozziAnalogRead(M3P), 0, 1023, 0, 192);
 
     decay = duration - attack; //map(new_value,1,255,64,256) ;
 
@@ -163,16 +153,16 @@ void updateFM() {
     // reset eventdelay
     kNoteChangeDelay.start(duration);
   }
-  Serial.println(mozziAnalogRead(CENTREFREQ_PIN));
-  Serial.println('-');
-  Serial.println(mozziAnalogRead(BANDWIDTH_PIN));
+  //Serial.println(mozziAnalogRead(CENTREFREQ_PIN));
+  //Serial.println('-');
+  //Serial.println(mozziAnalogRead(BANDWIDTH_PIN));
   //envelope.update();
   gain = (int) envelope.next();
   
   last_note = target_note;
   //Serial.println(target_note);
   
-  int modulate = ( mozziAnalogRead(BANDWIDTH_PIN)  + mozziAnalogRead(A6) ) / 2;
+  int modulate = ( mozziAnalogRead(BANDWIDTH_PIN)  + mozziAnalogRead(M2P) ) / 2;
   int modI = map(modulate, 0,1023,200,2800);
   
   // vary the modulation index
@@ -199,9 +189,9 @@ void setFreqs(Q8n8 midi_note){
 
 void updateWavePacket(){
   wavey.set( 
-     (mozziAnalogRead(FUNDAMENTAL_PIN) - map(mozziAnalogRead(A5),  0,1023,0,255) )+1   ,
-     (mozziAnalogRead(BANDWIDTH_PIN)  - map(mozziAnalogRead(A6),  0,1023,10,255) )+10  , 
-     (2*mozziAnalogRead(CENTREFREQ_PIN) + mozziAnalogRead(A7)>>1 / 2)
+     (mozziAnalogRead(FUNDAMENTAL_PIN) - map(mozziAnalogRead(M1P),  0,1023,0,255) )+1   ,
+     (mozziAnalogRead(BANDWIDTH_PIN)  - map(mozziAnalogRead(M2P),  0,1023,10,255) )+10  , 
+     (2*mozziAnalogRead(CENTREFREQ_PIN) + mozziAnalogRead(M3P)>>1 / 2)
   );
 }
 
