@@ -1,0 +1,32 @@
+E(2,3) = {1,1,0,} = (12) (West Africa, Latin America, Nubia, Northern Canada)0,
+E(2,5) = {1,0, 1,0, 0,} = (23) (classical music, jazz, Greece, Macedonia, Namibia, Persia, Rwanda), (authentic
+aksak)0,
+E(2,7) = {1,0, 0, 1,0, 0, 0,} = (34) (classical music)0,
+E(3,4) = {1,1,1,0,} = (112) (Brazil, Bali rhythms), (Colombia, Greece, Spain, Persia, Trinidad necklaces)0,
+E(3,7) = {1,0, 1,0, 1,0, 0,} = (223) (Bulgaria, Greece, Sudan, Turkestan), (authentic aksak)0,
+E(3,10) = {1,0, 0, 1,0, 0, 1,0, 0, 0,} = (334) (Tuareg necklace)0,
+E(4,5) = {1,1,1,1,0,} = (1112) (Greece)0,
+E(4,9) = {1,0, 1,0, 1,0, 1,0, 0,} = (2223) (Greece, Macedonia, Turkey, Za¨ıre), (quasi-aksak)0,
+E(5,6) = {1,1,1,1,1,0,} = (11112) (Arab)0,
+16
+E(5,11) = {1,0, 1,0, 1,0, 1,0, 1,0, 0,} = (22223) (classical music, Bulgaria, Northern India, Serbia), (authentic aksak)0,
+E(5,16) = {1,0, 0, 1,0, 0, 1,0, 0, 1,0, 0, 1,0, 0, 0, 0,} = (33334) (Brazilian, West African necklaces)0,
+E(6,7) = {1,1,1,1,1,1,0,} = (111112) (Greek necklace)
+E(6,13) = {1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 0,} = (222223) (Macedonia), (authentic aksak)0,
+E(7,8) = {1,1,1,1,1,1,1,0,} = (1111112) (Libyan necklace)0,
+E(7,15) = {1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 0,} = (2222223) (Bulgarian necklace), (quasi-aksak)0,
+E(8,17) = {1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 0,} = (22222223) (Bulgaria), (authentic aksak)0,
+The following Euclidean rhythms are reverse Euclidean strings:
+E(3,5) = {1,0, 1,0, x} = (221) (India), (Korean, Rumanian, Persian necklaces)0,
+E(3,8) = {1,0, 0, 1,0, 0, 1,0,} = (332) (Central Africa, Greece, India, Latin America, West Africa, Sudan), (pseudoaksak)0,
+E(3,11) = {1,0, 0, 0, 1,0, 0, 0, 1,0, 0,} = (443) (North India)0,
+E(3,14) = {1,0, 0, 0, 0, 1,0, 0, 0, 0, 1,0, 0, 0,} = (554) (North India)0,
+E(4,7) = {1,0, 1,0, 1,0, x} = (2221) (Bulgaria)0,
+E(4,11) = {1,0, 0, 1,0, 0, 1,0, 0, 1,0,} = (3332) (Southern India rhythm), (Serbian necklace), (authentic aksak)0,
+E(4,15) = {1,0, 0, 0, 1,0, 0, 0, 1,0, 0, 0, 1,0, 0,} = (4443) (North India)0,
+E(5,7) = {1,0, 1,1,0, 1,x} = (21211) (Arab)0,
+E(5,9) = {1,0, 1,0, 1,0, 1,0, x} = (22221) (Arab)0,
+E(5,12) = {1,0, 0, 1,0, 1,0, 0, 1,0, 1,0,} = (32322) (Macedonia, South Africa), (pseudo-aksak)0,
+E(7,9) = {1,0, 1,1,1,0, 1,1,x} = (2112111) (Greece)0,
+E(7,10) = {1,0, 1,1,0, 1,1,0, 1,x} = (2121211) (Turkey)0,
+E(7,16) = {1,0, 0, 1,0, 1,0, 1,0, 0, 1,0, 1,0, 1,0,} = (3223222) (Brazilian, M
