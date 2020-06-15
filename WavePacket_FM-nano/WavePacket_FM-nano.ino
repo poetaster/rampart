@@ -178,7 +178,6 @@ void updateFM() {
 void setFreqs(Q8n8 midi_note){
 
   carrier_freq = Q16n16_mtof(Q8n8_to_Q16n16(midi_note)); // convert midi note to fractional frequency  
-  //int dev = map( kAverageM3.next(mozziAnalogRead(A7)), 0,1023,0,mod_index);
   //int dev = map( ( mozziAnalogRead(CENTREFREQ_PIN) + mozziAnalogRead(A7) / 2 ), 0,1023,0,mod_index);  
   mod_freq = ((carrier_freq>>8) * mod_to_carrier_ratio)  ; // (Q16n16>>8)   Q8n8 = Q16n16, beware of overflow  
   deviation = ((mod_freq>>16) * mod_index); // (Q16n16>>16)   Q8n8 = Q24n8, beware of overflow was * mod_index  
