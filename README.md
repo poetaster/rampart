@@ -2,7 +2,7 @@
 An arduino semi-modular synth companion to keep, moat and bastl's kastle.
 
 The prototype uses an Arduino Nano. The Mozzi library is used for synthesis.
-
+![laser cut and etched prototype, v2](rampart_v2.jpg)
 ![BreadBoard view](https://github.com/poetaster/rampart/raw/master/rampart_bb.jpg)
 
 Analog Pins 0-3 are potentionmeters. Analog pins 4-7 (4 not yet used) are used for modulation signal inputs.
