@@ -1,9 +1,9 @@
 /*   This program is based on the Mozzi examples WavePacket_Double and FMsynth
-*    Mark Washeim <blueprint@poetaster.de) 2020, public domain. 
-*    
-*    Tim Barrass 2013, CC by-nc-sa.
+     Mark Washeim <blueprint@poetaster.de) 2020, public domain.
+
+     Tim Barrass 2013, CC by-nc-sa.
 */
- 
+
 //#include <ADC.h>  // Teensy 3.0/3.1 uncomment this line and install http://github.com/pedvide/ADC
 #include <MozziGuts.h>
 #include <mozzi_analog.h>
@@ -78,18 +78,18 @@ Smooth <int> kSmoothNote(0.95f);
 
 
 // variables will change: 1-3
-int buttonState = 0; 
+int buttonState = 0;
 
 
-void setup(){
-  
+void setup() {
+
   Serial.begin(115200);
   // initialize the pushbutton pin as an input:
   pinMode(B2_PIN, INPUT);
   pinMode(B3_PIN, INPUT);
   pinMode(13, OUTPUT);
-  
-// FMsetup
+
+  // FMsetup
   kNoteChangeDelay.set(768); // ms countdown, taylored to resolution of CONTROL_RATE
   kModIndex.setFreq(.768f); // sync with kNoteChangeDelay
   target_note = note0;
@@ -100,56 +100,61 @@ void setup(){
   note0 = note_lower_limit;
   note1 = note_lower_limit + Q7n0_to_Q7n8(5);
   // for the env
-  randSeed(); // fresh random 
+  randSeed(); // fresh random
   startMozzi(CONTROL_RATE);
 }
 
 
-void updateControl(){  
+void updateControl() {
 
   static int previous2;
   int current2 = digitalRead(B2_PIN);
   if (previous2 == LOW && current2 == HIGH) {
-    if(buttonState == 1) {
-       buttonState = 0;
+    if (buttonState == 1) {
+      buttonState = 0;
     } else {
       buttonState = 1;
     }
   }
-  previous2 = current2; 
+  previous2 = current2;
   if ( buttonState == 0 ) {
-    updateWavePacket();   
+    updateWavePacket();
   } else if ( buttonState == 1 ) {
     updateFM();
   }
-   if (buttonState == 1) {
+  if (buttonState == 1) {
     // turn LED on:
     digitalWrite(13, HIGH);
   } else {
     // turn LED off:
     digitalWrite(13, LOW);
   }
-  
+
 }
 
 void updateFM() {
 
-  
+
   //byte cutoff_freq = knob>>4;
   //kAverageF.next( mozziAnalogRead(FUNDAMENTAL_PIN)>>1 ) + kAverageM1.next(mozziAnalogRead(A5)>>1 ) / 2  ,
   int note0 = map(mozziAnalogRead(FUNDAMENTAL_PIN), 0, 1023, 200, 10000);
-  int noteM = map(mozziAnalogRead(M1P), 0, 1023, 200, 10000);
-  int target_note = note0 + noteM /2;
-  
-  
-  if(kNoteChangeDelay.ready()){
-     int attack = map(mozziAnalogRead(A3),0,1023,8,384);
-     unsigned int duration = map(mozziAnalogRead(A2),0,1023,attack,768);
-     duration = duration + map(mozziAnalogRead(M3P), 0, 1023, 0, 192);
+  int noteM = map(mozziAnalogRead(M1P), 0, 1023, 0, 10000);
+  int target_note = note0 + noteM / 2;
 
+
+  if (kNoteChangeDelay.ready()) {
+    int attack = map(mozziAnalogRead(A3), 0, 1023, 8, 384);
+    if ( attack % 2 != 0 ) {
+      attack = attack + 1;
+    }
+    unsigned int duration = map(mozziAnalogRead(A2), 0, 1023, attack, 1024);
+    duration = duration + map(mozziAnalogRead(M3P), 0, 1023, 0, 384);
+    if ( duration % 2 != 0 ) {
+      duration = duration + 1;
+    }
     decay = duration - attack; //map(new_value,1,255,64,256) ;
 
-    envelope.start(attack,decay);
+    envelope.start(attack, decay);
     // reset eventdelay
     kNoteChangeDelay.start(duration);
   }
@@ -158,53 +163,53 @@ void updateFM() {
   //Serial.println(mozziAnalogRead(BANDWIDTH_PIN));
   //envelope.update();
   gain = (int) envelope.next();
-  
+
   last_note = target_note;
   //Serial.println(target_note);
-  
+
   int modulate = ( mozziAnalogRead(BANDWIDTH_PIN)  + mozziAnalogRead(M2P) ) / 2;
-  int modI = map(modulate, 0,1023,200,2800);
-  
+  int modI = map(modulate, 0, 1023, 200, 2800);
+
   // vary the modulation index
-  mod_index = (Q8n8)modI+kModIndex.next();
-  
+  mod_index = (Q8n8)modI + kModIndex.next();
+
   //smoothed_note = kSmoothNote.next(target_note);
   setFreqs(target_note);
-  
-  
+
+
 }
 
 //FM
-void setFreqs(Q8n8 midi_note){
+void setFreqs(Q8n8 midi_note) {
 
-  carrier_freq = Q16n16_mtof(Q8n8_to_Q16n16(midi_note)); // convert midi note to fractional frequency  
-  //int dev = map( ( mozziAnalogRead(CENTREFREQ_PIN) + mozziAnalogRead(A7) / 2 ), 0,1023,0,mod_index);  
-  mod_freq = ((carrier_freq>>8) * mod_to_carrier_ratio)  ; // (Q16n16>>8)   Q8n8 = Q16n16, beware of overflow  
-  deviation = ((mod_freq>>16) * mod_index); // (Q16n16>>16)   Q8n8 = Q24n8, beware of overflow was * mod_index  
+  carrier_freq = Q16n16_mtof(Q8n8_to_Q16n16(midi_note)); // convert midi note to fractional frequency
+  //int dev = map( ( mozziAnalogRead(CENTREFREQ_PIN) + mozziAnalogRead(A7) / 2 ), 0,1023,0,mod_index);
+  mod_freq = ((carrier_freq >> 8) * mod_to_carrier_ratio)  ; // (Q16n16>>8)   Q8n8 = Q16n16, beware of overflow
+  deviation = ((mod_freq >> 16) * mod_index); // (Q16n16>>16)   Q8n8 = Q24n8, beware of overflow was * mod_index
   aCarrier.setFreq_Q16n16(carrier_freq);
   aModulator.setFreq_Q16n16(mod_freq);
 
 }
 
-void updateWavePacket(){
-  wavey.set( 
-     (mozziAnalogRead(FUNDAMENTAL_PIN) - map(mozziAnalogRead(M1P),  0,1023,0,255) )+1   ,
-     (mozziAnalogRead(BANDWIDTH_PIN)  - map(mozziAnalogRead(M2P),  0,1023,10,255) )+10  , 
-     (2*mozziAnalogRead(CENTREFREQ_PIN) + mozziAnalogRead(M3P)>>1 / 2)
+void updateWavePacket() {
+  wavey.set(
+    (mozziAnalogRead(FUNDAMENTAL_PIN) - map(mozziAnalogRead(M1P),  0, 1023, 8, 256) ) + 1   ,
+    (mozziAnalogRead(BANDWIDTH_PIN)  - map(mozziAnalogRead(M2P),  0, 1023, 8, 256) ) + 1  ,
+    (2 * mozziAnalogRead(CENTREFREQ_PIN) + mozziAnalogRead(M3P) >> 1 / 2)
   );
 }
 
-int updateAudio(){
-  
+int updateAudio() {
+
   if ( buttonState == 0 ) {
     return wavey.next()  >> 8;
   } else if ( buttonState == 1 ) {
     Q15n16 modulation = deviation * aModulator.next() >> 8;
-    return (gain*(int)aCarrier.phMod(modulation))>>8;   
+    return (gain * (int)aCarrier.phMod(modulation)) >> 8;
   }
-   
+
 }
 
-void loop(){
+void loop() {
   audioHook(); // required here
 }
