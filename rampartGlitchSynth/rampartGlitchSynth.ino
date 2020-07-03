@@ -22,14 +22,15 @@ const int KNOB_PIN_1   = 1; // Analog input pin 1
 const int KNOB_PIN_2   = 2; // Analog input pin 2
 const int LDR1_PIN     = 3; // Analog input for fm_intensity to pin 1
 const int BUTTON_PIN   = 2;// Digital input pin 2
-const int BUTTON_PIN_1 = 3; // Digital input pin 3
-const int BUTTON_PIN_2 = 4; // Digital input pin 4
+const int BUTTON_PIN_1 = 4; // Digital input pin 3
+const int BUTTON_PIN_2 = 3; // Digital input pin 4
 const int BUTTON_PIN_3 = 8; // Digital input pin 8
 const int LED_PIN      = 6;// Digital output pin 6  Red LED
 const int LED_PIN_1    = 13; // Digital output pin 13 Green LED
 
 int brightness = 0;    // how bright the LED is
 int fadeAmount = 5;
+int bandwidthMod = 0;
 
 //A mess of variables with silly names but perfectly reasonable functions
 int heck    = 3;
@@ -59,6 +60,9 @@ int buttonState  = 0;
 int buttonState1 = 0;
 int buttonState2 = 0;
 int buttonState3 = 0;
+
+
+int adjCon = 20;
 
 // for smoothing the control signals
 // use: RollingAverage <number_type, how_many_to_average> myThing
@@ -96,19 +100,23 @@ void updateControl()
   int knobby = mozziAnalogRead(KNOB_PIN) + 1;
   int knibby = mozziAnalogRead(KNOB_PIN_1) + 1;
   int knab = knibby / 10;
+
+
+  // input A4.
+  if (reading > 20 )  {
+       knibby = (knibby + reading) / 2;
+       
+  } 
+ 
+  //Serial.println(reading);
   
   buttonState = digitalRead(BUTTON_PIN);
   buttonState1 = digitalRead(BUTTON_PIN_1);
   buttonState2 = digitalRead(BUTTON_PIN_2);
   buttonState3 = digitalRead(BUTTON_PIN_3);
   int bandwidth = mozziAnalogRead(LDR1_PIN);
-  int bandwidthMod = 0;
+  
   bandwidthMod = mozziAnalogRead(7); // rampart second input pin
-  // if we have a modulating signal, use it to modify bandwidth
-  if ( bandwidthMod > 300 ) {
-    bandwidth = bandwidth + bandwidthMod / 2 ;
-    Serial.println(bandwidthMod);
-  }
   
   int fundamental = bandwidth ;
   fundamental = kMapF(fundamental);
@@ -139,7 +147,8 @@ void updateControl()
   }
 
   if (buttonState1 == HIGH)
-  {
+  {   
+    //Serial.println("one");
     button1 = button1 + 1;
     if (button1 > 250)
     {
@@ -149,6 +158,7 @@ void updateControl()
 
   if (buttonState2 == HIGH)
   {
+    //Serial.println("two");
     button2 = button2 + 1;
     if (button2 > 250)
     {
@@ -158,6 +168,7 @@ void updateControl()
 
   if (buttonState == HIGH)
   {
+    //Serial.println("three");
     button3 = button3 + 1;
     if (button3 > 250)
     {
@@ -165,9 +176,10 @@ void updateControl()
     }
   }
 
+  
   alright = alright + 1;
   con = (thirdknob / 20) + 4;
-
+  
   if (alright > 7)
   {
     alright = 0;
@@ -208,31 +220,46 @@ void updateControl()
     centre_freq = centre_freq + con;
   }
 
-  // this was a button3 only thing.
-  if (buttonState3 == HIGH || buttonState2 == HIGH )
-  {
+  // random all this was a button3 only thing.
+  if (buttonState3 == HIGH && buttonState2 == HIGH )  {
     int choose = random(3);
     switch (choose) {
       case 1:
         button1 = random(300 - button1);
+        Serial.println(button1);
         break;
       case 2:
         button3 = random(300 - button3);
+        Serial.println(button2);
         break;
       case 3:
         button2 = random(300 - button2);
+        Serial.println(button3);
         break;
 
     }
   }
-    // input A4.
-  if (reading > 700 )  {
-       button1 = random(reading/5);
-       //Serial.println(button3);
+  
+
+  
+  //reset
+  if (buttonState1 == HIGH && buttonState2 == HIGH )  {
+    button1 = 0;
+    button2 = 0;
+    button3 = 0;
   }
 
+  // if we have a modulating signal, use it to modify bandwidth
+  if ( bandwidthMod > 50 ) {
+    bandwidth = (bandwidth + bandwidthMod) / 2  ;
+    //Serial.println(bandwidthMod);
+  } else {
+    bandwidth = (brightness * 14) + (knobby / 2);
+  }
+  //Serial.println(bandwidth);
+  
   cons = (con / 10) + 4;
-  bandwidth = (brightness * 14) + (knobby / 2);
+  //bandwidth = (brightness * 14) + (knobby / 2);
   centre_freq = (brightness + knibby * 3);
   wavey.set(fundamental, bandwidth, centre_freq);
 }
