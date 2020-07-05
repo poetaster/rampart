@@ -61,7 +61,8 @@ int buttonState1 = 0;
 int buttonState2 = 0;
 int buttonState3 = 0;
 
-
+// used to inc/dec the iterations running in the audio loop
+int alrightcons = 7;
 int adjCon = 20;
 
 // for smoothing the control signals
@@ -146,35 +147,7 @@ void updateControl()
     }
   }
 
-  if (buttonState1 == HIGH)
-  {   
-    //Serial.println("one");
-    button1 = button1 + 1;
-    if (button1 > 250)
-    {
-      button1 = 1;
-    }
-  }
-
-  if (buttonState2 == HIGH)
-  {
-    //Serial.println("two");
-    button2 = button2 + 1;
-    if (button2 > 250)
-    {
-      button2 = 1;
-    }
-  }
-
-  if (buttonState == HIGH)
-  {
-    //Serial.println("three");
-    button3 = button3 + 1;
-    if (button3 > 250)
-    {
-      button3 = 1;
-    }
-  }
+  updateButtons();
 
   
   alright = alright + 1;
@@ -220,35 +193,6 @@ void updateControl()
     centre_freq = centre_freq + con;
   }
 
-  // random all this was a button3 only thing.
-  if (buttonState3 == HIGH && buttonState2 == HIGH )  {
-    int choose = random(3);
-    switch (choose) {
-      case 1:
-        button1 = random(300 - button1);
-        Serial.println(button1);
-        break;
-      case 2:
-        button3 = random(300 - button3);
-        Serial.println(button2);
-        break;
-      case 3:
-        button2 = random(300 - button2);
-        Serial.println(button3);
-        break;
-
-    }
-  }
-  
-
-  
-  //reset
-  if (buttonState1 == HIGH && buttonState2 == HIGH )  {
-    button1 = 0;
-    button2 = 0;
-    button3 = 0;
-  }
-
   // if we have a modulating signal, use it to modify bandwidth
   if ( bandwidthMod > 50 ) {
     bandwidth = (bandwidth + bandwidthMod) / 2  ;
@@ -262,6 +206,74 @@ void updateControl()
   //bandwidth = (brightness * 14) + (knobby / 2);
   centre_freq = (brightness + knibby * 3);
   wavey.set(fundamental, bandwidth, centre_freq);
+}
+
+/* all button handling within control update */
+
+void updateButtons() {
+
+  buttonState = digitalRead(BUTTON_PIN);
+  buttonState1 = digitalRead(BUTTON_PIN_1);
+  buttonState2 = digitalRead(BUTTON_PIN_2);
+  buttonState3 = digitalRead(BUTTON_PIN_3);
+
+  // random all this was a button3 only thing.
+  if (buttonState2 == HIGH && buttonState1 == HIGH )  {
+    Serial.println("random");
+    int choose = random(3);
+    switch (choose) {
+      case 1:
+        button1 = random(300 - button1);
+        break;
+      case 2:
+        button3 = random(300 - button3);
+        break;
+      case 3:
+        button2 = random(300 - button2);
+        break;
+
+    }
+    alrightcons = random(16) + 4;
+  }
+  if (buttonState == HIGH && buttonState2 == HIGH )  {
+    //reset
+    Serial.println("reset");
+    button1 = 0;
+    button2 = 0;
+    button3 = 0;
+  }
+  // works better with random
+  if (buttonState == HIGH && buttonState1 == HIGH)  {
+    alrightcons = alrightcons + 1;
+  }
+
+
+  if (buttonState1 == HIGH && buttonState2 == LOW && buttonState == LOW)  {
+    Serial.println("one");
+    button1 = button1 + 1; 
+    if (button1 > 250) {
+      button1 = 1;
+    }
+  }
+
+  if (buttonState2 == HIGH && buttonState1 == LOW && buttonState == LOW)
+  {
+    Serial.println("two");
+    button2 = button2 + 1;
+    if (button2 > 250) {
+      button2 = 1;
+    }
+  }
+
+  if (buttonState == HIGH && buttonState1 == LOW && buttonState2 == LOW )
+  {
+    Serial.println("three");
+    button3 = button3 + 1;
+    if (button3 > 250) {
+      button3 = 1;
+    }
+  }
+
 }
 
 
