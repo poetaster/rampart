@@ -13,11 +13,15 @@ The Fritzing sketch here is still rough as electrical questions (modulate on the
 
 A fritzing sketch is included to illustrate the basics.
 
-An Arduino sketches include 2 synths (switch with button 1 on D2) which have 3 variable parts of the signal. Both sketches share the wavepacket object as 1st synth. One has PDResonant as second, one an FM synth as second synth.
+## Arduino Sketches
+
+Two Arduino sketches include 2 synths (switch with button 1 on D2) which have 3 variable parts of the signal. Both sketches share the wavepacket object as 1st synth. One has PDResonant as second, one an FM synth as second synth.
 
 So, Patch 1 is always a wavelet (based on the wavelet example with mozzi) synth and Patch 2 is an FM synth or PDResonant. Also still rough ideas.
 
 This synth works well with Keep (moat), my analog synth and also with Bastl's Kastle synth. I've also played it with Korg's micro modular which works quiet well (in both directions).
+
+I've included a granular synth without mozzi as an example and two versions of a 'glitch synth' from other sources modified to work with rampart.
 
 
 ![PCB view](https://github.com/poetaster/rampart/raw/master/rampart_pcb.jpg)
