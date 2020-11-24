@@ -55,6 +55,8 @@ const int MIN_CF = 60;
 const int MAX_CF = 2000;
 long randNumber;
 
+int centre_freq = 52;
+
 // variables for reading the pushbutton status
 int buttonState  = 0;
 int buttonState1 = 0;
@@ -111,27 +113,24 @@ void updateControl()
  
   //Serial.println(reading);
   
-  buttonState = digitalRead(BUTTON_PIN);
-  buttonState1 = digitalRead(BUTTON_PIN_1);
-  buttonState2 = digitalRead(BUTTON_PIN_2);
-  buttonState3 = digitalRead(BUTTON_PIN_3);
   int bandwidth = mozziAnalogRead(LDR1_PIN);
-  
   bandwidthMod = mozziAnalogRead(7); // rampart second input pin
   
   int fundamental = bandwidth ;
   fundamental = kMapF(fundamental);
 
   bandwidth = kMapBw(bandwidth);
+
+  centre_freq = kMapCf(knibby);
   
-  int centre_freq = 250;
+  //int centre_freq = 250;
   digitalWrite(LED_PIN, HIGH);
   digitalWrite(LED_PIN_1, LOW);
   if (alright < 8)
   {
     brightness = 0;    // how bright the LED is
     fadeAmount = 5;
-    centre_freq = 0;
+    //centre_freq = 0;
     bandwidth = 0;
     digitalWrite(LED_PIN, LOW);
     digitalWrite(LED_PIN_1, HIGH);
@@ -204,7 +203,17 @@ void updateControl()
   
   cons = (con / 10) + 4;
   //bandwidth = (brightness * 14) + (knobby / 2);
-  centre_freq = (brightness + knibby * 3);
+
+  
+  //Serial.println(centre_freq);
+  Serial.println(fundamental);
+  //Serial.println(cons);
+  //Serial.println(con);
+
+  
+  //centre_freq = (knobby + centre_freq ) / 2;
+  Serial.println(centre_freq);
+  
   wavey.set(fundamental, bandwidth, centre_freq);
 }
 

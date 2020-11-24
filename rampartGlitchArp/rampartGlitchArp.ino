@@ -106,7 +106,7 @@ void updateControl()
 
 
   // input A4.
-  if (reading > 20 )  {
+  if (reading > 100 )  {
     knibby = (knibby + reading) / 2;
 
   }
@@ -128,7 +128,7 @@ void updateControl()
   {
     brightness = 0;    // how bright the LED is
     fadeAmount = 5;
-    //centre_freq = 52;
+    //centre_freq = 0;
     bandwidth = 0;
     //digitalWrite(LED_PIN, LOW);
     //analogWrite(LED_PIN_1, bandwidth);
@@ -162,11 +162,12 @@ void updateControl()
 
   fundamental = fundamental / 4;
   brightness = brightness + con;
-  centre_freq = centre_freq - con;
+  
 
   if (swotch > 9 && swotch < 20)
   {
     fundamental = fundamental + button1;
+    centre_freq = centre_freq - con;
     //digitalWrite(LED_PIN, HIGH);
     digitalWrite(LED_PIN_1, HIGH);
 
@@ -212,12 +213,12 @@ void updateControl()
   cons = (con / 10) + 2;
   //cons = map(thirdknob, 0,1023, alrightcons, con);
   Serial.println(centre_freq);
-  Serial.println(fundamental);
-  Serial.println(cons);
-  Serial.println(con);
+  Serial.println(knibby);
+  //Serial.println(cons);
+  //Serial.println(con);
 
   //bandwidth = (brightness * 14) + (knobby / 2);
-  //centre_freq = (brightness + knibby * 3);
+  centre_freq = (brightness + centre_freq); // * 3);
   //centre_freq = (brightness + centre_freq / 2);
   wavey.set(fundamental, bandwidth, centre_freq);
 }
