@@ -9,7 +9,7 @@ The prototype uses an Arduino Nano. The Mozzi library is used for synthesis.
 
 Analog Pins 0-3 are potentionmeters. Analog pins 4-7 (4 avaible as an input) are used for modulation signal inputs.
 
-Digital Pin 9 is audio (PWM) out, the Mozzi standard. Digital 2 and 3 and 4 (?) are buttons (2 being used to switch presests currently).
+Digital Pin 9 is audio (PWM) out, the Mozzi standard. Digital 2 and 3 and 4 (?) are buttons (3 being used to switch presests currently).
 
 The Fritzing sketch here is still rough as electrical questions (modulate on the pots directly?) are being explored.
 
@@ -17,7 +17,7 @@ A fritzing sketch is included to illustrate the basics.
 
 ## Arduino Sketches
 
-A number of Arduino sketches include 2 synths (switch with button 1 on D2) which have 3 to 4 variable parts of the signal. Both sketches share the wavepacket object as 1st synth. One has PDResonant as second, one an FM synth as second synth.
+A number of Arduino sketches include 2 synths (switch with button 3 on digital pin 2) which have 3 to 4 variable parts of the signal. Both sketches share the wavepacket object as 1st synth. One has PDResonant as second, one an FM synth as second synth.
 
 So, Patch 1 is always a wavelet (based on the wavelet example with mozzi) synth and Patch 2 is an FM synth or PDResonant. Also still rough ideas.
 
