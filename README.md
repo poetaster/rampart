@@ -7,9 +7,9 @@ The prototype uses an Arduino Nano. The Mozzi library is used for synthesis.
 
 ![BreadBoard view](https://github.com/poetaster/rampart/raw/master/rampart_bb.jpg)
 
-Analog Pins 0-3 are potentionmeters. Analog pins 4-7 (4 not yet used) are used for modulation signal inputs.
+Analog Pins 0-3 are potentionmeters. Analog pins 4-7 (4 avaible as an input) are used for modulation signal inputs.
 
-Digital Pin 9 is audio (PWM) out, the Mozzi standard. Digital 2 and 3 are buttons (2 being used to switch presests currently).
+Digital Pin 9 is audio (PWM) out, the Mozzi standard. Digital 2 and 3 and 4 (?) are buttons (2 being used to switch presests currently).
 
 The Fritzing sketch here is still rough as electrical questions (modulate on the pots directly?) are being explored.
 
