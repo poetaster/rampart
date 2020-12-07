@@ -34,6 +34,18 @@
 #include "TR_KICK_AT.h"
 #include "KICK2_AT.h"
 
+Sample <TR_HH_NUM_CELLS, AUDIO_RATE>aBamboo1(TR_HH_DATA);
+Sample <rim_NUM_CELLS, AUDIO_RATE>aBamboo0(rim_DATA);
+Sample <kick_NUM_CELLS, AUDIO_RATE>aBamboo2(kick_DATA);
+
+/* use: Sample <table_size, update_rate> SampleName (wavetable)
+  Sample <SNARE2_NUM_CELLS, AUDIO_RATE>aBamboo0(SNARE2_DATA);
+  Sample <TR_KICK_NUM_CELLS, AUDIO_RATE>aBamboo2(TR_KICK_DATA);
+  Sample <KICK2_NUM_CELLS, AUDIO_RATE>aBamboo2(KICK2_DATA);
+  Sample <BAMBOO_01_2048_NUM_CELLS, AUDIO_RATE>aBamboo1(BAMBOO_01_2048_DATA);
+  Sample <BAMBOO_01_2048_NUM_CELLS, AUDIO_RATE>aBamboo1(BAMBOO_01_2048_DATA);
+  Sample <BAMBOO_02_2048_NUM_CELLS, AUDIO_RATE>aBamboo2(BAMBOO_02_2048_DATA);
+*/
 
 // STL stuff
 #include <ArduinoSTL.h>
@@ -42,26 +54,12 @@ using namespace std;
 #include <iostream>
 #include <string>
 #include <vector>
+#include <deque>
 
 #include <EventDelay.h>
 #include <mozzi_rand.h>
 
-#define CONTROL_RATE 256
-
-// use: Sample <table_size, update_rate> SampleName (wavetable)
-//Sample <SNARE2_NUM_CELLS, AUDIO_RATE>aBamboo0(SNARE2_DATA);
-Sample <TR_HH_NUM_CELLS, AUDIO_RATE>aBamboo1(TR_HH_DATA);
-//Sample <TR_KICK_NUM_CELLS, AUDIO_RATE>aBamboo2(TR_KICK_DATA);
-
-Sample <rim_NUM_CELLS, AUDIO_RATE>aBamboo0(rim_DATA);
-
-//Sample <kick_NUM_CELLS, AUDIO_RATE>aBamboo2(kick_DATA);
-
-Sample <KICK2_NUM_CELLS, AUDIO_RATE>aBamboo2(KICK2_DATA);
-//Sample <BAMBOO_01_2048_NUM_CELLS, AUDIO_RATE>aBamboo1(BAMBOO_01_2048_DATA);
-
-//Sample <BAMBOO_01_2048_NUM_CELLS, AUDIO_RATE>aBamboo1(BAMBOO_01_2048_DATA);
-//Sample <BAMBOO_02_2048_NUM_CELLS, AUDIO_RATE>aBamboo2(BAMBOO_02_2048_DATA);
+#define CONTROL_RATE 1024
 
 // for scheduling audio gain changes
 EventDelay kTriggerDelay;
@@ -74,39 +72,93 @@ int patlen = 0;
 
 // Button handling
 const int buttonPin = 2;
+const int buttonPin2 = 3;
+
+// would be nice but need to design around it. nano only allows intr on d2 & d3 which I'm using. sigh.
+//volatile unsigned long lastTime = 0;
+
+// Used for timing clk
+
+int marker = 13;   // marker output pin
+int aval = 0;      // analog value
+
+//patterns are now NOT external, see the bjorklung calcs for pattern generation
+
+std::vector <int> beat = {1, 2, 1, 1, 2, 1, 1, 2};
+std::vector <int> waf1 = {1, 1, 2}; // = (12) (West Africa, Latin America, N
+std::vector <int> clas1 =  {1, 2, 1, 2, 2}; //= (23) (classical music, jazz,
+std::vector <int> clas2 =  {1, 2, 2, 1, 2, 2, 2}; //  = (34) (classical music)0
+std::vector <int> braz1 =  {1, 1, 1, 2}; // = (112) (Brazil, Bali rhythms), (Co
+std::vector <int> tuar1 = {1, 2, 2, 1, 2, 2, 1, 2, 2, 2}; // = (334) (Tuareg
+std::vector <int> grec1 =  {1, 1, 1, 1, 2}; // = (1112) (Greece)0,
+std::vector <int> grec2 = {1, 2, 1, 2, 1, 2, 1, 2, 2} ; // = (2223) (Greece, Ma
+std::vector <int> bulg1 =  {1, 2, 1, 2, 1, 2, 2}; // = (223) (Bulgaria, Greece,
+std::vector <int> arab1 =  {1, 1, 1, 1, 1, 2}; // = (11112) (Arab)0,
 
 
+// measure time
+//std::deque <int>offOne; 
+
+unsigned long startD;
+unsigned long stopD;
+int mills;
+int millsA;
+int millsB;
 
 void setup() {
-  startMozzi(CONTROL_RATE);
-  //Serial.begin(115200)
-  Serial.begin(9600);
-  seq = bjorklund(5, 8);
-  cout << seq << endl;
+  // for clock in
+  // attachInterrupt(6, readTime, RISING);
 
-  /*
-    //aBamboo0.setFreq((float) SNARE2_SAMPLERATE / (float) SNARE2_NUM_CELLS); // play at the speed it was recorded at
-    aBamboo1.setFreq((float) TR_HH_SAMPLERATE / (float) TR_HH_NUM_CELLS);
-    aBamboo2.setFreq((float) TR_KICK_SAMPLERATE / (float) TR_KICK_NUM_CELLS);
-    //aBamboo2.setFreq((float) snare_SAMPLERATE / (float) snare_NUM_CELLS);
-    aBamboo0.setFreq((float) kick_SAMPLERATE / (float) kick_NUM_CELLS);
-  */
-  aBamboo2.setFreq((float) KICK2_SAMPLERATE / (float) KICK2_NUM_CELLS);
+  // mozzi start
+  startMozzi(CONTROL_RATE);
+
+  Serial.begin(9600);
+
+
+  // these were for testing generated sequences
+  // seq = bjorklund(5, 8);
+  // cout << seq << endl;
+
+  // initial speed 
+  mills = 127;
+  
   aBamboo0.setFreq((float) rim_SAMPLERATE / (float) rim_NUM_CELLS);
-  //aBamboo1.setFreq((float) TR_HH_SAMPLERATE / (float) TR_HH_NUM_CELLS);
-  //aBamboo1.setFreq((float) BAMBOO_01_2048_SAMPLERATE / (float) BAMBOO_01_2048_NUM_CELLS); // play at the speed it was recorded at
   aBamboo1.setFreq((float) TR_HH_SAMPLERATE / (float) TR_HH_NUM_CELLS);
-  //aBamboo1.setFreq((float) BAMBOO_01_2048_SAMPLERATE / (float) BAMBOO_01_2048_NUM_CELLS);
-  //aBamboo2.setFreq((float) BAMBOO_02_2048_SAMPLERATE / (float) BAMBOO_02_2048_NUM_CELLS);
+  aBamboo2.setFreq((float) kick_SAMPLERATE / (float) kick_NUM_CELLS);
+  /*
+    aBamboo0.setFreq((float) SNARE2_SAMPLERATE / (float) SNARE2_NUM_CELLS); // play at the speed it was recorded at
+    aBamboo1.setFreq((float) TR_HH_SAMPLERATE / (float) TR_HH_NU  M_CELLS);
+    aBamboo2.setFreq((float) TR_KICK_SAMPLERATE / (float) TR_KICK_NUM_CELLS);
+    aBamboo2.setFreq((float) snare_SAMPLERATE / (float) snare_NUM_CELLS);
+    aBamboo0.setFreq((float) kick_SAMPLERATE / (float) kick_NUM_CELLS);
+    aBamboo2.setFreq((float) KICK2_SAMPLERATE / (float) KICK2_NUM_CELLS);
+    aBamboo2.setFreq((float) TR_KICK_SAMPLERATE / (float) TR_KICK_NUM_CELLS);
+    aBamboo1.setFreq((float) BAMBOO_01_2048_SAMPLERATE / (float) BAMBOO_01_2048_NUM_CELLS); // play at the speed it was recorded at
+    aBamboo1.setFreq((float) TR_HH_SAMPLERATE / (float) TR_HH_NUM_CELLS);
+    aBamboo1.setFreq((float) BAMBOO_01_2048_SAMPLERATE / (float) BAMBOO_01_2048_NUM_CELLS);
+    aBamboo2.setFreq((float) BAMBOO_02_2048_SAMPLERATE / (float) BAMBOO_02_2048_NUM_CELLS);
+  */
 
   kTriggerDelay.set(111); // countdown ms, within resolution of CONTROL_RATE
   //Serial.println( bjorklund(13, 13));
 
   // Setup the first button with an internal pull-up :
   pinMode(buttonPin, INPUT_PULLUP);
+  pinMode(buttonPin2, INPUT_PULLUP);
 
+  // put some valuesin our timer offset deque
+  //offOne.push_front(256);
+  //offOne.push_front(256);
+  //offOne.push_front(256);
+ 
 }
 
+/* unused, might go there when we set up the layout differently.
+  void readTime() {
+    unsigned long t = millis();
+    // calculate speed basing on t - lastTime
+    lastTime = t;
+  } */
 
 byte randomGain(int amount) {
   //return lowByte(xorshift96())<<1;
@@ -124,57 +176,85 @@ gains;
 
 
 
-//patterns
-
-/*c
-
-
-  = {1,0, 1,0, 1,0, 1,0, 1,0, 0,} = (22223) (clas
-  = {1,0, 0, 1,0, 0, 1,0, 0, 1,0, 0, 1,0, 0, 0, 0
-  {1,1,1,1,1,1,0,} = (111112) (Greek necklace)
-  = {1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 0,} = (222223)
-  {1,1,1,1,1,1,1,0,} = (1111112) (Libyan necklac
-  = {1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 0,} = (22
-  = {1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 0,}
-  owing Euclidean rhythms are reverse Euclidean s
-  {1,0, 1,0, x} = (221) (India), (Korean, Rumani
-  {1,0, 0, 1,0, 0, 1,0,} = (332) (Central Africa
-  = {1,0, 0, 0, 1,0, 0, 0, 1,0, 0,} = (443) (Nort
-  = {1,0, 0, 0, 0, 1,0, 0, 0, 0, 1,0, 0, 0,} = (5
-  {1,0, 1,0, 1,0, x} = (2221) (Bulgaria)0,
-  = {1,0, 0, 1,0, 0, 1,0, 0, 1,0,} = (3332) (Sout
-  = {1,0, 0, 0, 1,0, 0, 0, 1,0, 0, 0, 1,0, 0,} =
-  {1,0, 1,1,0, 1,x} = (21211) (Arab)0,
-  {1,0, 1,0, 1,0, 1,0, x} = (22221) (Arab)0,
-  = {1,0, 0, 1,0, 1,0, 0, 1,0, 1,0,} = (32322) (M
-  {1,0, 1,1,1,0, 1,1,x} = (2112111) (Greece)0,
-  = {1,0, 1,1,0, 1,1,0, 1,x} = (2121211) (Turkey)
-  = {1,0, 0, 1,0, 1,0, 1,0, 0, 1,0, 1,0, 1,0,} =
-*/
-
-
-std::vector <int> beat = {1, 2, 1, 1, 2, 1, 1, 2};
-std::vector <int> waf1 = {1, 1, 2}; // = (12) (West Africa, Latin America, N
-std::vector <int> clas1 =  {1, 2, 1, 2, 2}; //= (23) (classical music, jazz,
-std::vector <int> clas2 =  {1, 2, 2, 1, 2, 2, 2}; //  = (34) (classical music)0
-std::vector <int> braz1 =  {1, 1, 1, 2}; // = (112) (Brazil, Bali rhythms), (Co
-std::vector <int> tuar1 = {1, 2, 2, 1, 2, 2, 1, 2, 2, 2}; // = (334) (Tuareg
-std::vector <int> grec1 =  {1, 1, 1, 1, 2}; // = (1112) (Greece)0,
-std::vector <int> grec2 = {1, 2, 1, 2, 1, 2, 1, 2, 2} ; // = (2223) (Greece, Ma
-std::vector <int> bulg1 =  {1, 2, 1, 2, 1, 2, 2}; // = (223) (Bulgaria, Greece,
-std::vector <int> arab1 =  {1,1,1,1,1,2}; // = (11112) (Arab)0,
 
 void updateControl() {
+
+
+  int offsetT;
+  offsetT = map(mozziAnalogRead(A3), 0, 1023, 1, 8);
+
+  static int lastTrig;
+  static int offset;
+  
+  // here we're timing a pulse in for clock
+  int trig = mozziAnalogRead(A4);
+  
+    // set offset to be free running on CV or controlled by pot
+  /*  
+  static int previousB;
+  int currentB = digitalRead(buttonPin2);
+  
+  if (previousB == LOW && currentB == HIGH) {
+    offsetT = map(offsetT, 0, 1023, 1, 256);
+    //Serial.println(currentbeats);
+  } else {
+    offsetT = map(offsetT, 0, 1023, 1, 8);
+  }
+
+  previousB = currentB;
+  */
+  
+  
+  if ( lastTrig == 1023 && trig == 1023 ) { // sustained pulse
+
+    mills +=1;
+    //startD += micros(); // this is just entropy
+  } else if ( lastTrig == 0 && trig == 0 && mills != 0 ) { // edge to 0
+    
+    // this is smoothing
+    millsB = millsA;
+    millsA = mills;
+    int millsMin = (millsA, millsB);
+    millsMin = (millsMin, mills);
+    offset = millsMin * offsetT;
+    //offset = startD  * offsetT;
+    
+    
+    //offOne.pop_back();
+    //offOne.push_front(offset);
+    //std::deque<int>::iterator it = (offOne.begin(),offOne.end());
+     
+    Serial.println("Second");
+    
+    Serial.println(offsetT);
+    //Serial.println(mills);
+    Serial.println(offset);
+    //Serial.println(*it);
+
+    //Serial.println(micros());
+    
+    mills = 0;
+    startD = 0;
+  }
+  //Serial.println(lastTrig);
+  lastTrig = trig;
+  if ( offset < 20 ) { offset = 256; }
+  
   int beatval;
   //cout << currentbeats << endl;
+
+
+
+
 
   static int previous;
   int current = digitalRead(buttonPin);
   if (previous == LOW && current == HIGH && currentbeats < 11) {
     currentbeats += 1;
-    Serial.println(currentbeats);
+    //Serial.println(currentbeats);
   }
   previous = current;
+
   if (currentbeats == 10) {
     currentbeats = 0;  //wrap pattern
   }
@@ -253,38 +333,50 @@ void updateControl() {
 
   }
 
+  /* we're using a bit of arbitrary current beat switching to vary the rythms */
 
   if (kTriggerDelay.ready()) {
     if (beatval == 2) {
-      gains.gain0 = map(mozziAnalogRead(A0), 0, 1023, 0, 200) + randomGain(5);
-      aBamboo0.start();
+      if ( currentbeat == 0) {
+        gains.gain1 = map(mozziAnalogRead(A2), 0, 1023, 0, 200) + randomGain(5);
+        aBamboo1.start();
+      } else {
+        gains.gain0 = map(mozziAnalogRead(A0), 0, 1023, 0, 200) + randomGain(5);
+        aBamboo0.start();
+      }
+
     }
     if (beatval == 1) {
-      gains.gain2 = map(mozziAnalogRead(A1), 0, 1023, 0, 200) + randomGain(5);
-      aBamboo2.start();
-
-
-      /*if (currentbeat = patlen) {
-        switch (rand(0, 3)) {
-          case 0:
-            gains.gain0 = map(mozziAnalogRead(A1), 0, 1023, 0, 200) + randomGain(5);
-            aBamboo0.start();
-            break;
-          case 1:
-            gains.gain0 = map(mozziAnalogRead(A1), 0, 1023, 0, 200) + randomGain(5);
-            aBamboo0.start();
-            break;
-          case 2:
-            gains.gain1 = map(mozziAnalogRead(A2), 0, 1023, 0, 200) + randomGain(5);
-            aBamboo1.start();
-            break;
-
-        }
-        }*/
+      if ( currentbeat == 3) {
+        gains.gain1 = map(mozziAnalogRead(A2), 0, 1023, 0, 200) + randomGain(5);
+        aBamboo1.start();
+      } else {
+        gains.gain2 = map(mozziAnalogRead(A1), 0, 1023, 0, 200) + randomGain(5);
+        aBamboo2.start();
+      }
 
     }
 
-    /*
+    /* More arbitrary variation, this time on gain
+
+       if (currentbeat = patlen) {
+      switch (rand(0, 3)) {
+        case 0:
+          gains.gain0 = map(mozziAnalogRead(A1), 0, 1023, 0, 200) + randomGain(5);
+          aBamboo0.start();
+          break;
+        case 1:
+          gains.gain0 = map(mozziAnalogRead(A1), 0, 1023, 0, 200) + randomGain(5);
+          aBamboo0.start();
+          break;
+        case 2:
+          gains.gain1 = map(mozziAnalogRead(A2), 0, 1023, 0, 200) + randomGain(5);
+          aBamboo1.start();
+          break;
+
+      }
+      }
+
       switch(rand(0, 3)) {
       case 0:
       gains.gain0 = map(mozziAnalogRead(A0),0,1023,0,200) + randomGain();
@@ -298,18 +390,15 @@ void updateControl() {
       gains.gain2 = map(mozziAnalogRead(A2),0,1023,0,200)+ randomGain();
       aBamboo2.start();
       break;
-      } }*/
-    int trig = map(mozziAnalogRead(A4), 0, 1023, 1, 100);
-    int offset = map(mozziAnalogRead(A3), 0, 1023, 25, 250);
-    
-    kTriggerDelay.set( trig + offset );
-      
+      } }
+    */
+
+
+    kTriggerDelay.set( offset ); // was + trig
     kTriggerDelay.start();
+
     //static int previousT;
     //int currentT = digitalRead(buttonPin);
-  
-    
-    Serial.println( trig + offset);
 
     currentbeat += 1;
   }
@@ -317,8 +406,8 @@ void updateControl() {
 
 }
 
-
 int updateAudio() {
+
   int asig = (int)
              ((long) aBamboo0.next() * gains.gain0 +
               aBamboo1.next() * gains.gain1 +
@@ -332,4 +421,32 @@ int updateAudio() {
 
 void loop() {
   audioHook();
+
 }
+
+
+/*c old patterns
+
+
+  = {1,0, 1,0, 1,0, 1,0, 1,0, 0,} = (22223) (clas
+  = {1,0, 0, 1,0, 0, 1,0, 0, 1,0, 0, 1,0, 0, 0, 0
+  {1,1,1,1,1,1,0,} = (111112) (Greek necklace)
+  = {1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 0,} = (222223)
+  {1,1,1,1,1,1,1,0,} = (1111112) (Libyan necklac
+  = {1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 0,} = (22
+  = {1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 0,}
+  owing Euclidean rhythms are reverse Euclidean s
+  {1,0, 1,0, x} = (221) (India), (Korean, Rumani
+  {1,0, 0, 1,0, 0, 1,0,} = (332) (Central Africa
+  = {1,0, 0, 0, 1,0, 0, 0, 1,0, 0,} = (443) (Nort
+  = {1,0, 0, 0, 0, 1,0, 0, 0, 0, 1,0, 0, 0,} = (5
+  {1,0, 1,0, 1,0, x} = (2221) (Bulgaria)0,
+  = {1,0, 0, 1,0, 0, 1,0, 0, 1,0,} = (3332) (Sout
+  = {1,0, 0, 0, 1,0, 0, 0, 1,0, 0, 0, 1,0, 0,} =
+  {1,0, 1,1,0, 1,x} = (21211) (Arab)0,
+  {1,0, 1,0, 1,0, 1,0, x} = (22221) (Arab)0,
+  = {1,0, 0, 1,0, 1,0, 0, 1,0, 1,0,} = (32322) (M
+  {1,0, 1,1,1,0, 1,1,x} = (2112111) (Greece)0,
+  = {1,0, 1,1,0, 1,1,0, 1,x} = (2121211) (Turkey)
+  = {1,0, 0, 1,0, 1,0, 1,0, 0, 1,0, 1,0, 1,0,} =
+*/
