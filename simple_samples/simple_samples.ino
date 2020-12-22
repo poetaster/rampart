@@ -71,8 +71,8 @@ int currentbeats = 0;
 int patlen = 0;
 
 // Button handling
-const int buttonPin = 2;
-const int buttonPin2 = 3;
+const int BPIN = 2;
+const int BPIN2 = 3;
 
 // would be nice but need to design around it. nano only allows intr on d2 & d3 which I'm using. sigh.
 //volatile unsigned long lastTime = 0;
@@ -84,7 +84,8 @@ int aval = 0;      // analog value
 
 //patterns are now NOT external, see the bjorklung calcs for pattern generation
 
-std::vector <int> beat = {1, 2, 1, 1, 2, 1, 1, 2};
+std::vector <int> beat = {1, 1, 1, 2, 1, 1, 1, 2};
+//std::vector <int> beat = {1, 2, 1, 1, 2, 1, 1, 2};
 std::vector <int> waf1 = {1, 1, 2}; // = (12) (West Africa, Latin America, N
 std::vector <int> clas1 =  {1, 2, 1, 2, 2}; //= (23) (classical music, jazz,
 std::vector <int> clas2 =  {1, 2, 2, 1, 2, 2, 2}; //  = (34) (classical music)0
@@ -143,8 +144,8 @@ void setup() {
   //Serial.println( bjorklund(13, 13));
 
   // Setup the first button with an internal pull-up :
-  pinMode(buttonPin, INPUT_PULLUP);
-  pinMode(buttonPin2, INPUT_PULLUP);
+  pinMode(BPIN, INPUT);
+  pinMode(BPIN2, INPUT);
 
   // put some valuesin our timer offset deque
   //offOne.push_front(256);
@@ -190,19 +191,20 @@ void updateControl() {
   int trig = mozziAnalogRead(A4);
   
     // set offset to be free running on CV or controlled by pot
-  /*  
+   
   static int previousB;
-  int currentB = digitalRead(buttonPin2);
+  
+  int currentB = digitalRead(BPIN2);
   
   if (previousB == LOW && currentB == HIGH) {
-    offsetT = map(offsetT, 0, 1023, 1, 256);
+    offsetT+=1;
     //Serial.println(currentbeats);
-  } else {
-    offsetT = map(offsetT, 0, 1023, 1, 8);
+  } else if ( offsetT == 10 ) {
+    offsetT = 1;
   }
 
   previousB = currentB;
-  */
+  
   
   
   if ( lastTrig == 1023 && trig == 1023 ) { // sustained pulse
@@ -211,18 +213,14 @@ void updateControl() {
     //startD += micros(); // this is just entropy
   } else if ( lastTrig == 0 && trig == 0 && mills != 0 ) { // edge to 0
     
+    mills = mills / 2;
     // this is smoothing
     millsB = millsA;
     millsA = mills;
     int millsMin = (millsA, millsB);
     millsMin = (millsMin, mills);
-    offset = millsMin * offsetT;
+    offset = millsMin  * offsetT;
     //offset = startD  * offsetT;
-    
-    
-    //offOne.pop_back();
-    //offOne.push_front(offset);
-    //std::deque<int>::iterator it = (offOne.begin(),offOne.end());
      
     Serial.println("Second");
     
@@ -230,14 +228,14 @@ void updateControl() {
     //Serial.println(mills);
     Serial.println(offset);
     //Serial.println(*it);
-
-    //Serial.println(micros());
     
     mills = 0;
     startD = 0;
   }
   //Serial.println(lastTrig);
   lastTrig = trig;
+  
+  //just in case to keep the machine from hanging.
   if ( offset < 20 ) { offset = 256; }
   
   int beatval;
@@ -248,7 +246,7 @@ void updateControl() {
 
 
   static int previous;
-  int current = digitalRead(buttonPin);
+  int current = digitalRead(BPIN);
   if (previous == LOW && current == HIGH && currentbeats < 11) {
     currentbeats += 1;
     //Serial.println(currentbeats);
@@ -398,7 +396,7 @@ void updateControl() {
     kTriggerDelay.start();
 
     //static int previousT;
-    //int currentT = digitalRead(buttonPin);
+    //int currentT = digitalRead(BPIN);
 
     currentbeat += 1;
   }
