@@ -95,7 +95,11 @@ void updateControl(){
   f2 = Q16n16_mtof(Q16n0_to_Q16n16(map(mozziAnalogRead(A1), 0, 1023, 36, 74)));
   f3 = Q16n16_mtof(Q16n0_to_Q16n16(map(mozziAnalogRead(A2), 0, 1023, 24, 77)));
   f4 = Q16n16_mtof(Q16n0_to_Q16n16(map(mozziAnalogRead(A3), 0, 1023, 48, 86)));
-
+  // ok, now modulate on the pins ! :)
+  f1 = Q16n16_mtof(Q16n0_to_Q16n16(map(mozziAnalogRead(A4), 0, 1023, f1, 64)));
+  f2 = Q16n16_mtof(Q16n0_to_Q16n16(map(mozziAnalogRead(A5), 0, 1023, f2, 74)));
+  f3 = Q16n16_mtof(Q16n0_to_Q16n16(map(mozziAnalogRead(A6), 0, 1023, f3, 77)));
+  f4 = Q16n16_mtof(Q16n0_to_Q16n16(map(mozziAnalogRead(A7), 0, 1023, f4, 86)));
   Serial.println(variation());
   // change frequencies of the b oscillators
   switch (lowByte(xorshift96()) & 7){ // 7 is 0111
