@@ -33,22 +33,31 @@
 #include "TR_HH_AT.h"
 #include "TR_KICK_AT.h"
 #include "KICK2_AT.h"
+/*
+  Sample <TR_HH_NUM_CELLS, AUDIO_RATE>aBamboo1(TR_HH_DATA);
+  Sample <rim_NUM_CELLS, AUDIO_RATE>aBamboo0(rim_DATA);
+  Sample <kick_NUM_CELLS, AUDIO_RATE>aBamboo2(kick_DATA);
 
-Sample <TR_HH_NUM_CELLS, AUDIO_RATE>aBamboo1(TR_HH_DATA);
-Sample <rim_NUM_CELLS, AUDIO_RATE>aBamboo0(rim_DATA);
-Sample <kick_NUM_CELLS, AUDIO_RATE>aBamboo2(kick_DATA);
-
-/* use: Sample <table_size, update_rate> SampleName (wavetable)
+   use: Sample <table_size, update_rate> SampleName (wavetable)
   Sample <SNARE2_NUM_CELLS, AUDIO_RATE>aBamboo0(SNARE2_DATA);
   Sample <TR_KICK_NUM_CELLS, AUDIO_RATE>aBamboo2(TR_KICK_DATA);
   Sample <KICK2_NUM_CELLS, AUDIO_RATE>aBamboo2(KICK2_DATA);
-  Sample <BAMBOO_01_2048_NUM_CELLS, AUDIO_RATE>aBamboo1(BAMBOO_01_2048_DATA);
-  Sample <BAMBOO_01_2048_NUM_CELLS, AUDIO_RATE>aBamboo1(BAMBOO_01_2048_DATA);
-  Sample <BAMBOO_02_2048_NUM_CELLS, AUDIO_RATE>aBamboo2(BAMBOO_02_2048_DATA);
+
+Sample <rim_NUM_CELLS, AUDIO_RATE>aBamboo0(rim_DATA);
+
+Sample <tom_NUM_CELLS, AUDIO_RATE>aBamboo2(tom_DATA);
+Sample <tom_NUM_CELLS, AUDIO_RATE>aBamboo2(tom_DATA);
+Sample <BAMBOO_02_2048_NUM_CELLS, AUDIO_RATE>aBamboo2(BAMBOO_02_2048_DATA);
+
 */
+Sample <closedhat_NUM_CELLS, AUDIO_RATE>aBamboo2(closedhat_DATA);
+Sample <BAMBOO_00_2048_NUM_CELLS, AUDIO_RATE>aBamboo0(BAMBOO_00_2048_DATA);
+Sample <BAMBOO_01_2048_NUM_CELLS, AUDIO_RATE>aBamboo1(BAMBOO_01_2048_DATA);
+
 
 // STL stuff
 #include <ArduinoSTL.h>
+//#include <Arduino_AVRSTL.h>
 using namespace std;
 #include "bjorklung.h"
 #include <iostream>
@@ -98,7 +107,7 @@ std::vector <int> arab1 =  {1, 1, 1, 1, 1, 2}; // = (11112) (Arab)0,
 
 
 // measure time
-//std::deque <int>offOne; 
+std::deque <int>offOne;
 
 unsigned long startD;
 unsigned long stopD;
@@ -120,12 +129,17 @@ void setup() {
   // seq = bjorklund(5, 8);
   // cout << seq << endl;
 
-  // initial speed 
+  // initial speed
   mills = 127;
+
+  aBamboo0.setFreq((float) BAMBOO_00_2048_SAMPLERATE / (float) BAMBOO_00_2048_NUM_CELLS);
+  aBamboo1.setFreq((float) BAMBOO_01_2048_SAMPLERATE / (float) BAMBOO_01_2048_NUM_CELLS);
+  //aBamboo2.setFreq((float) BAMBOO_02_2048_SAMPLERATE / (float) BAMBOO_02_2048_NUM_CELLS);
+  //aBamboo1.setFreq((float) TR_HH_SAMPLERATE / (float) TR_HH_NUM_CELLS);
+  //aBamboo0.setFreq((float) rim_SAMPLERATE / (float) rim_NUM_CELLS);
+  //aBamboo2.setFreq((float) tom_SAMPLERATE / (float) tom_NUM_CELLS);
+  aBamboo2.setFreq((float) closedhat_SAMPLERATE / (float) closedhat_NUM_CELLS);
   
-  aBamboo0.setFreq((float) rim_SAMPLERATE / (float) rim_NUM_CELLS);
-  aBamboo1.setFreq((float) TR_HH_SAMPLERATE / (float) TR_HH_NUM_CELLS);
-  aBamboo2.setFreq((float) kick_SAMPLERATE / (float) kick_NUM_CELLS);
   /*
     aBamboo0.setFreq((float) SNARE2_SAMPLERATE / (float) SNARE2_NUM_CELLS); // play at the speed it was recorded at
     aBamboo1.setFreq((float) TR_HH_SAMPLERATE / (float) TR_HH_NU  M_CELLS);
@@ -148,10 +162,10 @@ void setup() {
   pinMode(BPIN2, INPUT);
 
   // put some valuesin our timer offset deque
-  //offOne.push_front(256);
-  //offOne.push_front(256);
-  //offOne.push_front(256);
- 
+  offOne.push_front(256);
+  offOne.push_front(256);
+  offOne.push_front(256);
+
 }
 
 /* unused, might go there when we set up the layout differently.
@@ -182,37 +196,37 @@ void updateControl() {
 
 
   int offsetT;
-  offsetT = map(mozziAnalogRead(A3), 0, 1023, 1, 8);
+  offsetT = map(mozziAnalogRead(A2), 0, 1023, 1, 8);
 
   static int lastTrig;
   static int offset;
-  
+
   // here we're timing a pulse in for clock
-  int trig = mozziAnalogRead(A4);
-  
-    // set offset to be free running on CV or controlled by pot
-   
+  int trig = map(mozziAnalogRead(A3), 0, 1023, 32, 1023);
+  offset = map(mozziAnalogRead(A3), 0, 1023, 32, 1023);
+  // set offset to be free running on CV or controlled by pot
+
   static int previousB;
-  
+
   int currentB = digitalRead(BPIN2);
-  
+
   if (previousB == LOW && currentB == HIGH) {
-    offsetT+=1;
-    //Serial.println(currentbeats);
+    offsetT += 1;
+    Serial.println(currentbeats);
   } else if ( offsetT == 10 ) {
     offsetT = 1;
   }
 
   previousB = currentB;
-  
-  
-  
+
+
+
   if ( lastTrig == 1023 && trig == 1023 ) { // sustained pulse
 
-    mills +=1;
+    mills += 1;
     //startD += micros(); // this is just entropy
   } else if ( lastTrig == 0 && trig == 0 && mills != 0 ) { // edge to 0
-    
+
     mills = mills / 2;
     // this is smoothing
     millsB = millsA;
@@ -221,23 +235,25 @@ void updateControl() {
     millsMin = (millsMin, mills);
     offset = millsMin  * offsetT;
     //offset = startD  * offsetT;
-     
+
     Serial.println("Second");
-    
+
     Serial.println(offsetT);
     //Serial.println(mills);
     Serial.println(offset);
     //Serial.println(*it);
-    
+
     mills = 0;
     startD = 0;
   }
   //Serial.println(lastTrig);
   lastTrig = trig;
-  
+
   //just in case to keep the machine from hanging.
-  if ( offset < 20 ) { offset = 256; }
-  
+  if ( offset < 20 ) {
+    offset = 256;
+  }
+
   int beatval;
   //cout << currentbeats << endl;
 
@@ -336,7 +352,7 @@ void updateControl() {
   if (kTriggerDelay.ready()) {
     if (beatval == 2) {
       if ( currentbeat == 0) {
-        gains.gain1 = map(mozziAnalogRead(A2), 0, 1023, 0, 200) + randomGain(5);
+        gains.gain1 = map(mozziAnalogRead(A1), 0, 1023, 0, 200) + randomGain(5);
         aBamboo1.start();
       } else {
         gains.gain0 = map(mozziAnalogRead(A0), 0, 1023, 0, 200) + randomGain(5);
@@ -346,21 +362,21 @@ void updateControl() {
     }
     if (beatval == 1) {
       if ( currentbeat == 3) {
-        gains.gain1 = map(mozziAnalogRead(A2), 0, 1023, 0, 200) + randomGain(5);
+        gains.gain1 = map(mozziAnalogRead(A1), 0, 1023, 0, 200) + randomGain(5);
         aBamboo1.start();
       } else {
-        gains.gain2 = map(mozziAnalogRead(A1), 0, 1023, 0, 200) + randomGain(5);
+        gains.gain2 = map(mozziAnalogRead(A0), 0, 1023, 0, 200) + randomGain(5);
         aBamboo2.start();
       }
 
     }
 
-    /* More arbitrary variation, this time on gain
+    /* More arbitrary variation, this time on gain */
 
-       if (currentbeat = patlen) {
+    if (currentbeat = patlen) {
       switch (rand(0, 3)) {
         case 0:
-          gains.gain0 = map(mozziAnalogRead(A1), 0, 1023, 0, 200) + randomGain(5);
+          gains.gain0 = map(mozziAnalogRead(A0), 0, 1023, 0, 200) + randomGain(5);
           aBamboo0.start();
           break;
         case 1:
@@ -373,22 +389,22 @@ void updateControl() {
           break;
 
       }
-      }
-
-      switch(rand(0, 3)) {
-      case 0:
-      gains.gain0 = map(mozziAnalogRead(A0),0,1023,0,200) + randomGain();
-      aBamboo0.start();
-      break;
-      case 1:
-      gains.gain1 = map(mozziAnalogRead(A1),0,1023,0,200)+ randomGain();
-      aBamboo1.start();
-      break;
-      case 2:
-      gains.gain2 = map(mozziAnalogRead(A2),0,1023,0,200)+ randomGain();
-      aBamboo2.start();
-      break;
-      } }
+    }
+    /* More arbitrary variation, this time on gain
+          switch(rand(0, 3)) {
+          case 0:
+          gains.gain0 = map(mozziAnalogRead(A0),0,1023,0,200) + randomGain();
+          aBamboo0.start();
+          break;
+          case 1:
+          gains.gain1 = map(mozziAnalogRead(A1),0,1023,0,200)+ randomGain();
+          aBamboo1.start();
+          break;
+          case 2:
+          gains.gain2 = map(mozziAnalogRead(A2),0,1023,0,200)+ randomGain();
+          aBamboo2.start();
+          break;
+          } }
     */
 
 
