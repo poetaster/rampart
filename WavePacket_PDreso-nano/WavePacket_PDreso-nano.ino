@@ -13,7 +13,7 @@
   
     Tim Barrass 2013, CC by-nc-sa.
 */
- 
+//#include <VS1053Driver.h>
 //#include <ADC.h>  // Teensy 3.0/3.1 uncomment this line and install http://github.com/pedvide/ADC
 #include <MozziGuts.h>
 #include <mozzi_analog.h>
@@ -88,7 +88,7 @@ int buttonState = 0;
 
 void setup(){
   
-  Serial.begin(115200);
+  Serial.begin(9600);
   // initialize the pushbutton pin as an input:
   pinMode(B2_PIN, INPUT);
   pinMode(B3_PIN, INPUT);

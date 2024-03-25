@@ -43,16 +43,17 @@
   Sample <TR_KICK_NUM_CELLS, AUDIO_RATE>aBamboo2(TR_KICK_DATA);
   Sample <KICK2_NUM_CELLS, AUDIO_RATE>aBamboo2(KICK2_DATA);
 
-Sample <rim_NUM_CELLS, AUDIO_RATE>aBamboo0(rim_DATA);
-
 Sample <tom_NUM_CELLS, AUDIO_RATE>aBamboo2(tom_DATA);
-Sample <tom_NUM_CELLS, AUDIO_RATE>aBamboo2(tom_DATA);
+Sample <BAMBOO_00_2048_NUM_CELLS, AUDIO_RATE>aBamboo0(BAMBOO_00_2048_DATA);
+Sample <BAMBOO_01_2048_NUM_CELLS, AUDIO_RATE>aBamboo1(BAMBOO_01_2048_DATA);
 Sample <BAMBOO_02_2048_NUM_CELLS, AUDIO_RATE>aBamboo2(BAMBOO_02_2048_DATA);
 
 */
+
+Sample <rim_NUM_CELLS, AUDIO_RATE>aBamboo0(rim_DATA);
+Sample <tom_NUM_CELLS, AUDIO_RATE>aBamboo1(tom_DATA);
 Sample <closedhat_NUM_CELLS, AUDIO_RATE>aBamboo2(closedhat_DATA);
-Sample <BAMBOO_00_2048_NUM_CELLS, AUDIO_RATE>aBamboo0(BAMBOO_00_2048_DATA);
-Sample <BAMBOO_01_2048_NUM_CELLS, AUDIO_RATE>aBamboo1(BAMBOO_01_2048_DATA);
+
 
 
 // STL stuff
@@ -132,12 +133,12 @@ void setup() {
   // initial speed
   mills = 127;
 
-  aBamboo0.setFreq((float) BAMBOO_00_2048_SAMPLERATE / (float) BAMBOO_00_2048_NUM_CELLS);
-  aBamboo1.setFreq((float) BAMBOO_01_2048_SAMPLERATE / (float) BAMBOO_01_2048_NUM_CELLS);
+  //aBamboo0.setFreq((float) BAMBOO_00_2048_SAMPLERATE / (float) BAMBOO_00_2048_NUM_CELLS);
+  //aBamboo1.setFreq((float) BAMBOO_01_2048_SAMPLERATE / (float) BAMBOO_01_2048_NUM_CELLS);
   //aBamboo2.setFreq((float) BAMBOO_02_2048_SAMPLERATE / (float) BAMBOO_02_2048_NUM_CELLS);
   //aBamboo1.setFreq((float) TR_HH_SAMPLERATE / (float) TR_HH_NUM_CELLS);
-  //aBamboo0.setFreq((float) rim_SAMPLERATE / (float) rim_NUM_CELLS);
-  //aBamboo2.setFreq((float) tom_SAMPLERATE / (float) tom_NUM_CELLS);
+  aBamboo0.setFreq((float) rim_SAMPLERATE / (float) rim_NUM_CELLS);
+  aBamboo1.setFreq((float) tom_SAMPLERATE / (float) tom_NUM_CELLS);
   aBamboo2.setFreq((float) closedhat_SAMPLERATE / (float) closedhat_NUM_CELLS);
   
   /*

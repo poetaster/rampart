@@ -83,7 +83,8 @@ int buttonState = 0;
 
 void setup() {
 
-  Serial.begin(115200);
+  //Serial.begin(9600);
+  //Serial.println("hi there");
   // initialize the pushbutton pin as an input:
   pinMode(B2_PIN, INPUT);
   pinMode(B3_PIN, INPUT);
@@ -207,7 +208,7 @@ int updateAudio() {
     Q15n16 modulation = deviation * aModulator.next() >> 8;
     return (gain * (int)aCarrier.phMod(modulation)) >> 8;
   }
-
+  return 0; // should not get here
 }
 
 void loop() {
