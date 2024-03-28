@@ -202,7 +202,7 @@ ISR(TIMER1_COMPA_vect) {
 
     case 14:
       //Both cool. What to choose?
-      //value=t>>c^t&1|t+(t^t>>21)-t*((t>>4?b:a)&t>>12)^t<<1&(a&12?t>>4:t>>10);
+      //value=t >> c ^ t & 1 | t + (t ^ t >>21) - t* (( t >> 4 ? b : a) &t >> 12 ) ^ t << 1 & ( a & 12 ? t >> 4 : t >> 10 );
       value = t >> c ^ t & 1 | t + (t ^ t >> 21) - t * ((t >> 4 ? b : a)&t >> (12 - (a >> 1)))^t << 1 & (a & 12 ? t >> 4 : t >> 10);
       aTop = 8;
       aBottom = 0;
@@ -215,7 +215,6 @@ ISR(TIMER1_COMPA_vect) {
 
       //value = (t*((t>>a|t<<c)&29&t>>b));
       //((t&4096)?((t*(t^t%255)|(t>>4))>>1):(t>>3)|((t&8192)?t<<2:t))
-      //value=((t&(a<<a))?((t*(t^t%b)|(t>>c))>>1):(t>>3)|((t&(b<<b))?t<<2:t));
       // value = ((t & (4 << c)) ? ((t * (t ^ t & a) | (t >> b)) >> 1) : (t >> 4) | ((t & (c << b)) ? t << 1 : t));
       //value = ((t &  (4 << a)) ? ((-t * (t ^ t ) | (t >> b)) >> c) : (t >> 4) | ((t & (c << b)) ? t << 1 : t));
       value = ((t &  (4 << a)) ? ((-t * (t ^ t ) | (t >> b)) >> c) : (t >> 4) | ((t & (c << b)) ? t << 1 : t));
@@ -244,7 +243,17 @@ ISR(TIMER1_COMPA_vect) {
       cTop = 6;
       cBottom = 0;
       break;
+    case 18:
+      value= (( t & (a<<a) ) ? ( ( t * ( t ^ t % b ) | ( t >> c ) ) >> 1 ) : ( t >> 3 ) | ( ( t & ( b << b ) ) ? t << 2 : t ) );
+      aTop = 8;
+      aBottom = 0;
+      bTop = 9;
+      bBottom = 0;
+      cTop = 6;
+      cBottom = 0;
+      break;
 
+       
       //((i * (i >> 8 + i >> 9) * 100) + sin(i));
 
   }

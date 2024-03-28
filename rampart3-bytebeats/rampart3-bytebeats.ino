@@ -34,7 +34,10 @@ const unsigned int TOP = 0x07FF; // 11-bit resolution.  7812 Hz PWM
 #define speakerPin 11
 #define upButtonPin 4
 #define downButtonPin 5
-
+#define progBit0Pin 7
+#define progBit1Pin 6
+#define progBit2Pin 5
+#define progBit3Pin 4
 int debounceRange = 20;// 5
 long t = 0;
 volatile int a, b, c,i;
@@ -43,7 +46,7 @@ byte programNumber = 1;
 byte upButtonState = 0;
 byte downButtonState = 0;
 byte lastButtonState = 0;
-byte totalPrograms = 17;
+byte totalPrograms = 18;
 byte clocksOut = 0;
 int cyclebyte = 0;
 volatile int aTop = 99;
@@ -234,7 +237,7 @@ void onEb1Encoder(EncoderButton& eb) {
   Serial.print("eb1 position is: ");
   Serial.println(eb.position());
   //displayUpdate();
-  currentSound = constrain(eb.position(), 1, 12);
+  currentSound = constrain(eb.position(), 1, 18);
   programNumber = currentSound;
   t += eb1.increment();
 }
@@ -251,10 +254,10 @@ void setup() {
   
   pinMode(ledPin, OUTPUT);
   pinMode(1,OUTPUT);
-  //pinMode(progBit0Pin, OUTPUT);
+  pinMode(progBit0Pin, INPUT);
   //pinMode(progBit1Pin, OUTPUT);
   //pinMode(progBit2Pin, OUTPUT);
-  //pinMode(progBit3Pin, OUTPUT);
+  pinMode(progBit3Pin, OUTPUT);
 
   pinMode(upButtonPin, INPUT_PULLUP);
   pinMode(downButtonPin, INPUT_PULLUP);
@@ -291,22 +294,22 @@ void setup() {
   //testanimate(logo_bmp, LOGO_WIDTH, LOGO_HEIGHT); // Animate bitmaps
 }
 
-long timeoffset;
+long timeoffset = 0;
 
 void updateControl(){
 
-  
+  ledCounter(); /// could be in loop
   //floatI += tempo; //float counter so that you can set tempo
       // always write the sound out begore doing or not doing arduboy stuff
   i = i + tempo;
   if (i>256) i = 1;
-  a = getSound(currentSound, i);
+  //a = getSound(currentSound, i);
   //print_cur("Sound: ", (String) a);
   if (isDebugging) {
     //Serial.println(a);
   }
-  if (value < 100 ) digitalWrite(1,LOW);
-  if (value > 150 ) digitalWrite(1,HIGH);
+  if (value < 50 ) digitalWrite(13,LOW);
+  if (value > 80 ) digitalWrite(13,HIGH);
   //display.clearDisplay();
   //Serial.println((String) a);
   // draw current pattern
@@ -386,11 +389,24 @@ void loop(){
   
   buttonsManager();
   potsManager();
-
+  adcManager();
   updateControl(); // required here
-    if (millis() > timeoffset + 1000) {
+    if (millis() > timeoffset + 100) {
       timeoffset = millis();
       //display.display();
+        //analogWrite(13,value);
+
+  }
+}
+
+// used for mapping adc input on pins 5 - 7 to a - c
+void adcManager() {
+
+  if (!isButton1Active && !isButton2Active) {
+    a = map(analogRead(7), 0, 1023, aBottom, aTop);
+    //b = map(analogRead(1), 0, 1023, bBottom, bTop);
+    //c = map(analogRead(2), 0, 1023, cBottom, cTop);
+
   }
 }
 void potsManager() {
@@ -423,7 +439,6 @@ void rightLongPressActions() {
   int actual_A_Pot = map(analogRead(0), 0, 1023, -7, 7);
 
   if (old_A_Pot != actual_A_Pot) {
-
     shift_A_Pot = actual_A_Pot;
   }
   old_A_Pot = actual_A_Pot;
@@ -434,6 +449,7 @@ void rightLongPressActions() {
     shift_A_Pot = 1;
   }
 }
+
 void leftLongPressActions() {
 
   // SAMPLE RATE *************************************
@@ -471,7 +487,9 @@ void ledCounter() {
 //  digitalWrite(progBit0Pin, bitRead(val, 0));
 //  digitalWrite(progBit1Pin, bitRead(val, 1));
 //  digitalWrite(progBit2Pin, bitRead(val, 2));
-//  digitalWrite(progBit3Pin, bitRead(val, 3));
+  digitalWrite(progBit3Pin, bitRead(val, 3));
+  Serial.println(val);
+  //digitalWrite(progBit3Pin, value);
 }
 
 void printValues() {
