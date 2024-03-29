@@ -146,13 +146,13 @@ ISR(TIMER1_COMPA_vect) {
       break;
     case 9:
       // value = ( (t * ( t >> a | t >> ( a + 1 ) ) & b & t >> 8 ) ) ^ ( t & t >> 13 | t >>6 );
-      aMax = 12;
-      aMin = 1;
+      aMax = 16;
+      aMin = 6;
       bMax = 12;
-      bMin = 1;
-      cMax = 12;
-      cMin = 1;
-      value =  ( t  &  a >> a | t >> a -1 ) ^ (t & b >> b | t >> b-1) ^ ( t & t >> c | t >>c-1 );
+      bMin = 4;
+      cMax = 10;
+      cMin = 2;
+      value =  ( t  &  t >> a | t >> a - 3 ) ^ (t & t >> b | t >> b - 2) ^ ( t & t >> c | t >> c - 1 );
       
       break;
     case 10:
@@ -271,9 +271,19 @@ ISR(TIMER1_COMPA_vect) {
       cMin = 6;
       value = t - b & ( (t>>a | t<<4 ) ) ^ t - c & ( ( t>>b | t<<3 ) ) ^ t - a & ( ( t>>c | t<<2 ) ) ;
       break;
-
+    case 21:
+    // classic vizmut paper pp. 5 https://arxiv.org/pdf/1112.1368.pdf
+      aMax = 100;
+      aMin = 20;
+      bMax = 50;
+      bMin = 10;
+      cMax = 5;
+      cMin = 1;
+      value = ( ( t >> a/5) ^ ( t >> b/2 ) - c ) % 11 * t & 64 ;
+      break;
+//( ( t >>10)\ˆ( t >>10)−2)%11∗ t &64
        
-      //((i * (i >> 8 + i >> 9) * 100) + sin(i));
+
 
   }
 
