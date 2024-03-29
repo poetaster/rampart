@@ -32,8 +32,8 @@ const unsigned int TOP = 0x07FF; // 11-bit resolution.  7812 Hz PWM
 // from glitchstorm
 #define ledPin   13
 #define speakerPin 11
-#define upButtonPin 4
-#define downButtonPin 5
+#define upButtonPin 5
+#define downButtonPin 4
 #define progBit0Pin 7
 #define progBit1Pin 6
 #define progBit2Pin 5
@@ -46,7 +46,7 @@ byte programNumber = 1;
 byte upButtonState = 0;
 byte downButtonState = 0;
 byte lastButtonState = 0;
-byte totalPrograms = 18;
+byte totalPrograms = 20;
 byte clocksOut = 0;
 int cyclebyte = 0;
 volatile int aTop = 99;
@@ -413,6 +413,8 @@ void potsManager() {
 
   if (!isButton1Active && !isButton2Active) {
     a = map(analogRead(0), 0, 1023, aBottom, aTop);
+    // take the average on the input on pin 7
+    int aa = 
     b = map(analogRead(1), 0, 1023, bBottom, bTop);
     c = map(analogRead(2), 0, 1023, cBottom, cTop);
 
@@ -487,8 +489,8 @@ void ledCounter() {
 //  digitalWrite(progBit0Pin, bitRead(val, 0));
 //  digitalWrite(progBit1Pin, bitRead(val, 1));
 //  digitalWrite(progBit2Pin, bitRead(val, 2));
-  digitalWrite(progBit3Pin, bitRead(val, 3));
-  Serial.println(val);
+  //digitalWrite(progBit3Pin, bitRead(val, 3));
+  //Serial.println(val);
   //digitalWrite(progBit3Pin, value);
 }
 
