@@ -61,73 +61,73 @@ ISR(TIMER1_COMPA_vect) {
 
   switch (programNumber) {
     case 1:
-      aTop = 10;
-      aBottom = 0;
-      bTop = 14;
-      bBottom = 0;
-      cTop = 14;
-      cBottom = 0;
+      aMax = 10;
+      aMin = 0;
+      bMax = 14;
+      bMin = 0;
+      cMax = 14;
+      cMin = 0;
       value = ((t & ((t >> a))) + (t | ((t >> b)))) & (t >> (c + 1)) | (t >> a) & (t * (t >> b));
       break;
     case 2:
-      aTop = 12;
-      aBottom = 0;
-      bTop = 20;
-      bBottom = 4;
-      cTop = 12;
-      cBottom = 5;
+      aMax = 12;
+      aMin = 0;
+      bMax = 20;
+      bMin = 4;
+      cMax = 12;
+      cMin = 5;
       if (t > 65536) t = -65536;
       value = (t >> c | a | t >> (t >> 16)) * b + ((t >> (b + 1)) & (a + 1));
       break;
     case 3:
-      aTop = 30;
-      aBottom = 6;
-      bTop = 16;
-      bBottom = 0;
-      cTop = 10;
-      cBottom = 0;
+      aMax = 30;
+      aMin = 6;
+      bMax = 16;
+      bMin = 0;
+      cMax = 10;
+      cMin = 0;
       //value = t>>6^t&37|t+(t^t>>11)-t*((t%a?2:6)&t>>11)^t<<1&(t&b?t>>4:t>>10);
       value = t >> c ^ t & 37 | t + (t ^ t >> a) - t * ((t >> a ? 2 : 6)&t >> b)^t << 1 & (t & b ? t >> 4 : t >> 10);
       break;
     case 4:
-      aTop = 12;
-      aBottom = 0;
-      bTop = 16;
-      bBottom = 0;
-      cTop = 10;
-      cBottom = 0;
+      aMax = 12;
+      aMin = 0;
+      bMax = 16;
+      bMin = 0;
+      cMax = 10;
+      cMin = 0;
       // value = t>>6^t&37|t+(t^t>>11)-t*((t%a?2:6)&t>>11)^t<<1&(t&b?t>>4:t>>10);
       value = b * t >> a ^ t & (37 - c) | t + ((t ^ t >> 11)) - t * ((t >> 6 ? 2 : a)&t >> (c + b))^t << 1 & (t & 6 ? t >> 4 : t >> c);
       break;
     case 5:
-      aTop = 24;
-      aBottom = 0;
-      bTop = 22;
-      bBottom = 0;
-      cTop = 16;
-      cBottom = 0;
+      aMax = 24;
+      aMin = 0;
+      bMax = 22;
+      bMin = 0;
+      cMax = 16;
+      cMin = 0;
       // t>>6^t&37|t+(t^t>>11)-t*((t%a?2:6)&t>>11)^t<<1&(t&b?t>>4:t>>10);
       //value = t+(t&t^t>>6)-t*((t>>9)&(t%16?2:6)&t>>9)
       // value = t+(t&t^t>>(b*2-c))-t*((t>>a)&(t%c?2:(a-c))&t>>b);
       value = c * t >> 2 ^ t & (30 - b) | t + ((t ^ t >> b)) - t * ((t >> 6 ? a : c)&t >> (a))^t << 1 & (t & b ? t >> 4 : t >> c);
       break;
     case 6:
-      aTop = 10;
-      aBottom = 3;
-      bTop = 28;
-      bBottom = 0;
-      cTop = 10;
-      cBottom = 3;
+      aMax = 10;
+      aMin = 3;
+      bMax = 28;
+      bMin = 0;
+      cMax = 10;
+      cMin = 3;
       //value = ((t>>a&t)-(t>>a)+(t>>a&t))+(t*((t>>b)&b));
       value = ((t >> a & t) - (t >> a) + (t >> a & t)) + (t * ((t >> c)&b));
       break;
     case 7:
-      aTop = 10;
-      aBottom = 0;
-      bTop = 22;
-      bBottom = 10;
-      cTop = 8;
-      cBottom = 0;
+      aMax = 10;
+      aMin = 0;
+      bMax = 22;
+      bMin = 10;
+      cMax = 8;
+      cMin = 0;
       //SE CUELGA A 16KH
       // value = ((t % 42 + b) * (a >> t) | (128 & b) - (t >> a)) % (t >> b) ^ (t & (t >> c));
       //value =  t>>b&t?t>>a:-t>>c ;
@@ -135,44 +135,43 @@ ISR(TIMER1_COMPA_vect) {
       break;
     case 8:
       //16kh only work by 65536 loops
-      aTop = 12;
-      aBottom = 0;
-      bTop = 20;
-      bBottom = 0;
-      cTop = 20;
-      cBottom = 0;
+      aMax = 12;
+      aMin = 0;
+      bMax = 20;
+      bMin = 0;
+      cMax = 20;
+      cMin = 0;
       if (t > 65536) t = -65536;
       value = (t >> a | c | t >> (t >> 16)) * b + ((t >> (b + 1)));
       break;
     case 9:
-      // value = ((t*(t>>a|t>>(a+1))&b&t>>8))^(t&t>>13|t>>6);
-      aTop = 32;
-      aBottom = 1;
-      bTop = 32;
-      bBottom = 1;
-      cTop = 32;
-      cBottom = 1;
-      value = ( ( t * (t >> a | t >> ( b & t) ) & t >> 8) + 1 ) ^ (t & t >> c | t >> 6);
-      //( ( t / 9 >> a ) ^ ( t / 6 >> b ) & ( t / 3 >> c) * t ) >> 8 ;
+      // value = ( (t * ( t >> a | t >> ( a + 1 ) ) & b & t >> 8 ) ) ^ ( t & t >> 13 | t >>6 );
+      aMax = 12;
+      aMin = 1;
+      bMax = 12;
+      bMin = 1;
+      cMax = 12;
+      cMin = 1;
+      value =  ( t  &  a >> a | t >> a -1 ) ^ (t & b >> b | t >> b-1) ^ ( t & t >> c | t >>c-1 );
       
       break;
     case 10:
-      aTop = 12;
-      aBottom = 1;
-      bTop = 12;
-      bBottom = 1;
-      cTop = 12;
-      cBottom = 1;
+      aMax = 12;
+      aMin = 1;
+      bMax = 12;
+      bMin = 1;
+      cMax = 12;
+      cMin = 1;
       //if (t > 65536) t = -65536;
       value = (t*(a+(t/131072%2))*(t>33e3) & t>>4 | t*(c+(t/32768%2)) & t>>7 | t*(b+(t/65536%2)) & (t>32768)&t>>11)-(t>97e3);
       break;
     case 11:
-      aTop = 16;
-      aBottom = 1;
-      bTop = 16;
-      bBottom = 1;
-      cTop = 16;
-      cBottom = 1;
+      aMax = 16;
+      aMin = 1;
+      bMax = 16;
+      bMin = 1;
+      cMax = 16;
+      cMin = 1;
       value = (t * a & t >> b | t * c & t >> 7 | t * 3 & t / 1024) - 1; 
       // % is a too heavy operatin for atmel 328. Should not be used in any equation. Change it
       // value = ((t >> a % (128-b<<t))) * b * t >>( c*t<<4) * t >> 18 ;
@@ -185,107 +184,92 @@ ISR(TIMER1_COMPA_vect) {
       break;
     case 12:
       // moola long
-      aTop = 24;
-      aBottom = 0;
-      bTop = 24 ;
-      bBottom = 1;
-      cTop = 14;
-      cBottom = 1;
+      aMax = 24;
+      aMin = 0;
+      bMax = 24 ;
+      bMin = 1;
+      cMax = 14;
+      cMin = 1;
       value = (t * 12 & t >> a | t * b & t >> c | t * b & c / (b << 2)) - 2;
       //value = (t * a & t >> b | t * c & t >> 7 | t * 3 & t / 1024) - 1;
       break;
     case 13:
       //moola viznu
-      aTop = 18;
-      aBottom = 10;
-      bTop = 14;
-      bBottom = 1;
-      cTop = 10;
-      cBottom = 1;
+      aMax = 18;
+      aMin = 10;
+      bMax = 14;
+      bMin = 1;
+      cMax = 10;
+      cMin = 1;
       //value = (t * 5 & t >> 7) | (t * 3 & t >> 10);
       value = ((t * (t >> a) & (b * t >> 7) & (8 * t >> c)));
       break;
 
     case 14:
-      aTop = 8;
-      aBottom = 0;
-      bTop = 16;
-      bBottom = 0;
-      cTop = 1;
-      cBottom = 6;
-      //Both cool. What to choose?
-      //value=t >> c ^ t & 1 | t + (t ^ t >>21) - t* (( t >> 4 ? b : a) &t >> 12 ) ^ t << 1 & ( a & 12 ? t >> 4 : t >> 10 );
+      aMax = 8;
+      aMin = 0;
+      bMax = 16;
+      bMin = 0;
+      cMax = 1;
       value = t >> c ^ t & 1 | t + (t ^ t >> 21) - t * ((t >> 4 ? b : a)&t >> (12 - (a >> 1)))^t << 1 & (a & 12 ? t >> 4 : t >> 10);
       break;
     case 15:
-      aTop = 8;
-      aBottom = 0;
-      bTop = 9;
-      bBottom = 0;
-      cTop = 5;
-      cBottom = 0;
+      aMax = 8;
+      aMin = 0;
+      bMax = 9;
+      bMin = 0;
+      cMax = 5;
+      cMin = 0;
       value = ((t &  (4 << a)) ? ((-t * (t ^ t ) | (t >> b)) >> c) : (t >> 4) | ((t & (c << b)) ? t << 1 : t));
-      //value = (t*((t>>a|t<<c)&29&t>>b));
-      //((t&4096)?((t*(t^t%255)|(t>>4))>>1):(t>>3)|((t&8192)?t<<2:t))
-      // value = ((t & (4 << c)) ? ((t * (t ^ t & a) | (t >> b)) >> 1) : (t >> 4) | ((t & (c << b)) ? t << 1 : t));
-      //value = ((t &  (4 << a)) ? ((-t * (t ^ t ) | (t >> b)) >> c) : (t >> 4) | ((t & (c << b)) ? t << 1 : t));
       break;
     case 16:
-      aTop = 8;
-      aBottom = 0;
-      bTop = 9;
-      bBottom = 0;
-      cTop = 6;
-      cBottom = 0;
+      aMax = 8;
+      aMin = 0;
+      bMax = 9;
+      bMin = 0;
+      cMax = 6;
+      cMin = 0;
       value = ((t &  (4 << a)) ? ((-t * (t ^ t ) | (t >> b)) >> 3) : (t >> c) | ((t & (3 << b)) ? t << 1 : t));
       break;
     case 17:
     // pulse drone
-      aTop = 32;
-      aBottom = 1;
-      bTop = 24;
-      bBottom = 0;
-      cTop = 16;
-      cBottom = 0;
+      aMax = 32;
+      aMin = 1;
+      bMax = 24;
+      bMin = 0;
+      cMax = 16;
+      cMin = 0;
       value = ((t*a) & ( t>>5| t<<2 )  ) | ( (t*b) & ( t>>4 | t<<3)) | ((t*c)/2 & ( t>>3 | t<<4 ) );
-      // kills a nano 
-      // (t*8 & (t/24>>5|t<<2)) | (t*6 & (t/18>>4|t<<3)) | (t*4 & (t/12>>3|t<<4))
       break;
     case 18:
     // drone, organ, perc
-      aTop = 8;
-      aBottom = 1;
-      bTop = 16;
-      bBottom = 1;
-      cTop = 8;
-      cBottom = 1;
+      aMax = 8;
+      aMin = 1;
+      bMax = 16;
+      bMin = 1;
+      cMax = 8;
+      cMin = 1;
       value= ( ( t * a & t >> 4 ) | ( t * b & t >> 7 ) | ( t * c &  t) ) - 1;
-      // nah :)
-      //(1/(128000-t))|(t>96e3)?t%4000*("'&(&*$,*"[t%96000/4000]-a):(t%2000*("$$$&%%%''''%%%'&"[t%32000/2000]-b-(2*((t>28e3)&(t<32e3)))))/(1+(t%8000<4e3));
       break;
     case 19:
     // also a drone, basic with perc blurbs
-      aTop = 16;
-      aBottom = 4;
-      bTop = 16;
-      bBottom = 3;
-      cTop = 16;
-      cBottom = 1;
+      aMax = 16;
+      aMin = 4;
+      bMax = 16;
+      bMin = 3;
+      cMax = 16;
+      cMin = 1;
       value =  ( t >> a | t - b ) & ( t -a | t >> b ) * c;   
       break;
     case 20:
     // a melodic drone
-      aTop = 16;
-      aBottom = 8;
-      bTop = 14;
-      bBottom = 7;
-      cTop = 12;
-      cBottom = 6;
-      //value = ((t>>32)*7|(t>>a)*8|(t>>b)*7)&(t>>7); 
-      // 
+      aMax = 16;
+      aMin = 8;
+      bMax = 14;
+      bMin = 7;
+      cMax = 12;
+      cMin = 6;
       value = t - b & ( (t>>a | t<<4 ) ) ^ t - c & ( ( t>>b | t<<3 ) ) ^ t - a & ( ( t>>c | t<<2 ) ) ;
-      
-      //( (  (t/6) >> a &t) + ( t << 4) ) & ( ( ( ( t/3 ) >> b & t) + ( t << c) ) );
       break;
 
        

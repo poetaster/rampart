@@ -32,8 +32,8 @@ const unsigned int TOP = 0x07FF; // 11-bit resolution.  7812 Hz PWM
 // from glitchstorm
 #define ledPin   13
 #define speakerPin 11
-#define upButtonPin 5
-#define downButtonPin 4
+#define UPPIN 5
+#define DOWNPIN 4
 #define progBit0Pin 7
 #define progBit1Pin 6
 #define progBit2Pin 5
@@ -49,12 +49,12 @@ byte lastButtonState = 0;
 byte totalPrograms = 20;
 byte clocksOut = 0;
 int cyclebyte = 0;
-volatile int aTop = 99;
-volatile int aBottom = 0;
-volatile int bTop = 99;
-volatile int bBottom = 0;
-volatile int cTop = 99;
-volatile int cBottom = 0;
+volatile int aMax = 99;
+volatile int aMin = 0;
+volatile int bMax = 99;
+volatile int bMin = 0;
+volatile int cMax = 99;
+volatile int cMin = 0;
 int d = 0;
 bool isClockOutMode = false;
 bool isSerialValues = true;
@@ -259,8 +259,8 @@ void setup() {
   //pinMode(progBit2Pin, OUTPUT);
   pinMode(progBit3Pin, OUTPUT);
 
-  pinMode(upButtonPin, INPUT_PULLUP);
-  pinMode(downButtonPin, INPUT_PULLUP);
+  pinMode(UPPIN, INPUT_PULLUP);
+  pinMode(DOWNPIN, INPUT_PULLUP);
 
   initSound();
   ledCounter();
@@ -403,20 +403,19 @@ void loop(){
 void adcManager() {
 
   if (!isButton1Active && !isButton2Active) {
-    a = map(analogRead(7), 0, 1023, aBottom, aTop);
-    //b = map(analogRead(1), 0, 1023, bBottom, bTop);
-    //c = map(analogRead(2), 0, 1023, cBottom, cTop);
+    a = map(analogRead(7), 0, 1023, aMin, aMax);
+    //b = map(analogRead(1), 0, 1023, bMin, bMax);
+    //c = map(analogRead(2), 0, 1023, cMin, cMax);
 
   }
 }
 void potsManager() {
 
   if (!isButton1Active && !isButton2Active) {
-    a = map(analogRead(0), 0, 1023, aBottom, aTop);
+    a = map(analogRead(0), 0, 1023, aMin, aMax);
     // take the average on the input on pin 7
-    int aa = 
-    b = map(analogRead(1), 0, 1023, bBottom, bTop);
-    c = map(analogRead(2), 0, 1023, cBottom, cTop);
+    b = map(analogRead(1), 0, 1023, bMin, bMax);
+    c = map(analogRead(2), 0, 1023, cMin, cMax);
 
   }
   if (isLongPress2Active) {
@@ -444,8 +443,6 @@ void rightLongPressActions() {
     shift_A_Pot = actual_A_Pot;
   }
   old_A_Pot = actual_A_Pot;
-
-
   if (shift_A_Pot == 0) {
     //prevents the engine to stop
     shift_A_Pot = 1;
@@ -518,15 +515,17 @@ int  softDebounce(int  readCV, int  oldRead) {
 void buttonsManager() {
   bool pressBothButtons = false;
   //start button 1
-  if (digitalRead(upButtonPin) == LOW) {
+  if (digitalRead(UPPIN) == LOW) {
     if (isButton1Active == false) {
       isButton1Active = true;
       button1Timer = millis();
+      
       if (isDebugging) Serial.println("RIGHT button short press");
       
     }
     if ((millis() - button1Timer > longPress1Time) && (isLongPress1Active == false)) {
       isLongPress1Active = true;
+      
       if (isDebugging) Serial.println("RIGHT long press ON");
       
     }
@@ -534,6 +533,7 @@ void buttonsManager() {
     if (isButton1Active == true) {
       if (isLongPress1Active == true) {
         isLongPress1Active = false;
+        
         if (isDebugging) Serial.println("RIGHT long press RELEASE");
       } else {
 
@@ -543,9 +543,11 @@ void buttonsManager() {
         else if (programNumber == totalPrograms) {
           programNumber = 1;
         }
+        
         if (isDebugging) Serial.println("RIGHT button short release");
         if (isDebugging) Serial.print("PROGRAM: ");
         if (isDebugging) Serial.println(programNumber);
+        
         ledCounter();
       }
       isButton1Active = false;
@@ -553,7 +555,7 @@ void buttonsManager() {
   }
   //end RIGHT button
   //start LEFT button
-  if (digitalRead(downButtonPin) == LOW) {
+  if (digitalRead(DOWNPIN) == LOW) {
     if (isButton2Active == false) {
       isButton2Active = true;
       button2Timer = millis();
