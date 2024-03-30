@@ -156,14 +156,15 @@ ISR(TIMER1_COMPA_vect) {
       
       break;
     case 10:
-      aMax = 12;
-      aMin = 1;
+      aMax = 16;
+      aMin = 6;
       bMax = 12;
-      bMin = 1;
-      cMax = 12;
-      cMin = 1;
-      //if (t > 65536) t = -65536;
-      value = (t*(a+(t/131072%2))*(t>33e3) & t>>4 | t*(c+(t/32768%2)) & t>>7 | t*(b+(t/65536%2)) & (t>32768)&t>>11)-(t>97e3);
+      bMin = 4;
+      cMax = 10;
+      cMin = 2;
+      value =  ( t  &  t >> c | t >> a - 3 ) ^ (t & t >> a | t >> b - 2) ^ ( t & t >> b | t >> c - 1 );
+      // borked
+      //value = (t*(a+(t/a))*(t>33e3) & t>>4 | t*(c+(c)) & t>>7 | t*(b+(t/b)) & (t>32768)&t>>11)-(t>97e3);
       break;
     case 11:
       aMax = 16;
@@ -175,7 +176,6 @@ ISR(TIMER1_COMPA_vect) {
       value = (t * a & t >> b | t * c & t >> 7 | t * 3 & t / 1024) - 1; 
       // % is a too heavy operatin for atmel 328. Should not be used in any equation. Change it
       // value = ((t >> a % (128-b<<t))) * b * t >>( c*t<<4) * t >> 18 ;
-      //DEFFO
       //((t >> a / (128 - b << (t >> (9 - c))))) * b * t >> ( c * t << 4) * t >> 18 ;
       // value = ((t >> a % (128-b<<(t>>(9-c))))) * b * t >>( c*t<<4) * t >> 18+(t >> c ? 2 : a)&t * (t >> b) ;
       // value = ((t >> 6 ? 2 : a)&t * (t >> c) | ( b) - (t >> a)) % (t >> b) + (4 | (t >> c));
@@ -279,11 +279,28 @@ ISR(TIMER1_COMPA_vect) {
       bMin = 10;
       cMax = 5;
       cMin = 1;
-      value = ( ( t >> a/5) ^ ( t >> b/2 ) - c ) % 11 * t & 64 ;
+      value = ( ( t >> a/c) ^ ( t >> b/2 ) - c ) % 11 * t & 64 ;
       break;
-//( ( t >>10)\ˆ( t >>10)−2)%11∗ t &64
-       
-
+    case 22:
+    // classic vizmut paper pp. 6 https://arxiv.org/pdf/1112.1368.pdf
+      aMax = 16;
+      aMin = 1;
+      bMax = 16;
+      bMin = 1;
+      cMax = 16;
+      cMin = 1;
+      value = (int)(t/1e7 * t * t + c ) % 127 | t >> c ^ t >> b | t % 127 + ( t >> a ) | t ;
+      break;
+    case 23:
+    // classic vizmut paper pp. 6 https://arxiv.org/pdf/1112.1368.pdf
+      aMax = 90;
+      aMin = 45;
+      bMax = 28;
+      bMin = 7;
+      cMax = 7;
+      cMin = 2;
+      value = t >> c | t & (( t >> 5 )/( t >> b/4 - ( t >> a/3 ) & - t >> b/4 - ( t >> a/3 ) ) );
+      // t >>4 | t &(( t >> 5 )/( t >> 7 − ( t >> 15 ) & − t >> 7 − ( t >> 15 ) ) )
 
   }
 

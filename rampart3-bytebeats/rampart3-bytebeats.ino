@@ -46,7 +46,7 @@ byte programNumber = 1;
 byte upButtonState = 0;
 byte downButtonState = 0;
 byte lastButtonState = 0;
-byte totalPrograms = 21;
+byte totalPrograms = 23;
 byte clocksOut = 0;
 int cyclebyte = 0;
 volatile int aMax = 99;
@@ -231,15 +231,19 @@ void onEb1Clicked(EncoderButton& eb) {
  * A function to handle the 'encoder' event
  */
 void onEb1Encoder(EncoderButton& eb) {
-  
-  Serial.print("eb1 incremented by: ");
-  Serial.println(eb.increment());
-  Serial.print("eb1 position is: ");
-  Serial.println(eb.position());
+  if (isDebugging) {
+    Serial.print("eb1 incremented by: ");
+    Serial.println(eb.increment());
+    Serial.print("eb1 position is: ");
+    Serial.println(eb.position());
+  }
   //displayUpdate();
-  currentSound = constrain(eb.position(), 1, 18);
-  programNumber = currentSound;
-  t += eb1.increment();
+  currentSound = constrain(eb.position(), 1, 64);
+  old_SAMPLE_RATE = SAMPLE_RATE;
+  SAMPLE_RATE = currentSound * 256;
+  if (SAMPLE_RATE != old_SAMPLE_RATE) {
+    OCR1A = F_CPU / SAMPLE_RATE;
+  }
 }
 
 
@@ -421,7 +425,7 @@ void potsManager() {
   if (isLongPress2Active) {
 
     //left button is pressed
-    leftLongPressActions();
+    //leftLongPressActions();
 
 
   }
@@ -449,26 +453,6 @@ void rightLongPressActions() {
   }
 }
 
-void leftLongPressActions() {
-
-  // SAMPLE RATE *************************************
-
-  old_SAMPLE_RATE = SAMPLE_RATE;
-  //int actual_SAMPLE_RATE = analogRead(1);
-  SAMPLE_RATE = softDebounce(analogRead(0), SAMPLE_RATE);
-
-
-  // actual_SAMPLE_RATE=map(analogRead(1), 0, 1023, 256, 16384);
-  if (SAMPLE_RATE != old_SAMPLE_RATE) {
-    //el mapeo se hace aqui
-    //map(analogRead(1), 0, 1023, 256, 16384);
-    int mappedSAMPLE_RATE = map(SAMPLE_RATE, 0, 1023, 256, 16384);
-    OCR1A = F_CPU / mappedSAMPLE_RATE;
-  }
-
-  // TO BE PROGRAMMED ELASTIC STUFF ***********************
-  // shift_C_Pot = map(analogRead(2), 0, 1023, 0, 15);
-}
 
 void ledCounter() {
   int val;
