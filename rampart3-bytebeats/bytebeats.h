@@ -232,14 +232,15 @@ ISR(TIMER1_COMPA_vect) {
       value = ((t &  (4 << a)) ? ((-t * (t ^ t ) | (t >> b)) >> 3) : (t >> c) | ((t & (3 << b)) ? t << 1 : t));
       break;
     case 17:
-    // pulse drone
+    // pulse drone // seems to kill the nano after all?
       aMax = 32;
       aMin = 1;
       bMax = 24;
       bMin = 0;
       cMax = 16;
       cMin = 0;
-      value = ((t*a) & ( t>>5| t<<2 )  ) | ( (t*b) & ( t>>4 | t<<3)) | ((t*c)/2 & ( t>>3 | t<<4 ) );
+      //if (t > 65536) t = -65536;
+      value = ((t*a) & ( t>>5| t<<2 )  ) | ( (t*b) & ( t>>4 | t<<3)) | ((t*c) & ( t>>3 | t<<4 ) );
       break;
     case 18:
     // drone, organ, perc
@@ -301,7 +302,25 @@ ISR(TIMER1_COMPA_vect) {
       cMin = 2;
       value = t >> c | t & (( t >> 5 )/( t >> b/4 - ( t >> a/3 ) & - t >> b/4 - ( t >> a/3 ) ) );
       // t >>4 | t &(( t >> 5 )/( t >> 7 − ( t >> 15 ) & − t >> 7 − ( t >> 15 ) ) )
-
+    case 24:
+    // click mouth harp and hum and other chaos, clicky too :)
+      aMax = 15;
+      aMin = 0;
+      bMax = 15;
+      bMin = 0;
+      cMax = 5;
+      cMin = 0;
+      //if (t > 65536) t = -65536;
+      value= ((t >> 6 ? 2 : 3) & t * (t >> a) | (a+b+c) - (t >> b)) % (t >> a) + ( a << t | (t >> c) );
+    case 25:
+    // clicky burpy
+      aMax = 15;
+      aMin = 0;
+      bMax = 11;
+      bMin = 0;
+      cMax = 9;
+      cMin = 0;
+      value = ( ( (t >> 9 ? a : b) & t * (t >> b) % (t >> c) - (t >> b) ) * (t >> a) ) ;
   }
 
   //PWM16B(value);
