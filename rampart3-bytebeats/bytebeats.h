@@ -321,6 +321,37 @@ ISR(TIMER1_COMPA_vect) {
       cMax = 9;
       cMin = 0;
       value = ( ( (t >> 9 ? a : b) & t * (t >> b) % (t >> c) - (t >> b) ) * (t >> a) ) ;
+    case 26:
+      // variation t+(t&1)+(t>>5)*(t>>1)/1|t>>4|t>>8
+      //https://dollchan.net/btb/res/3.html#258
+      aMax = 37;
+      aMin = 4;
+      bMax = 5;
+      bMin = 1;
+      cMax = 12;
+      cMin = 5;
+      value = ( t + ( t & b) + ( t >> a ) * ( t >> b ) / 1 | t >> b | t >> c );
+    case 27:
+       // variation on https://dollchan.net/btb/res/3.html#78
+       // ( ( t >> 10 | t * 5 ) & ( t >> 8 | t * 4 ) & ( t >> 4 | t * 6 ) );
+      aMax = 14;
+      aMin = 4;
+      bMax = 6;
+      bMin = 1;
+      cMax = 12;
+      cMin = 4;
+      value = ( ( t >> a | t * 5 ) & ( t >> ( a + 2 ) | t * b ) & ( t >> b | t * c ) );
+    case 28:
+      // https://forum.arduino.cc/t/one-line-algorithmic-music/73409
+      // (t*(4|t>>13&3)>>(~t>>11&1)&128|t*(t>>11&t>>13)*(~t>>9&3)&127)^(t&4096?(t*(t^t%255)|t>>4)>>1:t>>3|(t&8192?t<<2:t))
+      aMax = 19;
+      aMin = 4;
+      bMax = 7;
+      bMin = 1;
+      cMax = 14;
+      cMin = 1;
+      value = (t * (4 | t >> 13 & b ) >> ( ~t >> 11 & 1 ) & 128 | t * ( t >> a & t >> 13 ) * ( ~t >> c & 3 ) & 127 ) ^ ( t & 4096 ? ( t * ( t ^ t % 255 ) | t >> 4 ) >> 1 : t >> 3 |( t & 8192 ? t << 2 : t ) );
+    
   }
 
   //PWM16B(value);
