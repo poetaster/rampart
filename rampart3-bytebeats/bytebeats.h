@@ -299,13 +299,14 @@ ISR(TIMER1_COMPA_vect) {
       break;
     case 23:
     // classic vizmut paper pp. 6 https://arxiv.org/pdf/1112.1368.pdf
-      aMax = 90;
-      aMin = 45;
-      bMax = 28;
-      bMin = 7;
+    // modified to keep from crashing :) divisions replaced with multiplication :)
+      aMax = 7;
+      aMin = 1;
+      bMax = 7;
+      bMin = 1;
       cMax = 7;
       cMin = 2;
-      value = t >> c | t & (( t >> 5 )/( t >> b/4 - ( t >> a/3 ) & - t >> b/4 - ( t >> a/3 ) ) );
+      value = t >> c | t & (( t >> 5 )/( t >> b*4 - ( t >> a*3 ) & - t >> b*4 - ( t >> a*3 ) ) );
       // t >>4 | t &(( t >> 5 )/( t >> 7 − ( t >> 15 ) & − t >> 7 − ( t >> 15 ) ) )
       break;
     case 24:
@@ -365,6 +366,10 @@ ISR(TIMER1_COMPA_vect) {
     case 29:
       bb39_set(a,b); 
       value =  bb39() |t>>c;
+      aMax = 69;
+      aMin = 1;
+      bMax = 69;
+      bMin = 1;
       cMax = 8;
       cMin = 0;
         // nice 8, 17, ( bb28 | t << c), bb32 << c (or |), 34 great, 37 ( also  << c, | c), b39 ( | t>>c)
@@ -389,9 +394,9 @@ ISR(TIMER1_COMPA_vect) {
       cMax = 8;
       cMin = 0;
       break;
-    case 33:
+    case 33: // not good
       bb28_set(a,b); 
-      value =  bb28() | t >> c;
+      value =  bb28() | t << c;
       cMax = 8;
       cMin = 0;
       break;
@@ -426,10 +431,14 @@ ISR(TIMER1_COMPA_vect) {
       cMin = 0;
       break;
     case 39:
-      bb22_set(a,b); 
-      value =  bb22() | t >> c;
+      aMax = 69;
+      aMin = 1;
+      bMax = 69;
+      bMin = 1;
       cMax = 8;
       cMin = 0;
+      bb22_set(a,b); 
+      value =  bb22() | t >> c;
       break;
 
       
@@ -472,7 +481,7 @@ ISR(TIMER1_COMPA_vect) {
 
 void initSound()
 {
-  pinMode(speakerPin, OUTPUT);
+  pinMode(PWMPIN, OUTPUT);
 
   ASSR &= ~(_BV(EXCLK) | _BV(AS2));
   

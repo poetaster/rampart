@@ -1,27 +1,18 @@
 /**************************************************************************
- This is an example for our Monochrome OLEDs based on SSD1306 drivers
+Rampart Bytebeats @copyright Mark Washeim blueprint@poetaster.de 
 
- Pick one up today in the adafruit shop!
- ------> http://www.adafruit.com/category/63_98
+GPLv3
 
- This example is for a 128x32 pixel display using I2C to communicate
- 3 pins are required to interface (two I2C and one reset).
+Some parts from https://raw.githubusercontent.com/schollz/nyblcore/main/bytebeat/bytebeat.ino
+Some parts from https://github.com/spherical-sound-society/glitch-storm
 
- Adafruit invests time and resources providing this open
- source code, please support Adafruit and open-source
- hardware by purchasing products from Adafruit!
-
- Written by Limor Fried/Ladyada for Adafruit Industries,
- with contributions from the open source community.
- BSD license, check license.txt for more information
- All text above, and the splash screen below must be
- included in any redistribution.
+Many contributions from the internet :) See nyblybyte.h for many equations origins and original form.
  **************************************************************************/
  
 
 #include <EncoderButton.h>
 //#include <Bounce2.h>
-//#include <Adafruit_SSD1306.h>
+//#include <Adafruit_SSD1306.h> // conflicts with timer.
 #include <EncoderButton.h>
 
 // for pwm
@@ -30,15 +21,17 @@ const unsigned int TOP = 0x07FF; // 11-bit resolution.  7812 Hz PWM
 
 
 // from glitchstorm
-#define ledPin   13
-#define speakerPin 11
+#define LEDPIN   13
+#define PWMPIN 11
 #define UPPIN 5
 #define DOWNPIN 4
 #define progBit0Pin 7
 #define progBit1Pin 6
 #define progBit2Pin 5
 #define progBit3Pin 4
+
 int debounceRange = 20;// 5
+
 long t = 0;
 volatile int a, b, c,i;
 volatile int value;
@@ -49,6 +42,9 @@ byte lastButtonState = 0;
 byte totalPrograms = 39;
 byte clocksOut = 0;
 int cyclebyte = 0;
+
+// these ranges are provisional and in schollz equations need to be reset
+
 volatile int aMax = 99;
 volatile int aMin = 0;
 volatile int bMax = 99;
@@ -79,7 +75,7 @@ int old_SAMPLE_RATE = SAMPLE_RATE;
 byte shift_C_Pot = 0;
 byte old_C_Pot = 0;
 
-bool isDebugging = true;
+bool debug = true;
 
 #include "bytebeats.h"
 
@@ -243,7 +239,7 @@ void onEb1Encoder(EncoderButton& eb) {
   if (SAMPLE_RATE != old_SAMPLE_RATE) {
     OCR1A = F_CPU / SAMPLE_RATE;
   }
-  if (isDebugging) {
+  if (debug) {
     Serial.print("eb1 incremented by: ");
     Serial.println(eb.increment());
     Serial.print("eb1 position is: ");
@@ -254,14 +250,14 @@ void onEb1Encoder(EncoderButton& eb) {
 
 void setup() {
 
-  if (isDebugging) {
+  if (debug) {
     Serial.begin(9600);
     Serial.println(F("Started"));
   }
 
   
   
-  pinMode(ledPin, OUTPUT);
+  pinMode(LEDPIN, OUTPUT);
   pinMode(1,OUTPUT);
   pinMode(progBit0Pin, INPUT);
   //pinMode(progBit1Pin, OUTPUT);
@@ -278,29 +274,9 @@ void setup() {
   eb1.setClickHandler(onEb1Clicked);
   eb1.setEncoderHandler(onEb1Encoder);
 
-  // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
-  /*if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
-    if (isDebugging) {
-      Serial.println(F("SSD1306 allocation failed"));
-    }
-    //for(;;); // Don't proceed, loop forever
-  }*/
   
    //pinMode(9, OUTPUT); // set up pin 9 for PWM audio out
 
-  // Show initial display buffer contents on the screen --
-  // the library initializes this with an Adafruit splash screen.
-  //display.display();
-  // Draw a single pixel in white
-  //display.drawPixel(10, 10, SSD1306_WHITE);
-
-  // Show the display buffer on the screen. You MUST call display() after
-  // drawing commands to make them visible on screen!
-  //display.display();
-  //delay(200);
-  //display.clearDisplay();
-
-  //testanimate(logo_bmp, LOGO_WIDTH, LOGO_HEIGHT); // Animate bitmaps
 }
 
 long timeoffset = 0;
@@ -314,77 +290,16 @@ void updateControl(){
   if (i>256) i = 1;
   //a = getSound(currentSound, i);
   //print_cur("Sound: ", (String) a);
-  if (isDebugging) {
+  if (debug) {
     //Serial.println(a);
   }
   if (value < 50 ) digitalWrite(13,LOW);
   if (value > 80 ) digitalWrite(13,HIGH);
-  //display.clearDisplay();
-  //Serial.println((String) a);
-  // draw current pattern
-  for (int x = 0; x < iterations; x++)
-  {
-    //int y = getSound(currentSound, i + x);
-    
-    //display.drawPixel(x, y % 64, SSD1306_WHITE);
-    
-  }
   
-  
-  tempo = map( analogRead(TEMPO), 0, 1023, 1, 256);
-  iterations = map( analogRead(ITERATIONS), 0, 1023, 16, 256);
-    //sadly, can't print em all directly.
-  /* 
-  switch(currentSound) {
-    case 1:
-    {
-      print_cur(F("i/13>>(1+((i>>12)&3))|i/2>>"), F("2&(i/6)>>7|i&31*i*(i>>8)"));
-    }
-    case 2:
-    {
-      print_cur(F("i/3>>(i%40+5)|i/(24+i&3)"), F(" >(i%(15-((i>>15)%8)*6)+5))/8"));
-    }
-    case 3:
-    {
-      print_cur("Sound: ", (String) a);
-    }
-    case 4:
-    {
-      print_cur("Sound: ", (String) a);
-    }
-    case 5:
-    {
-      print_cur(F("i * ((i>>12|i>>8))"), F("&63&i>>4)"));
-    }
-    case 6:
-    {
-      print_cur(F("(i^i>>8)|"), F("i<<3&56^i"));
-    }
-    case 7:
-    {
-      print_cur(F("(((((i>>12)^(i>>12)-2)"), F("%11*i)/4|i>>13)&127)"));
-    }
-    case 8:
-    {
-      print_cur(F("((i<<1)^((i<<1)+(i >> 7)&i>>12))|i >>"), F("(4-(1^7&(i >> 19)))|i>>7"));
-    }
-    case 9:
-    {
-      print_cur(F("(i*(i>>8+i>>9)*100)"), F("sin(i)"));
-    }
-    case 10:
-    {
-       print_cur(F("i*((i>>5|i>>8)>>"), F("(i>>16))"));
-    }
-    case 11:
-    {
-        print_cur(F(" ((i*(i>>8|i>>9)&46&i>>8))"), F("^(i&i>>13|i>>6)"));
-    }
-    case 12:
-    {
-      print_cur(F("Too Crazy"), F("To Print"));
-    }     
-  }*/
+
+  //tempo = map( analogRead(TEMPO), 0, 1023, 1, 256);
+  //iterations = map( analogRead(ITERATIONS), 0, 1023, 16, 256);
+
   
   // the sound selection is via encoder, so it's done heere
   eb1.update();
@@ -447,7 +362,6 @@ void rightLongPressActions() {
 
   //REVERSE TIME *********************
   int actual_A_Pot = map(analogRead(0), 0, 1023, -7, 7);
-
   if (old_A_Pot != actual_A_Pot) {
     shift_A_Pot = actual_A_Pot;
   }
@@ -501,29 +415,27 @@ int  softDebounce(int  readCV, int  oldRead) {
   }
   return oldRead;
 }
+
 void buttonsManager() {
   bool pressBothButtons = false;
   //start button 1
   if (digitalRead(UPPIN) == LOW) {
     if (isButton1Active == false) {
       isButton1Active = true;
-      button1Timer = millis();
-      
-      if (isDebugging) Serial.println("RIGHT button short press");
+      button1Timer = millis();      
+      if (debug) Serial.println("RIGHT button short press");
       
     }
     if ((millis() - button1Timer > longPress1Time) && (isLongPress1Active == false)) {
       isLongPress1Active = true;
-      
-      if (isDebugging) Serial.println("RIGHT long press ON");
+      if (debug) Serial.println("RIGHT long press ON");
       
     }
   } else {
     if (isButton1Active == true) {
       if (isLongPress1Active == true) {
         isLongPress1Active = false;
-        
-        if (isDebugging) Serial.println("RIGHT long press RELEASE");
+        if (debug) Serial.println("RIGHT long press RELEASE");
       } else {
 
         if (programNumber != totalPrograms) {
@@ -531,11 +443,10 @@ void buttonsManager() {
         }
         else if (programNumber == totalPrograms) {
           programNumber = 1;
-        }
-        
-        if (isDebugging) Serial.println("RIGHT button short release");
-        if (isDebugging) Serial.print("PROGRAM: ");
-        if (isDebugging) Serial.println(programNumber);
+        } 
+        if (debug) Serial.println("RIGHT button short release");
+        if (debug) Serial.print("PROGRAM: ");
+        if (debug) Serial.println(programNumber);
         
         ledCounter();
       }
@@ -548,18 +459,18 @@ void buttonsManager() {
     if (isButton2Active == false) {
       isButton2Active = true;
       button2Timer = millis();
-      if (isDebugging) Serial.println("LEFT button short press");
+      if (debug) Serial.println("LEFT button short press");
     }
     if ((millis() - button2Timer > longPress2Time) && (isLongPress2Active == false)) {
       isLongPress2Active = true;
 
-      if (isDebugging) Serial.println("LEFT BUTTON long press ON");
+      if (debug) Serial.println("LEFT BUTTON long press ON");
     }
   } else {
     if (isButton2Active == true) {
       if (isLongPress2Active == true) {
         isLongPress2Active = false;
-        if (isDebugging) Serial.println("LEFT BUTTON long press release");
+        if (debug) Serial.println("LEFT BUTTON long press release");
         pressBothButtons = true;
         //isClockOutMode = !isClockOutMode;
         //we only change program in short pressed, not long ones
@@ -572,7 +483,7 @@ void buttonsManager() {
           } else if (programNumber == 1) {
             programNumber = totalPrograms;
           }
-          if (isDebugging) Serial.println("LEFT BUTTON short release");
+          if (debug) Serial.println("LEFT BUTTON short release");
         }
         ledCounter();
         isButton2Active = false;
@@ -582,7 +493,7 @@ void buttonsManager() {
     //end button 2
 
     if (!isLongPress2Active && isLongPress1Active && pressBothButtons) {
-      if (isDebugging) Serial.println("HACKKK");
+      if (debug) Serial.println("HACKKK");
       isClockOutMode = !isClockOutMode;
     }
   }
