@@ -46,7 +46,7 @@ byte programNumber = 1;
 byte upButtonState = 0;
 byte downButtonState = 0;
 byte lastButtonState = 0;
-byte totalPrograms = 28;
+byte totalPrograms = 39;
 byte clocksOut = 0;
 int cyclebyte = 0;
 volatile int aMax = 99;
@@ -64,6 +64,7 @@ long button1Timer = 0;
 long longPress1Time = 400;
 long button2Timer = 0;
 long longPress2Time = 400;
+
 boolean isButton1Active = false;
 boolean isLongPress1Active = false;
 boolean isButton2Active = false;
@@ -71,12 +72,15 @@ boolean isLongPress2Active = false;
 
 int  shift_A_Pot = 1;
 int  old_A_Pot = 1;
-int SAMPLE_RATE = 16384;
+
+int SAMPLE_RATE = 8192; // 16384;
 int old_SAMPLE_RATE = SAMPLE_RATE;
+
 byte shift_C_Pot = 0;
 byte old_C_Pot = 0;
 
 bool isDebugging = true;
+
 #include "bytebeats.h"
 
 //Bounce2::Button keys[numsteps];
@@ -231,18 +235,19 @@ void onEb1Clicked(EncoderButton& eb) {
  * A function to handle the 'encoder' event
  */
 void onEb1Encoder(EncoderButton& eb) {
+
+  //displayUpdate();
+  currentSound = eb.increment() * 64;
+  old_SAMPLE_RATE = SAMPLE_RATE;
+  SAMPLE_RATE = SAMPLE_RATE + currentSound;
+  if (SAMPLE_RATE != old_SAMPLE_RATE) {
+    OCR1A = F_CPU / SAMPLE_RATE;
+  }
   if (isDebugging) {
     Serial.print("eb1 incremented by: ");
     Serial.println(eb.increment());
     Serial.print("eb1 position is: ");
-    Serial.println(eb.position());
-  }
-  //displayUpdate();
-  currentSound = constrain(eb.position(), 1, 64);
-  old_SAMPLE_RATE = SAMPLE_RATE;
-  SAMPLE_RATE = currentSound * 256;
-  if (SAMPLE_RATE != old_SAMPLE_RATE) {
-    OCR1A = F_CPU / SAMPLE_RATE;
+    Serial.println(SAMPLE_RATE);
   }
 }
 

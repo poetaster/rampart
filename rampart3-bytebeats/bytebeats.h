@@ -1,5 +1,7 @@
 #pragma once
 
+#include "nyblybyte.h"
+
 /* 
  *  these methods not yet used. searching an available timer is what we should aim for 
  *  for now, limited to the original on pin 11/timer 2
@@ -54,7 +56,8 @@ inline void PWM16B(unsigned int PWMValue)
 
 /* 
  *  These are the original methods from Glitchstorm, plus a few of mine and from
- *  https://github.com/erlehmann/algorithmic-symphonies
+ *  https://github.com/erlehmann/algorithmic-symphonies and
+ *  https://raw.githubusercontent.com/schollz/nyblcore/main/bytebeat/bytebeat.ino
  */
 
 ISR(TIMER1_COMPA_vect) {
@@ -68,7 +71,7 @@ ISR(TIMER1_COMPA_vect) {
       cMax = 14;
       cMin = 0;
       value = ((t & ((t >> a))) + (t | ((t >> b)))) & (t >> (c + 1)) | (t >> a) & (t * (t >> b));
-      break;
+      break;    
     case 2:
       aMax = 12;
       aMin = 0;
@@ -280,7 +283,8 @@ ISR(TIMER1_COMPA_vect) {
       bMin = 10;
       cMax = 5;
       cMin = 1;
-      value = ( ( t >> a/c) ^ ( t >> b/2 ) - c ) % 11 * t & 64 ;
+      value = t - b & ( (t>>a | t<<4 ) ) ^ t - c & ( ( t>>b | t<<3 ) ) ^ t - a & ( ( t>>c | t<<2 ) ) ;
+      //value = ( ( t >> a/c) ^ ( t >> b/2 ) - c ) % 11 * t & 64 ;
       break;
     case 22:
     // classic vizmut paper pp. 6 https://arxiv.org/pdf/1112.1368.pdf
@@ -290,7 +294,8 @@ ISR(TIMER1_COMPA_vect) {
       bMin = 1;
       cMax = 16;
       cMin = 1;
-      value = (int)(t/1e7 * t * t + c ) % 127 | t >> c ^ t >> b | t % 127 + ( t >> a ) | t ;
+      value = t - b & ( (t>>a | t<<4 ) ) ^ t - c & ( ( t>>b | t<<3 ) ) ^ t - a & ( ( t>>c | t<<2 ) ) ;
+      //value = (int)(t/1e7 * t * t + c ) % 127 | t >> c ^ t >> b | t % 127 + ( t >> a ) | t ;
       break;
     case 23:
     // classic vizmut paper pp. 6 https://arxiv.org/pdf/1112.1368.pdf
@@ -302,6 +307,7 @@ ISR(TIMER1_COMPA_vect) {
       cMin = 2;
       value = t >> c | t & (( t >> 5 )/( t >> b/4 - ( t >> a/3 ) & - t >> b/4 - ( t >> a/3 ) ) );
       // t >>4 | t &(( t >> 5 )/( t >> 7 − ( t >> 15 ) & − t >> 7 − ( t >> 15 ) ) )
+      break;
     case 24:
     // click mouth harp and hum and other chaos, clicky too :)
       aMax = 15;
@@ -312,6 +318,7 @@ ISR(TIMER1_COMPA_vect) {
       cMin = 0;
       //if (t > 65536) t = -65536;
       value= ((t >> 6 ? 2 : 3) & t * (t >> a) | (a+b+c) - (t >> b)) % (t >> a) + ( a << t | (t >> c) );
+      break;
     case 25:
     // clicky burpy
       aMax = 15;
@@ -321,6 +328,7 @@ ISR(TIMER1_COMPA_vect) {
       cMax = 9;
       cMin = 0;
       value = ( ( (t >> 9 ? a : b) & t * (t >> b) % (t >> c) - (t >> b) ) * (t >> a) ) ;
+      break;
     case 26:
       // variation t+(t&1)+(t>>5)*(t>>1)/1|t>>4|t>>8
       //https://dollchan.net/btb/res/3.html#258
@@ -331,6 +339,7 @@ ISR(TIMER1_COMPA_vect) {
       cMax = 12;
       cMin = 5;
       value = ( t + ( t & b) + ( t >> a ) * ( t >> b ) / 1 | t >> b | t >> c );
+      break;
     case 27:
        // variation on https://dollchan.net/btb/res/3.html#78
        // ( ( t >> 10 | t * 5 ) & ( t >> 8 | t * 4 ) & ( t >> 4 | t * 6 ) );
@@ -341,6 +350,7 @@ ISR(TIMER1_COMPA_vect) {
       cMax = 12;
       cMin = 4;
       value = ( ( t >> a | t * 5 ) & ( t >> ( a + 2 ) | t * b ) & ( t >> b | t * c ) );
+      break;
     case 28:
       // https://forum.arduino.cc/t/one-line-algorithmic-music/73409
       // (t*(4|t>>13&3)>>(~t>>11&1)&128|t*(t>>11&t>>13)*(~t>>9&3)&127)^(t&4096?(t*(t^t%255)|t>>4)>>1:t>>3|(t&8192?t<<2:t))
@@ -351,6 +361,91 @@ ISR(TIMER1_COMPA_vect) {
       cMax = 14;
       cMin = 1;
       value = (t * (4 | t >> 13 & b ) >> ( ~t >> 11 & 1 ) & 128 | t * ( t >> a & t >> 13 ) * ( ~t >> c & 3 ) & 127 ) ^ ( t & 4096 ? ( t * ( t ^ t % 255 ) | t >> 4 ) >> 1 : t >> 3 |( t & 8192 ? t << 2 : t ) );
+      break;
+    case 29:
+      bb39_set(a,b); 
+      value =  bb39() |t>>c;
+      cMax = 8;
+      cMin = 0;
+        // nice 8, 17, ( bb28 | t << c), bb32 << c (or |), 34 great, 37 ( also  << c, | c), b39 ( | t>>c)
+        // normal bb0,bb4 bb11 ( bb19 bb21 | t << c) (bb22 + c) bb23 + c, bb33 << c, bb35 << c, 
+        // 8192 slow bb5 bb7 bb9 (bb13 | c) bb14 bb16 (bb29 & t>>c), bb30 << c, bb36 | t <<  c;
+      break;
+    case 30:
+      bb37_set(a,b); 
+      value =  bb37() | t >> c;
+      cMax = 8;
+      cMin = 0;
+      break;
+    case 31:
+      bb34_set(a,b); 
+      value =  bb34() | t >> c;
+      cMax = 8;
+      cMin = 0;
+      break;
+    case 32:
+      bb32_set(a,b); 
+      value =  bb32() | t >> c;
+      cMax = 8;
+      cMin = 0;
+      break;
+    case 33:
+      bb28_set(a,b); 
+      value =  bb28() | t >> c;
+      cMax = 8;
+      cMin = 0;
+      break;
+    case 34:
+      bb17_set(a,b); 
+      value =  bb17() | t >> c;
+      cMax = 8;
+      cMin = 0;
+      break;
+    case 35:
+      bb8_set(a,b); 
+      value =  bb8() | t >> c;
+      cMax = 8;
+      cMin = 0;
+      break;
+    case 36:
+      bb35_set(a,b); 
+      value =  bb35() | t >> c;
+      cMax = 8;
+      cMin = 0;
+      break;
+    case 37:
+      bb33_set(a,b); 
+      value =  bb33() | t >> c;
+      cMax = 8;
+      cMin = 0;
+      break;
+    case 38:
+      bb23_set(a,b); 
+      value =  bb23() | t >> c;
+      cMax = 8;
+      cMin = 0;
+      break;
+    case 39:
+      bb22_set(a,b); 
+      value =  bb22() | t >> c;
+      cMax = 8;
+      cMin = 0;
+      break;
+
+      
+    /*
+    case 29:
+      // original t<40000?((t<20000?((t%(t>>9)*10)|(t/2)&t):(t*(t>>9)*10)&t/2)|(t%(t>>9)*3)&t/16):(t*(t>>9)^t)
+      aMax = 19;
+      aMin = 4;
+      bMax = 7;
+      bMin = 1;
+      cMax = 14;
+      cMin = 1;
+      value = ( ((t*2>>43|t*3*5>>4)*19)&(t*7>>172)/2 );
+      //value = ( t < 40000 ? ( ( t < 20000 ? ( ( t % ( t >> 9 ) * a ) | ( t / 2 ) & t) : ( t * ( t >> 9) * a ) & t / 2 ) | ( t % ( t >> 9 ) * b ) & t / a ) : ( t * ( t >> c ) ^ t ) );
+      */
+      
     
   }
 
