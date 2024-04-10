@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Fritzing (https://fritzing.org/) -->
+
+<svg
+   height="2.87909in"
+   version="1.2"
+   viewBox="0 0 268.615 207.294"
+   width="3.73076in"
+   x="0in"
+   y="0in"
+   id="svg8259"
+   sodipodi:docname="rampart3_top_pcb.svg"
+   inkscape:version="1.1.2 (0a00cf5339, 2022-02-04)"
+   inkscape:label="board"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs8263" />
+  <sodipodi:namedview
+     id="namedview8261"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="in"
+     showgrid="false"
+     inkscape:zoom="1.5830661"
+     inkscape:cx="196.77006"
+     inkscape:cy="54.009117"
+     inkscape:window-width="1680"
+     inkscape:window-height="1050"
+     inkscape:window-x="1920"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g1347"
+     inkscape:snap-global="false" />
+  <g
+     inkscape:groupmode="layer"
+     id="layer7"
+     inkscape:label="board"
+     style="display:inline">
+    <g
+       inkscape:groupmode="layer"
+       id="layer8"
+       inkscape:label="boardoutline"
+       style="display:inline">
+      <g
+         id="g1347">
+        <path
+           id="path1548"
+           style="fill:#0000ff;stroke-width:0.767999"
+           d="m 50.787109,0.3203125 c -20.938592,0 -37.794921,16.8563295 -37.794921,37.7949215 V 207.42578 c -1e-6,20.93861 16.856329,37.79492 37.794921,37.79492 H 306.64844 c 20.9386,0 37.79492,-16.85631 37.79492,-37.79492 V 38.115234 c 0,-20.938592 -16.85632,-37.7949215 -37.79492,-37.7949215 z M 259.81836,18.845703 A 13.228345,13.228346 0 0 1 273.04688,32.074219 13.228345,13.228346 0 0 1 259.81836,45.302734 13.228345,13.228346 0 0 1 246.58984,32.074219 13.228345,13.228346 0 0 1 259.81836,18.845703 Z M 122.71094,21.8125 h 13.05078 v 22.279297 h -13.05078 z m 196.5625,16.128906 A 13.228345,13.228346 0 0 1 332.50195,51.169922 13.228345,13.228346 0 0 1 319.27344,64.398438 13.228345,13.228346 0 0 1 306.04492,51.169922 13.228345,13.228346 0 0 1 319.27344,37.941406 Z M 21.261719,74.603516 h 43.36914 v 9.349609 H 85.134766 V 96.277344 H 64.630859 21.261719 Z M 146.5293,83.988281 h 21.36328 V 95.658203 H 146.5293 Z m 118.54297,6.103516 h 20.9707 v 11.822263 h -20.9707 z M 223.0332,93.537109 H 245.75 v 40.806641 h -22.7168 z m -27.67773,3.94336 h 22.71875 v 31.705081 h -22.71875 z m -18.67969,10.345701 h 13.50977 v 43.94531 H 176.67578 Z M 25.423828,162.29688 a 9.4488183,9.4488183 0 0 1 9.449219,9.44726 9.4488183,9.4488183 0 0 1 -9.449219,9.44922 9.4488183,9.4488183 0 0 1 -9.449219,-9.44922 9.4488183,9.4488183 0 0 1 9.449219,-9.44726 z m 156.603512,17.72265 a 13.228345,13.228346 0 0 1 13.22657,13.22852 13.228345,13.228346 0 0 1 -13.22657,13.22851 13.228345,13.228346 0 0 1 -13.22851,-13.22851 13.228345,13.228346 0 0 1 13.22851,-13.22852 z m -67.45117,0.0703 a 13.228345,13.228346 0 0 1 13.22852,13.22852 13.228345,13.228346 0 0 1 -13.22852,13.22852 13.228345,13.228346 0 0 1 -13.22851,-13.22852 13.228345,13.228346 0 0 1 13.22851,-13.22852 z m 133.28711,0.0391 a 13.228345,13.228346 0 0 1 13.22852,13.22851 13.228345,13.228346 0 0 1 -13.22852,13.22852 13.228345,13.228346 0 0 1 -13.22851,-13.22852 13.228345,13.228346 0 0 1 13.22851,-13.22851 z"
+           transform="matrix(0.75000079,0,0,0.75000079,0,-3.4943238e-4)" />
+      </g>
+    </g>
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="silkscreen"
+     style="display:none">
+    <rect
+       fill="none"
+       height="183.67599"
+       rx="28.3465"
+       ry="28.3465"
+       stroke="#000000"
+       stroke-width="0.576"
+       width="248.589"
+       x="9.9663925"
+       y="0.51179147"
+       id="rect4618"
+       style="display:none" />
+  </g>
+</svg>
