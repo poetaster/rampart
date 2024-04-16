@@ -149,22 +149,22 @@ ISR(TIMER1_COMPA_vect) {
       break;
     case 9:
       // value = ( (t * ( t >> a | t >> ( a + 1 ) ) & b & t >> 8 ) ) ^ ( t & t >> 13 | t >>6 );
-      aMax = 16;
-      aMin = 6;
-      bMax = 12;
-      bMin = 4;
-      cMax = 10;
-      cMin = 2;
+      aMax = 24;
+      aMin = 2;
+      bMax = 16;
+      bMin = 1;
+      cMax = 8;
+      cMin = 1;
       value =  ( t  &  t >> a | t >> a - 3 ) ^ (t & t >> b | t >> b - 2) ^ ( t & t >> c | t >> c - 1 );
       
       break;
     case 10:
-      aMax = 16;
-      aMin = 6;
-      bMax = 12;
-      bMin = 4;
-      cMax = 10;
-      cMin = 2;
+      aMax = 24;
+      aMin = 2;
+      bMax = 16;
+      bMin = 1;
+      cMax = 8;
+      cMin = 1;
       value =  ( t  &  t >> c | t >> a - 3 ) ^ (t & t >> a | t >> b - 2) ^ ( t & t >> b | t >> c - 1 );
       // borked
       //value = (t*(a+(t/a))*(t>33e3) & t>>4 | t*(c+(c)) & t>>7 | t*(b+(t/b)) & (t>32768)&t>>11)-(t>97e3);
@@ -208,7 +208,7 @@ ISR(TIMER1_COMPA_vect) {
       value = ((t * (t >> a) & (b * t >> 7) & (8 * t >> c)));
       break;
 
-    case 14:
+    case 14: // 
       aMax = 8;
       aMin = 0;
       bMax = 16;
@@ -216,7 +216,7 @@ ISR(TIMER1_COMPA_vect) {
       cMax = 1;
       value = t >> c ^ t & 1 | t + (t ^ t >> 21) - t * ((t >> 4 ? b : a)&t >> (12 - (a >> 1)))^t << 1 & (a & 12 ? t >> 4 : t >> 10);
       break;
-    case 15:
+    case 15: // 15, 16 and 17go together.
       aMax = 8;
       aMin = 0;
       bMax = 9;
@@ -245,7 +245,7 @@ ISR(TIMER1_COMPA_vect) {
       //if (t > 65536) t = -65536;
       value = ((t*a) & ( t>>5| t<<2 )  ) | ( (t*b) & ( t>>4 | t<<3)) | ((t*c) & ( t>>3 | t<<4 ) );
       break;
-    case 18:
+    case 18: 
     // drone, organ, perc
       aMax = 8;
       aMin = 1;
@@ -363,20 +363,22 @@ ISR(TIMER1_COMPA_vect) {
       cMin = 1;
       value = (t * (4 | t >> 13 & b ) >> ( ~t >> 11 & 1 ) & 128 | t * ( t >> a & t >> 13 ) * ( ~t >> c & 3 ) & 127 ) ^ ( t & 4096 ? ( t * ( t ^ t % 255 ) | t >> 4 ) >> 1 : t >> 3 |( t & 8192 ? t << 2 : t ) );
       break;
-    case 29:
-      bb39_set(a,b); 
-      value =  bb39() |t>>c;
+    case 29: 
       aMax = 69;
       aMin = 1;
       bMax = 69;
       bMin = 1;
       cMax = 8;
       cMin = 0;
+      
+      bb39_set(a,b); 
+      value =  bb39() ;;
+      
         // nice 8, 17, ( bb28 | t << c), bb32 << c (or |), 34 great, 37 ( also  << c, | c), b39 ( | t>>c)
         // normal bb0,bb4 bb11 ( bb19 bb21 | t << c) (bb22 + c) bb23 + c, bb33 << c, bb35 << c, 
         // 8192 slow bb5 bb7 bb9 (bb13 | c) bb14 bb16 (bb29 & t>>c), bb30 << c, bb36 | t <<  c;
       break;
-    case 30:
+    case 30: // scratch percussion on th extreme
       bb37_set(a,b); 
       value =  bb37() | t >> c;
       cMax = 8;
@@ -394,13 +396,13 @@ ISR(TIMER1_COMPA_vect) {
       cMax = 8;
       cMin = 0;
       break;
-    case 33: // not good
+    case 33: // not so good at first but it evolves noisy.
       bb28_set(a,b); 
-      value =  bb28() | t << c;
+      value =  bb28() |  ~t << c;
       cMax = 8;
       cMin = 0;
       break;
-    case 34:
+    case 34: // yeah, it's nice and evolves a lot :)
       bb17_set(a,b); 
       value =  bb17() | t >> c;
       cMax = 8;
@@ -440,8 +442,67 @@ ISR(TIMER1_COMPA_vect) {
       bb22_set(a,b); 
       value =  bb22() | t >> c;
       break;
-
-      
+    case 40:
+      // Nightmachines https://forum.aemodular.com/post/235
+      aMax = 16;
+      aMin = 1;
+      bMax = 16;
+      bMin = 1;
+      cMax = 16;
+      cMin = 1;
+      value  = (t * 4 | t | t >> 3 & t + t / 4 & t * a | t * 8 >> b | t / c & t + 140) & t >> 4;
+      break;
+    case 41:
+      //Street Surfer by skurk, raer (2011-09-30) https://www.pouet.net/topic.php?which=8357&page=4#c388479
+      aMax = 16;
+      aMin = 1;
+      bMax = 16;
+      bMin = 1;
+      cMax = 16;
+      cMin = 1;
+      value  = t & (4096) ? t / 2 * (t ^ t % (a << 1)) | t >> 5 : t / (a << 1) | (t & (b << 7) ? 4 * t : t);
+      break;
+    case 42:
+      // from http://xifeng.weebly.com/bytebeats.html we have someting similar already
+      aMax = 16;
+      aMin = 1;
+      bMax = 16;
+      bMin = 1;
+      cMax = 16;
+      cMin = 1;
+      value  = ((((((((t >> a) | t) | (t >> a)) * c) & ((5 * t) | (t >> c))) | (t ^ (t % b))) & 0xFF));
+      break;
+    case 43:
+      // Extraordinary thread of FRACTAL MUSIC by Anonymous from russian imageboards (2014-07-12) http://arhivach.ng/thread/28592/#71678984
+      aMax = 96;
+      aMin = 24;
+      bMax = 8;
+      bMin = 1;
+      cMax = 16;
+      cMin = 1;            
+      value = t >> b + t % a | t >> c + t % (t / 31108 & 1 ? 46 : 43) | t / b | t / c >> a; // % a crashes
+      break;
+    case 44:
+      // xpansive 2011-09-29 https://www.pouet.net/topic.php?which=8357&page=3#c388375
+      // t * (t >> 8 | t >> 9) & 46 & t >> 8 ^ (t & t >> 13 | t >> 6);
+      aMax = 56;
+      aMin = 40;
+      bMax = 9;
+      bMin = 1;
+      cMax = 16;
+      cMin = 1;  
+      value = t * (t >> 8 | t >> 9) & a & t >> 8 ^ (t & t >> c | t >> b);
+      break;
+    case 45: // straight rythmic, great range!
+      aMax = 16;
+      aMin = 1;
+      bMax = 8;
+      bMin = 1;
+      cMax = 12;
+      cMin = 1;  
+      // tejeez 2011-10-05 #countercomplex
+      value = (~t >> 2) * ((127 & t * (b & t >> 10)) < (245 & t * (2 + (c & t >> a))));
+      break;
     /*
     case 29:
       // original t<40000?((t<20000?((t%(t>>9)*10)|(t/2)&t):(t*(t>>9)*10)&t/2)|(t%(t>>9)*3)&t/16):(t*(t>>9)^t)
@@ -492,6 +553,7 @@ void initSound()
   // On the Arduino this is pin 11.
   TCCR2A = (TCCR2A | _BV(COM2A1)) & ~_BV(COM2A0);
   TCCR2A &= ~(_BV(COM2B1) | _BV(COM2B0));
+  
   // No prescaler (p.158)
   TCCR2B = (TCCR2B & ~(_BV(CS12) | _BV(CS11))) | _BV(CS10);
 

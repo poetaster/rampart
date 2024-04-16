@@ -15,8 +15,7 @@ Many contributions from the internet :) See nyblybyte.h for many equations origi
 //#include <Adafruit_SSD1306.h> // conflicts with timer.
 #include <EncoderButton.h>
 
-// for pwm
-
+// for pwm init functions
 const unsigned int TOP = 0x07FF; // 11-bit resolution.  7812 Hz PWM
 
 
@@ -39,7 +38,7 @@ byte programNumber = 1;
 byte upButtonState = 0;
 byte downButtonState = 0;
 byte lastButtonState = 0;
-byte totalPrograms = 39;
+byte totalPrograms = 45;
 byte clocksOut = 0;
 int cyclebyte = 0;
 
@@ -327,9 +326,9 @@ void loop(){
 void adcManager() {
 
   if (!isButton1Active && !isButton2Active) {
-    a = map(analogRead(7), 0, 1023, aMin, aMax);
-    //b = map(analogRead(1), 0, 1023, bMin, bMax);
-    //c = map(analogRead(2), 0, 1023, cMin, cMax);
+    //a = map(analogRead(7), 0, 1023, aMin, aMax);
+    //b = map(analogRead(6), 0, 1023, bMin, bMax);
+    c =  (c + map(analogRead(7), 0, 1023, cMin, cMax))/2;
 
   }
 }

@@ -15,7 +15,7 @@
 */
 //#include <VS1053Driver.h>
 //#include <ADC.h>  // Teensy 3.0/3.1 uncomment this line and install http://github.com/pedvide/ADC
-#include <MozziGuts.h>
+#include <Mozzi.h>
 #include <mozzi_analog.h>
 #include <WavePacket.h>
 #include <RollingAverage.h>
@@ -204,7 +204,7 @@ void updateWavePacket(){
   );
 }
 
-int updateAudio(){
+AudioOutput_t updateAudio(){
   
   if ( buttonState == 0 ) {
     return wavey.next()>>8;

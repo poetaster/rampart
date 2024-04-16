@@ -11,7 +11,7 @@
    https://github.com/poetaster/rampart
 
  *********************************************************************/
-
+#include <Mozzi.h>
 #include <WavePacket.h>
 #include <RollingAverage.h>
 #include <AutoMap.h>
@@ -292,7 +292,8 @@ void updateButtons() {
 
 }
 
-int updateAudio() {
+
+AudioOutput_t  updateAudio() {
   while (alright < cons) {
     return wavey.next() >> 8; // >>8 for AUDIO_MODE STANDARD
   }

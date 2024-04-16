@@ -18,7 +18,7 @@
 */
 
 //#include <ADC.h>  // Teensy 3.0/3.1 uncomment this line and install http://github.com/pedvide/ADC
-#include <MozziGuts.h>
+#include <Mozzi.h>
 #include <Sample.h> // Sample template
 #include <samples/bamboo/bamboo_00_2048_int8.h> // wavetable data
 #include <samples/bamboo/bamboo_01_2048_int8.h> // wavetable data
@@ -81,8 +81,8 @@ int currentbeats = 0;
 int patlen = 0;
 
 // Button handling
-const int BPIN = 2;
-const int BPIN2 = 3;
+const int BPIN = 4;
+const int BPIN2 = 5;
 
 // would be nice but need to design around it. nano only allows intr on d2 & d3 which I'm using. sigh.
 //volatile unsigned long lastTime = 0;
@@ -159,8 +159,8 @@ void setup() {
   //Serial.println( bjorklund(13, 13));
 
   // Setup the first button with an internal pull-up :
-  pinMode(BPIN, INPUT);
-  pinMode(BPIN2, INPUT);
+  pinMode(BPIN, INPUT_PULLUP);
+  pinMode(BPIN2, INPUT_PULLUP);
 
   // put some valuesin our timer offset deque
   offOne.push_front(256);
@@ -421,7 +421,7 @@ void updateControl() {
 
 }
 
-int updateAudio() {
+AudioOutput_t updateAudio() {
 
   int asig = (int)
              ((long) aBamboo0.next() * gains.gain0 +
