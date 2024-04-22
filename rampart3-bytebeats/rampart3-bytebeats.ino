@@ -1,13 +1,13 @@
-/**************************************************************************
-  Rampart Bytebeats @copyright Mark Washeim blueprint@poetaster.de
-
-  GPLv3
-
-  Some parts from https://raw.githubusercontent.com/schollz/nyblcore/main/bytebeat/bytebeat.ino
-  Some parts from https://github.com/spherical-sound-society/glitch-storm
-
-  Many contributions from the internet :) See nyblybyte.h for many equations origins and original form.
- **************************************************************************/
+/*
+ * Rampart Bytebeats @copyright 2024, Mark Washeim <blueprint@poetaster.de>
+ * GPLv3, see LICENSE 
+ * some parts use other licensces (nyblybyte.h is MIT)
+ * and some parts are Public Domain in as far as permissible by law
+ * 
+ * a number of formulas https://raw.githubusercontent.com/schollz/nyblcore/main/bytebeat/bytebeat.ino
+ * 
+ * Many contributions from the internet :) See nyblybyte.h for many equations origins and original form.
+ */
 
 
 #include <EncoderButton.h>
@@ -23,21 +23,17 @@ const unsigned int TOP = 0x07FF; // 11-bit resolution.  7812 Hz PWM
 
 long t = 0;
 volatile int a, b, c, i;
-volatile int value;
-byte prog = 1;
+volatile int result;
 
+byte prog = 1;
 byte numProg = 45;
 
 // these ranges are provisional and in schollz equations need to be reset
+volatile int aMax = 99, aMin = 0, bMax = 99, bMin = 0, cMax = 99, cMin = 0;
 
-volatile int aMax = 99;
-volatile int aMin = 0;
-volatile int bMax = 99;
-volatile int bMin = 0;
-volatile int cMax = 99;
-volatile int cMin = 0;
 int d = 0;
 
+// default rate close to the original bytebeat speed
 int SRATE = 8192; // 16384;
 
 bool debug = true;
@@ -226,8 +222,8 @@ void updateControl() {
   if (millis() > timeoffset + 50 ) {
     timeoffset = millis();
     //display_value(SRATE);
-    if (value > 5000) digitalWrite(LEDPIN, HIGH);
-    if (value < 1000) digitalWrite(LEDPIN, LOW);
+    if (result > 5000) digitalWrite(LEDPIN, HIGH);
+    if (result < 1000) digitalWrite(LEDPIN, LOW);
   }
 
   // the sound selection is via encoder, so it's done heere
@@ -265,7 +261,7 @@ void knobs() {
 // show a number in binary on the LEDs
 void display_value(int16_t value) {
   for (int i = 7; i >= 0; i--) { // NOPE + 1 can loop this way because port assignments are sequential
-    //digitalWrite(led[i], value & 1);
+    //digitalWrite(led[i], result & 1);
     value = value >> 1;
   }
   //display_timer = millis();
