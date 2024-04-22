@@ -82,7 +82,7 @@ int patlen = 0;
 
 // Button handling
 const int BPIN = 4;
-const int BPIN2 = 5;
+const int BPIN2 = 12;
 
 // would be nice but need to design around it. nano only allows intr on d2 & d3 which I'm using. sigh.
 //volatile unsigned long lastTime = 0;

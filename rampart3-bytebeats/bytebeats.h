@@ -55,198 +55,129 @@ inline void PWM16B(unsigned int PWMValue)
 }
 
 /* 
- *  These are the original methods from Glitchstorm, plus a few of mine and from
+ *  Various bytebeat formulas. nyblybyte has a lot of references
  *  https://github.com/erlehmann/algorithmic-symphonies and
  *  https://raw.githubusercontent.com/schollz/nyblcore/main/bytebeat/bytebeat.ino
  */
 
 ISR(TIMER1_COMPA_vect) {
 
-  switch (programNumber) {
+  switch (prog) {
     case 1:
-      aMax = 10;
-      aMin = 0;
-      bMax = 14;
-      bMin = 0;
-      cMax = 14;
-      cMin = 0;
-      value = ((t & ((t >> a))) + (t | ((t >> b)))) & (t >> (c + 1)) | (t >> a) & (t * (t >> b));
+      // poetaster
+      // c high, techno wheep, b pitch in the middle, a patterned blips fast to slow
+      aMax = 24; aMin = 1;
+      bMax = 12;  bMin = 1;
+      cMax = 16; cMin = 1;  
+      value =  t * ( t >> b & ( t >> b ? 13 : 8)  ) - t >> c ^ t & 21 | t + (t ^ t >> a)  ^ t<<1 & (t & a ? t >> 5 : t >> 3);
       break;    
     case 2:
-      aMax = 12;
-      aMin = 0;
-      bMax = 20;
-      bMin = 4;
-      cMax = 12;
-      cMin = 5;
-      if (t > 65536) t = -65536;
-      value = (t >> c | a | t >> (t >> 16)) * b + ((t >> (b + 1)) & (a + 1));
+    // poetaster fast to slow arps + staccato noise and robot voice
+      value = (( t >> c | b ) & (a + 1))  * (( t >> (b + 1) ) | t >> ( t >> 21)) ;
       break;
     case 3:
-      aMax = 30;
-      aMin = 6;
-      bMax = 16;
-      bMin = 0;
-      cMax = 10;
-      cMin = 0;
-      //value = t>>6^t&37|t+(t^t>>11)-t*((t%a?2:6)&t>>11)^t<<1&(t&b?t>>4:t>>10);
-      value = t >> c ^ t & 37 | t + (t ^ t >> a) - t * ((t >> a ? 2 : 6)&t >> b)^t << 1 & (t & b ? t >> 4 : t >> 10);
+      // poetaster descending / ascending bleep arps, lasers, a high bass run
+      value = t - ((t & ((t >> a))) + ( a | t >> c )) & (t >> ( c + 1)) | (t >> b) & (t * (t >> a));
       break;
     case 4:
-      aMax = 12;
-      aMin = 0;
-      bMax = 16;
-      bMin = 0;
-      cMax = 10;
-      cMin = 0;
-      // value = t>>6^t&37|t+(t^t>>11)-t*((t%a?2:6)&t>>11)^t<<1&(t&b?t>>4:t>>10);
-      value = b * t >> a ^ t & (37 - c) | t + ((t ^ t >> 11)) - t * ((t >> 6 ? 2 : a)&t >> (c + b))^t << 1 & (t & 6 ? t >> 4 : t >> c);
+      aMax = 30; aMin = 1; 
+      bMax = 15; bMin = 1;
+      cMax = 30; cMin = 1;  
+      // poetaster the devil. pulses and mana, mana.three controls can cross conflict or harmonize nice. turn c up first
+      value = t *  t << 1 & (t & 7 ? t >> 3 : t >> c) ^ ((t >> 7 ? 2 : b) & t >> (c + a)) | t + ((t ^ t >> 13)) | a * t >> b ^ t & c ;
       break;
     case 5:
-      aMax = 24;
-      aMin = 0;
-      bMax = 22;
-      bMin = 0;
-      cMax = 16;
-      cMin = 0;
-      // t>>6^t&37|t+(t^t>>11)-t*((t%a?2:6)&t>>11)^t<<1&(t&b?t>>4:t>>10);
-      //value = t+(t&t^t>>6)-t*((t>>9)&(t%16?2:6)&t>>9)
-      // value = t+(t&t^t>>(b*2-c))-t*((t>>a)&(t%c?2:(a-c))&t>>b);
-      value = c * t >> 2 ^ t & (30 - b) | t + ((t ^ t >> b)) - t * ((t >> 6 ? a : c)&t >> (a))^t << 1 & (t & b ? t >> 4 : t >> c);
+      // poetaster lead synth a & c mid low, b middle and you have a lead synth drone, it's a neat synth!
+      bMax = 45; bMin = 1;
+      value = t * ((t >> 7 ? a:c ) & t >> ( a*c)) ^ t << 1 & (t & b ? t >> 5 : t >> c) - b * t >> 3 ^ t & (42 - b) ;
       break;
     case 6:
-      aMax = 10;
-      aMin = 3;
-      bMax = 28;
-      bMin = 0;
-      cMax = 10;
-      cMin = 3;
-      //value = ((t>>a&t)-(t>>a)+(t>>a&t))+(t*((t>>b)&b));
-      value = ((t >> a & t) - (t >> a) + (t >> a & t)) + (t * ((t >> c)&b));
+      // poetaster helicopters has some arps with b in the middle, various!
+      value = ( (t >> a) - ( t >> a & t )  + ( t >> t & a) ) + ( t * ((t >> b) & c ) );
       break;
     case 7:
-      aMax = 10;
-      aMin = 0;
-      bMax = 22;
-      bMin = 10;
-      cMax = 8;
-      cMin = 0;
-      //SE CUELGA A 16KH
-      // value = ((t % 42 + b) * (a >> t) | (128 & b) - (t >> a)) % (t >> b) ^ (t & (t >> c));
-      //value =  t>>b&t?t>>a:-t>>c ;
-      value =  t >> b & t ? t >> a : -t >> c ;
+      // poetaster windy whirls, noisy swirls, ocean swells, drop off.
+      value =  t >> ( ( a + 1 )  & b & t >> 8 ) ^ ( t & t >> a | t >>c ); /// maybe t >> 16?
       break;
     case 8:
-      //16kh only work by 65536 loops
-      aMax = 12;
-      aMin = 0;
-      bMax = 20;
-      bMin = 0;
-      cMax = 20;
-      cMin = 0;
-      if (t > 65536) t = -65536;
-      value = (t >> a | c | t >> (t >> 16)) * b + ((t >> (b + 1)));
+      // poetaster breaky, jungle stuff a at one oclock, c middle, etc
+      cMax = 12; cMin = 1;
+      aMax = 8; aMin = 1;  
+      bMax = 8; bMin = 1;  
+      if (t > 65536) t = -65536; 
+      value = a + ( ( t >> a+1 ) ) * (t >> c | b | t >> ( t >> 16) )  ;
       break;
     case 9:
-      // value = ( (t * ( t >> a | t >> ( a + 1 ) ) & b & t >> 8 ) ) ^ ( t & t >> 13 | t >>6 );
-      aMax = 24;
-      aMin = 2;
-      bMax = 16;
-      bMin = 1;
-      cMax = 8;
-      cMin = 1;
-      value =  ( t  &  t >> a | t >> a - 3 ) ^ (t & t >> b | t >> b - 2) ^ ( t & t >> c | t >> c - 1 );
-      
+      // poetaster techno stuff but slow it down and it's rockin
+      aMax = 8; aMin = 1; 
+      bMax = 10; bMin = 1;
+      cMax = 10; cMin = 1;  
+      value =  (t & t >> b | t << b >> c) ^ ( t  &  t >> a | t << a >> b) & ( t & t >> c | t << c >> a);
       break;
+      
     case 10:
-      aMax = 24;
-      aMin = 2;
-      bMax = 16;
-      bMin = 1;
-      cMax = 8;
-      cMin = 1;
-      value =  ( t  &  t >> c | t >> a - 3 ) ^ (t & t >> a | t >> b - 2) ^ ( t & t >> b | t >> c - 1 );
-      // borked
-      //value = (t*(a+(t/a))*(t>33e3) & t>>4 | t*(c+(c)) & t>>7 | t*(b+(t/b)) & (t>32768)&t>>11)-(t>97e3);
+      // poetaster counter point bleeps with a hihat or reverb stuff
+      aMax = 30; aMin = 1; 
+      bMax = 30; bMin = 1;
+      cMax = 30; cMin = 1;  
+      value =  ( t  &  t >> c | t + c << 4) | (t & t >> a | t + a << 3) ^ ( t & t >> b | t + b << 2 );
+
       break;
     case 11:
-      aMax = 16;
-      aMin = 1;
-      bMax = 16;
-      bMin = 1;
-      cMax = 16;
-      cMin = 1;
+      // poetaster long distorted carnival number
+      aMax = 16; aMin = 1;
+      bMax = 16; bMin = 1;
+      cMax = 16; cMin = 1;
       value = (t * a & t >> b | t * c & t >> 7 | t * 3 & t / 1024) - 1; 
-      // % is a too heavy operatin for atmel 328. Should not be used in any equation. Change it
-      // value = ((t >> a % (128-b<<t))) * b * t >>( c*t<<4) * t >> 18 ;
-      //((t >> a / (128 - b << (t >> (9 - c))))) * b * t >> ( c * t << 4) * t >> 18 ;
-      // value = ((t >> a % (128-b<<(t>>(9-c))))) * b * t >>( c*t<<4) * t >> 18+(t >> c ? 2 : a)&t * (t >> b) ;
-      // value = ((t >> 6 ? 2 : a)&t * (t >> c) | ( b) - (t >> a)) % (t >> b) + (4 | (t >> c));
-      // value = ((t >> b ? c : a)&t * (a) | ( 8) - (t >> 1)) % (t >> b) + (4 | (t >> c));
 
       break;
     case 12:
-      // moola long
-      aMax = 24;
-      aMin = 0;
-      bMax = 24 ;
-      bMin = 1;
-      cMax = 14;
-      cMin = 1;
-      value = (t * 12 & t >> a | t * b & t >> c | t * b & c / (b << 2)) - 2;
-      //value = (t * a & t >> b | t * c & t >> 7 | t * 3 & t / 1024) - 1;
+      // poetaster twisted calliope distortion can rock :)
+      aMax = 30; aMin = 1; 
+      bMax = 15; bMin = 1;
+      cMax = 15; cMin = 1;  
+      value = (  t * b & c / (a << 2) | t * b & t >> c | t * 12 & t >> a) - 1;;
       break;
     case 13:
-      //moola viznu
-      aMax = 18;
-      aMin = 10;
-      bMax = 14;
-      bMin = 1;
-      cMax = 10;
-      cMin = 1;
-      //value = (t * 5 & t >> 7) | (t * 3 & t >> 10);
-      value = ((t * (t >> a) & (b * t >> 7) & (8 * t >> c)));
+      // (t*(t>>12)*64+(t>>1)*(t>>10)*(t>>11)*48)>>(((t>>16)|(t>>17))&1
+      // http://www.pouet.net/topic.php?which=8357&page=17#c389829",
+      // wroom zoom ..... goes long not like th original nice variety
+
+      value = ( t * (t>>c) * 64 + ( t >> 1 ) * ( t >> b ) * (t >>7) * 48 ) >> ( ( (t>>16)|(t>>a) )+1);
       break;
 
-    case 14: // 
-      aMax = 8;
-      aMin = 0;
-      bMax = 16;
-      bMin = 0;
-      cMax = 1;
-      value = t >> c ^ t & 1 | t + (t ^ t >> 21) - t * ((t >> 4 ? b : a)&t >> (12 - (a >> 1)))^t << 1 & (a & 12 ? t >> 4 : t >> 10);
+    case 14: 
+      // poetaster the next three together
+      aMax = 16; aMin = 1; 
+      bMax = 16; bMin = 1;
+      cMax = 16; cMin = 1;  
+      value = t >> c ^ t & 1 | t + (t ^ t >> 13) - t * ((t >> 5 ? b : a) & t >> ( 8 - ( a >> 1 )  ) ); 
       break;
     case 15: // 15, 16 and 17go together.
-      aMax = 8;
-      aMin = 0;
-      bMax = 9;
-      bMin = 0;
-      cMax = 5;
-      cMin = 0;
-      value = ((t &  (4 << a)) ? ((-t * (t ^ t ) | (t >> b)) >> c) : (t >> 4) | ((t & (c << b)) ? t << 1 : t));
+      aMax = 16; aMin = 1; 
+      bMax = 16; bMin = 1;
+      cMax = 16; cMin = 1;  
+      value =  t >> 4 ^ t & c | t + (t ^ t >> 8) - t * ((t >> 3 ? b : a) & t >> ( 5 - ( b >> 1 )  ) ); 
+      // ^ t << 1 & (a & 12 ? t >> 4 : t >> 10)
       break;
     case 16:
-      aMax = 8;
-      aMin = 0;
-      bMax = 9;
-      bMin = 0;
-      cMax = 6;
-      cMin = 0;
-      value = ((t &  (4 << a)) ? ((-t * (t ^ t ) | (t >> b)) >> 3) : (t >> c) | ((t & (3 << b)) ? t << 1 : t));
-      break;
+      aMax = 16; aMin = 1; 
+      bMax = 16; bMin = 1;
+      cMax = 16; cMin = 1;  
+      value = t >> 4 ^ t & c | t + (t ^ t >> 21) - t * ((t >> 8 ? b : a) & t >> ( 8 - ( b >> 5 )  ) ); 
+      break; 
     case 17:
-    // pulse drone // seems to kill the nano after all?
+    // poetaster pulse drone // seems to kill the nano after all?
       aMax = 32;
       aMin = 1;
       bMax = 24;
       bMin = 0;
       cMax = 16;
       cMin = 0;
-      //if (t > 65536) t = -65536;
       value = ((t*a) & ( t>>5| t<<2 )  ) | ( (t*b) & ( t>>4 | t<<3)) | ((t*c) & ( t>>3 | t<<4 ) );
       break;
     case 18: 
-    // drone, organ, perc
+    // poetaster drone, organ, perc
       aMax = 8;
       aMin = 1;
       bMax = 16;
@@ -256,7 +187,7 @@ ISR(TIMER1_COMPA_vect) {
       value= ( ( t * a & t >> 4 ) | ( t * b & t >> 7 ) | ( t * c &  t) ) - 1;
       break;
     case 19:
-    // also a drone, basic with perc blurbs
+    // poetaster also a drone, basic with perc blurbs
       aMax = 16;
       aMin = 4;
       bMax = 16;
@@ -521,52 +452,37 @@ ISR(TIMER1_COMPA_vect) {
 
   //PWM16B(value);
   OCR2A =  value;
-  t += shift_A_Pot;
+  if ( enc_offset != 0) t += enc_offset;
 
-  // timing  clockout easter-egg mode
-  cyclebyte++;
-  if (cyclebyte == 1024 ) {
-    cyclebyte = 0;
-    if (isClockOutMode ) {
-      //ledCounter();
-    }
-  }
-
-
+  
 }
 
 
 
 
-
-
-void initSound()
+void pwmSetup()
 {
-  pinMode(PWMPIN, OUTPUT);
-
+  
   ASSR &= ~(_BV(EXCLK) | _BV(AS2));
   
   TCCR2A |= _BV(WGM21) | _BV(WGM20);
   TCCR2B &= ~_BV(WGM22);
 
-  // Do non-inverting PWM on pin OC2A (p.155)
-  // On the Arduino this is pin 11.
+  // Do non-inverting PWM on pin OC2A (p.155), p11
   TCCR2A = (TCCR2A | _BV(COM2A1)) & ~_BV(COM2A0);
   TCCR2A &= ~(_BV(COM2B1) | _BV(COM2B0));
-  
   // No prescaler (p.158)
   TCCR2B = (TCCR2B & ~(_BV(CS12) | _BV(CS11))) | _BV(CS10);
-
+  
   // Set initial pulse width to the first sample.
   OCR2A = 0;
-
   // Set up Timer 1 to send a sample every interrupt.
   cli();
 
   // Set CTC mode (Clear Timer on Compare Match) (p.133)
   // Have to set OCR1A *after*, otherwise it gets reset to 0!
-  TCCR1B = (TCCR1B & ~_BV(WGM13)) | _BV(WGM12);
-  TCCR1A = TCCR1A & ~(_BV(WGM11) | _BV(WGM10));
+  TCCR1B = (TCCR1B & ~_BV(WGM13)) | _BV(WGM12 );
+  TCCR1A = TCCR1A & ~(_BV(WGM11) | _BV(WGM10) );
 
   // No prescaler (p.134)
   TCCR1B = (TCCR1B & ~(_BV(CS12) | _BV(CS11))) | _BV(CS10);
@@ -574,11 +490,11 @@ void initSound()
   // Set the compare register (OCR1A).
   // OCR1A is a 16-bit register, so we have to do this with
   // interrupts disabled to be safe.
-  OCR1A = F_CPU / SAMPLE_RATE;    // 16e6 / 8000 = 2000
+  OCR1A = F_CPU / SRATE;    // 16e6 / 8000 = 2000
   // Enable interrupt when TCNT1 == OCR1A (p.136)
   TIMSK1 |= _BV(OCIE1A);
-
   sei();
+  
 }
 
 
