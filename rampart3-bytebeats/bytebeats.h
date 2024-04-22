@@ -139,22 +139,24 @@ ISR(TIMER1_COMPA_vect) {
       bMax = 16; bMin = 1;
       cMax = 16; cMin = 1;
       result = (t * a & t >> b | t * c & t >> 7 | t * 3 & t / 1024) - 1; 
-
       break;
+      
     case 12:
       // poetaster twisted calliope distortion can rock :)
       aMax = 30; aMin = 1; 
       bMax = 15; bMin = 1;
       cMax = 15; cMin = 1;  
-      result = (  t * b & c / (a << 2) | t * b & t >> c | t * 12 & t >> a) - 1;;
+      result = (  t * b & c / (a << 2) | t * b & t >> c | t * ( c+b ) & t >> a) - 1;;
       break;
+      
     case 13:
+      // poetaster - sound fx
       // (t*(t>>12)*64+(t>>1)*(t>>10)*(t>>11)*48)>>(((t>>16)|(t>>17))&1
       // http://www.pouet.net/topic.php?which=8357&page=17#c389829",
       // wroom zoom ..... goes long not like th original nice variety
-
       result = ( t * (t>>c) * 64 + ( t >> 1 ) * ( t >> b ) * (t >>7) * 48 ) >> ( ( (t>>16)|(t>>a) )+1);
       break;
+      
     case 14:
       // poetaster
       // c high, techno wheep, b pitch in the middle, a patterned blips fast to slow
@@ -162,11 +164,14 @@ ISR(TIMER1_COMPA_vect) {
       bMax = 12;  bMin = 1;
       cMax = 16; cMin = 1;  
       result =  t * ( t >> b & ( t >> b ? 13 : 8)  ) - t >> c ^ t & 21 | t + (t ^ t >> a)  ^ t<<1 & (t & a ? t >> 5 : t >> 3);
-      break;    
+      break; 
+         
     case 15:
-    // poetaster fast to slow arps + staccato noise and robot voice
+      // poetaster fast to slow arps + staccato noise and robot voice
+      // breaks with 9 o'clock, 5 to 12 o'clock, 3 o'clock
       result = (( t >> c | b ) & (a + 1))  * (( t >> (b + 1) ) | t >> ( t >> 21)) ;
       break;
+      
     case 16:
       // poetaster descending / ascending bleep arps, lasers, a high bass run
       result = t - ((t & ((t >> a))) + ( a | t >> c )) & (t >> ( c + 1)) | (t >> b) & (t * (t >> a));
@@ -184,10 +189,10 @@ ISR(TIMER1_COMPA_vect) {
       aMax = 8; aMin = 1; 
       bMax = 16; bMin = 1;
       cMax = 8; cMin = 1;
-      result= ( ( t * a & t >> 4 ) | ( t * b & t >> 7 ) | ( t * c &  t) ) - 1;
+      result= ( ( t * a & t >> 4 ) | ( t * b & t >> 7 ) | ( t * c &  t) ) - ( t >> b ? 13 : 8)   ;
       break;
     case 19:
-    // poetaster also a drone, basic with perc blurbs
+    // poetaster also a drone, but melodic basic with perc blurbs hh hits
       aMax = 16; aMin = 4; bMax = 16; bMin = 3; cMax = 16; cMin = 1;
       result =  ( t >> a | t - b ) & ( t -a | t >> b ) * c;   
       break;
@@ -199,14 +204,15 @@ ISR(TIMER1_COMPA_vect) {
       result = t - b & ( (t>>a | t<<4 ) ) ^ t - c & ( ( t>>b | t<<3 ) ) ^ t - a & ( ( t>>c | t<<2 ) ) ;
       break;
     case 21:
-    // classic vizmut paper pp. 5 https://arxiv.org/pdf/1112.1368.pdf
-      aMax = 100; aMin = 20;
-      bMax = 50;  bMin = 10;
-      cMax = 5;   cMin = 1;
-      result = t - b & ( (t>>a | t<<4 ) ) ^ t - c & ( ( t>>b | t<<3 ) ) ^ t - a & ( ( t>>c | t<<2 ) ) ;
+    // started with vizmut paper pp. 5 https://arxiv.org/pdf/1112.1368.pdf
+    // hacked to bits :)
+      aMax = 100; aMin = 2;
+      bMax = 50;  bMin = 2;
+      cMax = 10;  cMin = 2;
+      result = t - b & ( ( t >> a | t >> b ) ) ^ t - c & ( ( t>> b | t << c*2 ) ) ^ t - a & ( ( t>> c | t >> 3 ) ) ;
       break;
     case 22:
-    // classic vizmut paper pp. 6 https://arxiv.org/pdf/1112.1368.pdf
+    // started with vizmut paper pp. 6 https://arxiv.org/pdf/1112.1368.pdf
       aMax = 16; aMin = 1;
       bMax = 16; bMin = 1;
       cMax = 16; cMin = 1;
@@ -214,7 +220,7 @@ ISR(TIMER1_COMPA_vect) {
       //result = (int)(t/1e7 * t * t + c ) % 127 | t >> c ^ t >> b | t % 127 + ( t >> a ) | t ;
       break;
     case 23:
-    // classic vizmut paper pp. 6 https://arxiv.org/pdf/1112.1368.pdf
+    // started with vizmut paper pp. 6 https://arxiv.org/pdf/1112.1368.pdf
     // modified to keep from crashing :) divisions replaced with multiplication :)
       aMax = 7; aMin = 1;
       bMax = 7; bMin = 1;
@@ -223,7 +229,7 @@ ISR(TIMER1_COMPA_vect) {
       // t >>4 | t &(( t >> 5 )/( t >> 7 − ( t >> 15 ) & − t >> 7 − ( t >> 15 ) ) )
       break;
     case 24:
-    // click mouth harp and hum and other chaos, clicky too :)
+      //  poetaster click mouth harp and hum and other chaos, clicky too :)
       aMax = 15; aMin = 0;
       bMax = 15; bMin = 0;
       cMax = 5; cMin = 0;
@@ -231,7 +237,7 @@ ISR(TIMER1_COMPA_vect) {
       result= ((t >> 6 ? 2 : 3) & t * (t >> a) | (a+b+c) - (t >> b)) % (t >> a) + ( a << t | (t >> c) );
       break;
     case 25:
-    // clicky burpy
+      // poetaster clicky burpy can do techno ! it's great when you find it ;)
       aMax = 15; aMin = 0;
       bMax = 11; bMin = 0;
       cMax = 9;  cMin = 0;
@@ -239,6 +245,7 @@ ISR(TIMER1_COMPA_vect) {
       break;
     case 26:
       // variation t+(t&1)+(t>>5)*(t>>1)/1|t>>4|t>>8
+      // nice bass drones with whirring open hats? or damped cymbals
       //https://dollchan.net/btb/res/3.html#258
       aMax = 37; aMin = 4;
       bMax = 5;  bMin = 1;
@@ -246,11 +253,12 @@ ISR(TIMER1_COMPA_vect) {
       result = ( t + ( t & b) + ( t >> a ) * ( t >> b ) / 1 | t >> b | t >> c );
       break;
     case 27:
+       // poeaster variation with melodic with shells
        // variation on https://dollchan.net/btb/res/3.html#78
        // ( ( t >> 10 | t * 5 ) & ( t >> 8 | t * 4 ) & ( t >> 4 | t * 6 ) );
-      aMax = 14; aMin = 4;
-      bMax = 6;  bMin = 1;
-      cMax = 12; cMin = 4;
+      aMax = 16; aMin = 1;
+      bMax = 8;  bMin = 1;
+      cMax = 16; cMin = 1;
       result = ( ( t >> a | t * 5 ) & ( t >> ( a + 2 ) | t * b ) & ( t >> b | t * c ) );
       break;
     case 28:
@@ -261,12 +269,14 @@ ISR(TIMER1_COMPA_vect) {
       cMax = 14; cMin = 1;
       result = (t * (4 | t >> 13 & b ) >> ( ~t >> 11 & 1 ) & 128 | t * ( t >> a & t >> 13 ) * ( ~t >> c & 3 ) & 127 ) ^ ( t & 4096 ? ( t * ( t ^ t % 255 ) | t >> 4 ) >> 1 : t >> 3 |( t & 8192 ? t << 2 : t ) );
       break;
+      
  // from here nybly
  // nice 8, 17, ( bb28 | t << c), bb32 << c (or |), 34 great, 37 ( also  << c, | c), b39 ( | t>>c)
  // normal bb0,bb4 bb11 ( bb19 bb21 | t << c) (bb22 + c) bb23 + c, bb33 << c, bb35 << c, 
  // 8192 slow bb5 bb7 bb9 (bb13 | c) bb14 bb16 (bb29 & t>>c), bb30 << c, bb36 | t <<  c;
  
     case 29: 
+      // crashes? or just really slow?
       aMax = 69; aMin = 1;
       bMax = 69; bMin = 1;
       cMax = 8;  cMin = 0;
