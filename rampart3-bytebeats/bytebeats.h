@@ -276,17 +276,19 @@ ISR(TIMER1_COMPA_vect) {
  // 8192 slow bb5 bb7 bb9 (bb13 | c) bb14 bb16 (bb29 & t>>c), bb30 << c, bb36 | t <<  c;
  
     case 29: 
-      // crashes? or just really slow?
+      // crashes? or just really slow? bb39 is nice but no go
       aMax = 69; aMin = 1;
       bMax = 69; bMin = 1;
       cMax = 8;  cMin = 0;
-      bb39_set(a,b); 
-      result =  bb39() ;;
+      bb19_set(a,b); 
+      result =  bb19() | t >> c ;
       break;
     case 30: // scratch percussion on th extreme
-      cMax = 8; cMin = 0;
+      cMax = 16; cMin = 0;
+      aMax = 69; aMin = 1;
+      bMax = 69; bMin = 1;
       bb37_set(a,b); 
-      result =  bb37() | t >> c;
+      result =  bb37() & t >> c;
       break;
     case 31:
       bb34_set(a,b); 
@@ -378,13 +380,14 @@ ISR(TIMER1_COMPA_vect) {
       break;
     case 43:
       // Extraordinary thread of FRACTAL MUSIC by Anonymous from russian imageboards (2014-07-12) http://arhivach.ng/thread/28592/#71678984
-      aMax = 96;
-      aMin = 24;
+      // crashes??? this is not the original, but, still :)
+      aMax = 64;
+      aMin = 2;
       bMax = 8;
       bMin = 1;
       cMax = 16;
       cMin = 1;            
-      result = t >> b + t % a | t >> c + t % (t / 31108 & 1 ? 46 : 43) | t / b | t / c >> a; // % a crashes
+      result = t >> b + t % a | t >> c + t - ( t ^ (t / 31108 & 1 ? (46 -c) : (43 - c )) ) | t / b | t / c % a; // % a crashes
       break;
     case 44:
       // xpansive 2011-09-29 https://www.pouet.net/topic.php?which=8357&page=3#c388375
