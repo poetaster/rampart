@@ -1,13 +1,13 @@
 /*
- * Rampart Bytebeats @copyright 2024, Mark Washeim <blueprint@poetaster.de>
- * GPLv3, see LICENSE 
- * some parts use other licensces (nyblybyte.h is MIT)
- * and some parts are Public Domain in as far as permissible by law
- * 
- * a number of formulas https://raw.githubusercontent.com/schollz/nyblcore/main/bytebeat/bytebeat.ino
- * 
- * Many contributions from the internet :) See nyblybyte.h for many equations origins and original form.
- */
+   Rampart Bytebeats @copyright 2024, Mark Washeim <blueprint@poetaster.de>
+   GPLv3, see LICENSE
+   some parts use other licensces (nyblybyte.h is MIT)
+   and some parts are Public Domain in as far as permissible by law
+
+   a number of formulas https://raw.githubusercontent.com/schollz/nyblcore/main/bytebeat/bytebeat.ino
+
+   Many contributions from the internet :) See nyblybyte.h for many equations origins and original form.
+*/
 
 
 #include <EncoderButton.h>
@@ -24,14 +24,13 @@ const unsigned int TOP = 0x07FF; // 11-bit resolution.  7812 Hz PWM
 long t = 0;
 volatile int a, b, c, i;
 volatile int result;
+int d = 0; // hmm?
 
 byte prog = 1;
-byte numProg = 45;
+byte numProg = 50;
 
 // these ranges are provisional and in schollz equations need to be reset
 volatile int aMax = 99, aMin = 0, bMax = 99, bMin = 0, cMax = 99, cMin = 0;
-
-int d = 0;
 
 // default rate close to the original bytebeat speed
 int SRATE = 8192; // 16384;
@@ -52,7 +51,7 @@ int enc_offset = 1; // changes direction
 int enc_delta; // which direction
 
 
-#include "bytebeats.h"
+#include "bytebeats.h" // forwards
 
 // unused screen stuff. keep for now.
 
@@ -75,16 +74,18 @@ const int oled_scl_pin = 21;
 const int oled_i2c_addr = 0x3C;
 
 
-// some constants for sound production
+// some constants for sound production these are the old ones.
 //counter for sound
 float floatI = 0;
 float tempo = 16;
 int currentSound = 4;
 int iterations = 256;
 
-// analog freq pins
+// analog freq pins OLD
 #define TEMPO 0
 #define ITERATIONS 1
+
+long timeoffset = 0;
 
 /**
    handle encoder button long press event
@@ -96,7 +97,6 @@ void onEb1LongPress(EncoderButton& eb) {
     Serial.println(eb.longPressCount());
   }
 }
-
 /**
    handle encoder turn with  button pressed
    offsets OCR2A
@@ -119,7 +119,6 @@ void onEb1PressTurn(EncoderButton& eb) {
 /**
    handle encoder turn with  button pressed
 */
-
 void onEb1Clicked(EncoderButton& eb) {
   if (debug) {
     Serial.print("eb1 clickCount: ");
@@ -127,7 +126,6 @@ void onEb1Clicked(EncoderButton& eb) {
   }
   // displayUpdate();
 }
-
 
 /**
     handle left button short release
@@ -149,7 +147,7 @@ void onLeftReleased(EncoderButton& left) {
     handle right button short release
 */
 void onRightReleased(EncoderButton& right) {
-  if (prog < numProg + 1) {
+  if (prog < numProg ) {
     prog++;
   } else if (prog == numProg) {
     prog = 1;
@@ -160,6 +158,7 @@ void onRightReleased(EncoderButton& right) {
     Serial.println(prog);
   }
 }
+
 /**
    A function to handle the 'encoder' event without button
 */
@@ -183,7 +182,6 @@ void onEb1Encoder(EncoderButton& eb) {
   }
 }
 
-long timeoffset = 0;
 
 void setup() {
 
@@ -191,7 +189,7 @@ void setup() {
     Serial.begin(9600);
     Serial.println(F("Started"));
   }
-  
+
   pinMode(LEDPIN, OUTPUT);
   pinMode(PWMPIN, OUTPUT);
 
@@ -226,7 +224,7 @@ void updateControl() {
     if (result < 1000) digitalWrite(LEDPIN, LOW);
   }
 
-  // the sound selection is via encoder, so it's done heere
+  // EncoderButton object updates
   eb1.update();
   left.update();
   right.update();
@@ -241,20 +239,17 @@ void loop() {
 
 // used for mapping adc input on pins 5 - 7 to a - c
 void adc() {
-  // this is just wrong ;)
-    //a = map(analogRead(7), 0, 1023, aMin, aMax);
-    //b = map(analogRead(6), 0, 1023, bMin, bMax);
-    c =  (c + map(analogRead(7), 0, 1023, cMin, cMax)) / 2;
+  // this is just very wrong ;)
+  // take the average on the input on pin 7
+  b =  ( b + map(analogRead(6), 0, 1023, bMin, bMax) ) / 2;
+  c =  ( c + map(analogRead(7), 0, 1023, cMin, cMax) ) / 2;
 }
+
+// pot inputs
 void knobs() {
-
-  
-    a = map(analogRead(0), 0, 1023, aMin, aMax);
-    // take the average on the input on pin 7
-    b = map(analogRead(1), 0, 1023, bMin, bMax);
-    c = map(analogRead(2), 0, 1023, cMin, cMax);
-  
-
+  a = map(analogRead(0), 0, 1023, aMin, aMax);
+  b = map(analogRead(1), 0, 1023, bMin, bMax);
+  c = map(analogRead(2), 0, 1023, cMin, cMax);
 }
 
 
