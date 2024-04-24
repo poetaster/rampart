@@ -27,7 +27,7 @@ volatile int result;
 int d = 0; // hmm?
 
 byte prog = 1;
-byte numProg = 50;
+byte numProg = 52;
 
 // these ranges are provisional and in schollz equations need to be reset
 volatile int aMax = 99, aMin = 0, bMax = 99, bMin = 0, cMax = 99, cMin = 0;

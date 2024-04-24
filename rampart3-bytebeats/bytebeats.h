@@ -72,10 +72,13 @@ ISR(TIMER1_COMPA_vect) {
 
   switch (prog) {
      case 1:  // poetaster the next three together
-      setLimits(1,16,1,16,1,16); // aMin, aMax, etc
-      result = t >> c ^ t & 1 | t + (t ^ t >> 13) - t * ((t >> 5 ? b : a) & t >> ( 8 - ( a >> 1 )  ) ); 
+      setLimits(0,32,0,32,8,16); // aMin, aMax, etc
+      //setLimits(1,32,1,16,1,9); // aMin, aMax, etc
+      result = ( ~t >>7? ~t>>3:~t>>5) * ( (127 & t * ( b & t >> 9) ) < (254 & t * ( 2 + ( c & t >> a ) ) ) );
+      
+      //result = t >> c ^ t & 1 | t + (t ^ t >> 13) - t * ( (t >> 5 ? b : a) & t >> ( 8 - ( a >> 1 )  ) ); 
       break;
-    case 2:  // 15, 16 and 17go together.
+    case 2:  
       setLimits(1,16,1,16,1,16); 
       result =  t >> 4 ^ t & c | t + (t ^ t >> 8) - t * ((t >> 3 ? b : a) & t >> ( 5 - ( b >> 1 )  ) ); 
       // ^ t << 1 & (a & 12 ? t >> 4 : t >> 10)
@@ -88,16 +91,15 @@ ISR(TIMER1_COMPA_vect) {
       setLimits(1,30,1,15,1,30);
       result = t *  t << 1 & (t & 7 ? t >> 3 : t >> c) ^ ((t >> 7 ? 2 : b) & t >> (c + a)) | t + ((t ^ t >> 13)) | a * t >> b ^ t & c ;
       break;
-    case 5:  // poetaster, ascending arps n bassline with tight snare
-      setLimits(1,30,1,41,1,30);
+    case 5:  // poetaster, noisy bassline , arps with tight snare  ... evolves.
+      setLimits(1,16,1,41,1,30);
       result = t * ((t >> 7 ? a : c ) & t >> a ) ^ t << 1 & (t & 7 ? t >> 5 : t >> c) - b * t >> 3 ^ t & (42 - b) ;
-      //result = t * ((t >> 7 ? a : c ) & t >> ( a*c)) ^ t << 1 & (t & b ? t >> 5 : t >> c) - b * t >> 3 ^ t & (42 - b) ;
       break;
-    case 6:  // poetaster helicopters has some arps with b in the middle, various!
+    case 6:  // poetaster helicopters has some arps with b in the middle, various! can also humm with bells.
       setLimits(8,24,1,16,1,16);
       result = ( (t >> a) - ( t >> a & t )  + ( t >> t &  b ) ) + ( t * ((t >> c) & c ) );
       break;
-    case 7:   // poetaster windy whirls, noisy swirls, ocean swells, drop off.
+    case 7:   // poetaster windy whirls, noisy swirls, ocean swells, drop off. revisit since it funks as
       setLimits(1,12,1,16,1,16);
       result =  t >> ( ( a + 1 )  & b & t >> 8 ) ^ ( t & t >> a | t >>c ); /// maybe t >> 16?
       break;
@@ -110,8 +112,7 @@ ISR(TIMER1_COMPA_vect) {
       setLimits(1,8,1,10,1,10);
       result =  (t & t >> b | t << b >> c) ^ ( t  &  t >> a | t << a >> b) & ( t & t >> c | t << c >> a);
       break;    
-    case 10:
-      // poetaster counter point bleeps with a hihat or reverb stuff
+    case 10: // poetaster counter point bleeps with a hihat or reverb stuff NAH
       setLimits(1,30,1,30,1,30);
       result =  ( t  &  t >> c | t + c << 4) | (t & t >> a | t + a << 3) ^ ( t & t >> b | t + b << 2 );
       break;
@@ -200,7 +201,7 @@ ISR(TIMER1_COMPA_vect) {
  
     case 29:  // b39 crashes? or just really slow? bb39 is nice but no go
       setLimits(1,68,1,68,0,32);
-      bb19_set(a,b); 
+      bb19_set( a,b); 
       result =  bb19() | t >> c ;
       break;
     case 30: // scratch percussion on th extreme
@@ -208,18 +209,18 @@ ISR(TIMER1_COMPA_vect) {
       bb37_set(a,b); 
       result =  bb37() & t >> c;
       break;   
-    case 31:
-      setLimits(1,68,1,68,0,32);
+    case 31: // nice
+      setLimits(1,68,1,68,1,32);
       bb34_set(a,b); 
-      result =  bb34() | t >> c;
+      result =  bb34() * c; // or - c
       break;
     case 32:
       setLimits(1,68,1,68,0,32);
       bb32_set(a,b); 
       result =  bb32() | t >> c;
       break;  
-    case 33: // not so good at first but it evolves noisy.
-      setLimits(1,68,1,68,0,32);
+    case 33: // it evolves noisy. lots of breaks to silence
+      setLimits(1,68,1,68,1,16);
       bb28_set(a,b); 
       result =  bb28() |  ~t << c;
       break;
@@ -233,25 +234,25 @@ ISR(TIMER1_COMPA_vect) {
       bb8_set(a,b); 
       result =  bb8() | t >> c;
       break; 
-    case 36:
+    case 36: // pad melodies 2 & 3 part with noise crackle on c
       setLimits(1,68,1,68,0,32);
       bb35_set(a,b); 
-      result =  bb35() | t >> c;
+      result =  bb35() - c ;
       break;
-    case 37:
-      setLimits(1,68,1,68,0,32);
+    case 37:// ?? borked
+      setLimits(1,16,1,16,0,16);
       bb33_set(a,b); 
-      result =  bb33() | t >> c;
+      result =  bb33() *  c;
       break;  
-    case 38:
-      setLimits(1,68,1,68,0,32);
+    case 38: // no needs 8000 hz and takes a while
+      setLimits(1,16,1,16,0,32);
       bb23_set(a,b); 
-      result =  bb23() | t >> c;
+      result =  bb23() - c;
       break;  
-    case 39:
-      setLimits(1,68,1,68,0,8);
+    case 39: // 5824 hz is nice. quaks like a duck
+      setLimits(1,16,1,16,0,32);
       bb22_set(a,b); 
-      result =  bb22() | t >> c;
+      result =  bb22() -c ;
       break;
     case 40:     // Nightmachines https://forum.aemodular.com/post/235
       setLimits(1,16,1,16,0,16);
@@ -275,29 +276,43 @@ ISR(TIMER1_COMPA_vect) {
       result = t * (t >> 8 | t >> 9) & a & t >> 8 ^ (t & t >> c | t >> b);
       break;
     case 45: // straight rythmic, great range! // tejeez 2011-10-05 #countercomplex  
-      setLimits(1,16,1,8,0,12);
-      result = (~t >> 2) * ((127 & t * (b & t >> 10)) < (245 & t * (2 + (c & t >> a))));
+      setLimits(1,16,1,16,0,16);
+      result = ( ~t >> 2) * ((127 & t * (b & t >> 10)) < (245 & t * (2 + (c & t >> a))));
       break;
-    case 46: // bit boring :) //https://www.blogger.com/profile/02935728280207314233 
+   case 46: // variation on 45
+      setLimits(0,32,0,32,0,32); // aMin, aMax, etc
+      result = ( ~t >> 2? ~t>>3:~t>>2) * ( (127 & t * ( b & t >> 10) ) < (245 & t * ( 2 + ( c & t >> a ) ) ) );
+      break;
+     case 47:  // variation on 45
+      setLimits(0,32,0,32,0,32); // aMin, aMax, etc
+      result = ( ~t >>7? ~t>>3:~t>>4) * ( (245 & t * ( b & t >> 10) ) < (127 & t * ( 2 + ( c & t >> a ) ) ) );
+      break;
+      
+    case 48: // bit boring :) //https://www.blogger.com/profile/02935728280207314233 
       setLimits(0,8,0,8,0,8);
       result = (t<16384)?(t*a&t*2>>b):(t<32768) ?(t*a&t*2>>c):(t<49152) ?(t*(b)&t*2>>a):(t<65536) ?(t*(b)&t*2>>c):0 ;
       if(t>=65536)t=0;
-    case 47:  // poetaster a synth lead with breaks, and stuff :) c 12 oclock and it starts being a wave form 
+    case 49:  // poetaster a synth lead with breaks, and stuff :) c 12 oclock and it starts being a wave form 
       setLimits(1,16,21,63,0,16);
       result= (t >> 3 ? b : a) * t >> c ^ t % c | t + (t ^ t >> a) ; 
-    case 48:  // poetaster mad techno helicopter bird flock this is an evil hack.
+    case 50:  // poetaster mad techno helicopter bird flock this is an evil hack.
       setLimits(1,16,1,16,0,16);
-      result =    ( t / ( a * b ) ) & ( ( t >> a ) & t >> b ) * ( t << c) + c ^ ( t >> (t / c ) ) ;//^ ( t >> ( 16 * c ) ) ;
+      result =    ( t / ( a * b ) ) & ( ( t >> a ) & t >> b ) * ( t << c) + a ^ ( t >> (t / b ) ) ;//^ ( t >> ( 16 * c ) ) ;
       break;
-    case 49: // funny melody! a bit like michael nyman on acid  http://www.pouet.net/topic.php?which=8357&page=9#c388930",
-      setLimits(1,16,1,16,0,16);
-      result =   (t*((a + ( 1 ^ t >> 10 & b ) ) * ( b + ( a & t >> 14 ) ) ) ) >> ( t >> c & a );
+    case 51: // funny melody! and arps.  http://www.pouet.net/topic.php?which=8357&page=9#c388930",
+      setLimits(1,16,1,16,0,32);
+      result =   ( t * ( ( a + ( 1 ^ t >> 10 & b ) ) * ( b + ( a & t >> 14 ) ) ) ) | ( t >> c  );
       break;
-    case 50: // same as 49 origin.
-      setLimits(1,16,1,16,0,16);
+    case 52: // same as 49 origin. more 4/4 tech qwowloon can be metal guitar
+      setLimits(1,32,1,32,1,32);
       result =   (t*((3 + ( 1 ^ t >> a & 5 ) ) * ( 5 + ( 3 & t >> b ) ) ) ) >> ( t >> c & 3 );
       //result = t >> c ^ t & 1 | t + (t ^ t >> 13) - t * ((t >> 5 ? b : a) & t >> ( 8 - ( a >> 1 )  ) );
-      break;    
+      break; 
+    case 53:  // always sirens noisy based on https://www.pouet.net/topic.php?post=388938
+      setLimits(1,16,1,16,1,16); // aMin, aMax, etc
+      result =  (t>>3 & a) + (t*( 0xC4 + a >> ( t>> 3 % b) & (13 + c) )| t >> c ) + (int)cos( t * 0xC4 + b);
+
+       //      techno result = t ^ ( t >> c) - t | t >> a * t<<1 & (t&3 ? t >> b: t >> 13 ) ^ ( (t >> 3 ? 8 : 3 ) & t >> 128);
     
   }
 
