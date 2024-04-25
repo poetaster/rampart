@@ -59,6 +59,16 @@ inline void setLimits(byte a1, byte a2, byte b1, byte b2, byte c1, byte c2) {
       bMax = b2; bMin = b1;
       cMax = c2; cMin = c1;
 }
+
+/* pentatonic
+ *  
+ *  A(t) = 1
+    C(t) = 32/27
+    D(t) = 4/3
+    E(t) = 3/2
+    G(t) = 16/9
+ */
+ 
 /* 
  *  I, Mark Washeim do not assert any Copyright for the result formulas. They belong to the public domain
  *  when no other copyright has been asserted.
@@ -67,14 +77,18 @@ inline void setLimits(byte a1, byte a2, byte b1, byte b2, byte c1, byte c2) {
  *  https://github.com/erlehmann/algorithmic-symphonies and
  *  https://raw.githubusercontent.com/schollz/nyblcore/main/bytebeat/bytebeat.ino
  */
+// return t*(((t>>11)^((t>>11)-1)^7)%11)
+// t*((0xDEADBEEF>>((t>>11)&37)&7)*(1/4)*(0xFEFEED>>((t>>13)&42)&5))
 
 ISR(TIMER1_COMPA_vect) {
 
   switch (prog) {
      case 1:  // poetaster the next three together
-      setLimits(0,32,0,32,8,16); // aMin, aMax, etc
+      setLimits(1,8,1,8,1,8); // aMin, aMax, etc
       //setLimits(1,32,1,16,1,9); // aMin, aMax, etc
-      result = ( ~t >>7? ~t>>3:~t>>5) * ( (127 & t * ( b & t >> 9) ) < (254 & t * ( 2 + ( c & t >> a ) ) ) );
+      // birthday fades in and out
+      result = ~t>>11 ^ a | ( (t>>a)&(t<<b) * 1968|(t>>c)%1976 ) / ( t%(a+b+c) | t%2012)  ;
+      //result = ( ~t >>7? ~t>>3:~t>>5) * ( (127 & t * ( b & t >> 9) ) < (254 & t * ( 2 + ( c & t >> a ) ) ) );
       
       //result = t >> c ^ t & 1 | t + (t ^ t >> 13) - t * ( (t >> 5 ? b : a) & t >> ( 8 - ( a >> 1 )  ) ); 
       break;
