@@ -26,8 +26,15 @@ volatile int a, b, c, i;
 volatile int result;
 int d = 0; // hmm?
 
-byte prog = 1;
-byte numProg = 52;
+int prog = 1;
+int bank = 1;
+int pb1 = 1;
+int pb1total = 13;
+int pb2 = 1;
+int pb2total = 19;
+int pb3 = 1;
+int pb3total = 21;
+int numProg = 52;
 
 // these ranges are provisional and in schollz equations need to be reset
 volatile int aMax = 99, aMin = 0, bMax = 99, bMin = 0, cMax = 99, cMin = 0;
@@ -120,8 +127,12 @@ void onEb1PressTurn(EncoderButton& eb) {
    handle encoder turn with  button pressed
 */
 void onEb1Clicked(EncoderButton& eb) {
+
+  // set which bank to select formulas from
+  bank = eb.clickCount();
+
   if (debug) {
-    Serial.print("eb1 clickCount: ");
+    Serial.print("bank: ");
     Serial.println(eb.clickCount());
   }
   // displayUpdate();
@@ -131,13 +142,34 @@ void onEb1Clicked(EncoderButton& eb) {
     handle left button short release
 */
 void onLeftReleased(EncoderButton& left) {
-  if (prog > 1) {
-    prog--;
-  } else if (prog == 1) {
-    prog = numProg;
+
+  if (bank == 1)
+  {
+    if (pb1 > 1) {
+      pb1--;
+    } else if (pb1 == 1) {
+      pb1 = pb1total;
+    }
+    prog = pb1;
+  } 
+  else if (bank == 2) {
+    if (pb2 > 1) {
+      pb2--;
+    } else if (pb2 == 1) {
+      pb2 = pb2total;
+    }
+    prog = pb2;
+  } 
+  else if (bank == 3) {
+    if (pb3 > 1) {
+      pb3--;
+    } else if (pb3 == 1) {
+      pb3 = pb3total;
+    }
+    prog = pb3;
   }
+
   if (debug) {
-    Serial.println("LEFT short release");
     Serial.print("PROGRAM: ");
     Serial.println(prog);
   }
@@ -147,13 +179,33 @@ void onLeftReleased(EncoderButton& left) {
     handle right button short release
 */
 void onRightReleased(EncoderButton& right) {
-  if (prog < numProg ) {
-    prog++;
-  } else if (prog == numProg) {
-    prog = 1;
+  
+  if (bank == 1)
+  {
+    if (pb1 < pb1total) {
+      pb1++;
+    } else if (pb1 == pb1total) {
+      pb1 = 1;
+    }
+    prog = pb1;
+  } 
+  else if (bank == 2) {
+    if (pb2 < pb2total) {
+      pb2++;
+    } else if (pb2 == pb2total) {
+      pb2 = 1;
+    }
+    prog = pb2;
+  } 
+  else if (bank == 3) {
+    if (pb3 < pb2total) {
+      pb3++;
+    } else if (pb3 == pb3total) {
+      pb3 = 1;
+    }
+    prog = pb3;
   }
   if (debug) {
-    Serial.println("RIGHT short release");
     Serial.print("PROGRAM: ");
     Serial.println(prog);
   }
