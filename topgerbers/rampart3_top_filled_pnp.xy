@@ -1,0 +1,20 @@
+# Pick And Place List
+# Company=
+# Author=
+# eMail=
+#
+# Project=rampart3_top_filled
+# Date=19:16:28
+# CreatedBy=Fritzing 1.0.2b.2023-12-20.1.0.2rc2-1-gdbdbe34c
+#
+#
+# Coordinates in mils, always center of component
+# Origin 0/0=Lower left corner of PCB
+# Rotation in degree (0-360, math. pos.)
+#
+RefDes,Description,Package,X,Y,Rotation,Side,Mount
+Description: resistance;capacitance;inductance;voltage;current;power;mpn;mn;
+sssgv,";;;;;;;;","THT",1964.21,2226.93,90,Top,THT
+S2,";;;;;;;;","THT",3172.24,599.968,0,Top,THT
+touch,";;;;;;;;","THT",2951.98,1236.56,180,Top,THT
+S1,";;;;;;;;","THT",502.059,600.413,0,Top,THT

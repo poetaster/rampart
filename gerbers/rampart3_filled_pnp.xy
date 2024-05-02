@@ -1,0 +1,61 @@
+# Pick And Place List
+# Company=
+# Author=
+# eMail=
+#
+# Project=rampart3_filled
+# Date=19:16:01
+# CreatedBy=Fritzing 1.0.2b.2023-12-20.1.0.2rc2-1-gdbdbe34c
+#
+#
+# Coordinates in mils, always center of component
+# Origin 0/0=Lower left corner of PCB
+# Rotation in degree (0-360, math. pos.)
+#
+RefDes,Description,Package,X,Y,Rotation,Side,Mount
+Description: resistance;capacitance;inductance;voltage;current;power;mpn;mn;
+J12,";;;;;;;;","THT",161.86,1618.92,0,Top,THT
+J+,";;;;;;;;","THT",2261.55,1315.17,0,Top,THT
+J8/8,";;;;;;;;","THT",1220.18,2157.17,0,Top,THT
+C1,";1µF;;35V;;;;;","100 mil [THT, electrolytic]",3065.45,1394.49,0,Top,THT
+J2,";;;;;;;;","THT",1972.63,1318.49,0,Top,THT
+4.7k,"4.7k;;;;;0.25W;;;","THT",417.434,653.773,0,Top,THT
+RXTX,";;;;;;;;","THT",1511.03,1571.95,-90,Top,THT
+J10,";;;;;;;;","THT",368.198,1619.57,180,Top,THT
+J13,";;;;;;;;","THT",1979.84,2230.68,90,Top,THT
+Via4,";;;;;;;;","",1162.8,732.533,0,Top,MANUAL
+S5,";;;;;;;;","switch-spdt_kit",585.027,132.526,-90,Top,SMT
+Via8,";;;;;;;;","",860.582,1936.97,0,Top,MANUAL
+1K,"1k;;;;;0.25W;;;","THT",2240.94,858.462,180,Top,THT
+104,";;;;;;;;","cap-pth-5mm",3109.97,1156.56,180,Top,SMT
+1K,"4.7k;;;;;0.25W;;;","THT",2245.53,762.973,180,Top,THT
+10k,";;;;;0.5W;;;","THT",1771.67,378.284,-90,Top,THT
+10k,";;;;;0.5W;;;","THT",1077.31,379.763,-90,Top,THT
+J8/7,";;;;;;;;","THT",624.324,1572.47,-90,Top,THT
+J9,";;;;;;;;","THT",471.731,1619.95,180,Top,THT
+100Ω1,"100;;;;;0.25;;;","THT",3161.37,1057.92,180,Top,THT
+Via6,";;;;;;;;","",1573.92,684.377,0,Top,MANUAL
+SSD1307,";;;;;;;;","",1072.57,1145.76,180,Top,MANUAL
+S3,";;;;;;;;","[THT]",1676.14,2001.77,-90,Top,THT
+Audio OUt1,";;;;;;;;","PG203J [THT]",3217.92,745.363,0,Top,THT
+Via7,";;;;;;;;","",1247.25,1934.75,0,Top,MANUAL
+105,";;;;;;;;","cap-pth-5mm",627.538,1759.39,-90,Top,SMT
+Via9,";;;;;;;;","",2151.69,1916.97,0,Top,MANUAL
+Nano,";;;;;;;;","",869.876,1158.46,90,Top,MANUAL
+10K3,"10k;;;;;0.25;;;","THT",881.953,1795.31,0,Top,THT
+JAIN,";;;;;;;;","THT",2744.57,1499.41,90,Top,THT
+RE1,";;;;;;;;","THT",2611.24,2131.06,0,Top,THT
+Via5,";;;;;;;;","",909.471,683.644,0,Top,MANUAL
+VCC1,";;;4.8V;;;;;","",1384.49,1284.02,180,Bottom,MANUAL
+1KΩ1,"1k;;;;;0.25W;;;","THT",1326.4,1847.71,-90,Top,THT
+clckaudio1,";;;;;;;;","PG203J [THT]",226.49,1972.31,180,Top,THT
+LED1,";;;;0.030A;;;;","3 mm [THT]",137.72,712.646,180,Top,THT
+J11,";;;;;;;;","THT",265.582,1620.49,0,Top,THT
+1k,"1k;;;;;0.25W;;;","THT",2246.99,957.296,180,Top,THT
+100Ω2,"100;;;;;0.25;;;","THT",875.552,2247.07,90,Top,THT
+S2,";;;;;;;;","[THT]",1983.3,2001.77,-90,Top,THT
+JGND,";;;;;;;;","THT",2369.6,1314.18,0,Top,THT
+10k,";;;;;0.5W;;;","THT",2435.7,378.284,-90,Top,THT
+10K2,";;;;;0.5W;;;","THT",3155.39,1821.09,-90,Top,THT
+J5,";;;;;;;;","THT",2078.88,1318.7,0,Top,THT
+1k,"1k;;;;;0.25W;;;","THT",2245.55,1053.42,180,Top,THT
