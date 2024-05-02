@@ -18,6 +18,8 @@ The prototype uses an Arduino Nano. The Mozzi library is used for synthesis.
 * audio wired stereo out
 * headers for most digital and analog pins
 
+![V3 bottom pcb](rampartv3_bottom.jpg)
+
 Analog Pins 0-2 are potentionmeters. Analog pins 3-7 (4 avaible as an input) are used for modulation signal inputs. 
 
 Pins 4&5, also SCL/SDA are layed out such that a SSD1306 could be used for a display.
