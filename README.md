@@ -3,17 +3,36 @@ An arduino semi-modular synth companion to keep, moat and bastl's kastle.
 
 The prototype uses an Arduino Nano. The Mozzi library is used for synthesis.
 
-![laser cut and etched prototype, v2](rampart_v2.jpg)
+![V3 top pcb](rampartV3_pcb.jpg)
 
-![BreadBoard view](https://github.com/poetaster/rampart/raw/master/rampart_bb.jpg)
+## Hardware
 
-Analog Pins 0-3 are potentionmeters. Analog pins 4-7 (4 avaible as an input) are used for modulation signal inputs.
+* 3 pots
+* 1 encoder w/button
+* 2 buttons
+* tactile switch w/LED
+* CV inputs (analog)
+* header for a SSD1306 display 
+* analog filter/volume control
+* audio/clock in
+* audio wired stereo out
+* headers for most digital and analog pins
 
-Digital Pin 9 is audio (PWM) out, the Mozzi standard. Digital 2 and 3 and 4 (?) are buttons (3 being used to switch presests currently).
+Analog Pins 0-2 are potentionmeters. Analog pins 3-7 (4 avaible as an input) are used for modulation signal inputs. 
 
-The Fritzing sketch here is still rough as electrical questions (modulate on the pots directly?) are being explored.
+Pins 4&5, also SCL/SDA are layed out such that a SSD1306 could be used for a display.
 
-A fritzing sketch is included to illustrate the basics.
+Digital Pin 9 is audio (PWM) out, the Mozzi standard. 
+
+Digital 2 - 6 are used for two buttons, an encoder and encoder button.
+
+The layout includes an analog lowpass/volume knob and analog clock/audio in (pocket operator compatible).
+
+The two buttons are located on the top pcb as is a 3pin header which is layed out GND/IO/VCC for connecting things like touch panels.
+
+## Fritzing 
+
+There are two Fritzing files used, one for the main pcb and one for the top (pictured above).
 
 ## Arduino Sketches
 
@@ -27,10 +46,13 @@ I've included a granular synth without mozzi as an example and two versions of a
 
 ## Physical inputs
 
-A note on the power input. Currently this should handle 6-12 volts (it's ground and vin). For the moment I've been soldering 'around' the input female J10. This is silly. I'm adding pads for soldering directly.
+A note on -/+ located to the left below the volume knob ... these can also be used as input ;) If you take an internal signal (say my moat or a korg micromodular) you can use the filter to simply 'mix' the signals.
 
-A note on -/+ out ... these can also be used as input ;) If you take an internal signal (say my moat or a korg micromodular) you can use the filter to simply 'mix' the signals. It's dirty but can be handy.
+# Historical versions
 
+![laser cut and etched prototype, v2](rampart_v2.jpg)
+
+![BreadBoard view](https://github.com/poetaster/rampart/raw/master/rampart_bb.jpg)
 
 
 ![PCB view](https://github.com/poetaster/rampart/raw/master/rampart_pcb.jpg)
