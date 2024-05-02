@@ -187,8 +187,7 @@ struct gainstruct {
   byte gain0;
   byte gain1;
   byte gain2;
-}
-gains;
+} gains;
 
 
 
