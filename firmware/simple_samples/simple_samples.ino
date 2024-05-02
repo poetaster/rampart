@@ -18,6 +18,7 @@
 */
 
 //#include <ADC.h>  // Teensy 3.0/3.1 uncomment this line and install http://github.com/pedvide/ADC
+
 #include <Mozzi.h>
 #include <Sample.h> // Sample template
 #include <samples/bamboo/bamboo_00_2048_int8.h> // wavetable data
@@ -82,7 +83,7 @@ int patlen = 0;
 
 // Button handling
 const int BPIN = 4;
-const int BPIN2 = 12;
+const int BPIN2 = 3;
 
 // would be nice but need to design around it. nano only allows intr on d2 & d3 which I'm using. sigh.
 //volatile unsigned long lastTime = 0;
@@ -112,13 +113,19 @@ std::deque <int>offOne;
 
 unsigned long startD;
 unsigned long stopD;
+unsigned long lastTime;
 int mills;
 int millsA;
 int millsB;
 
+#define ENCODER_DO_NOT_USE_INTERRUPTS
+#include <Encoder.h>
+Encoder myEnc(6, 5);
+long position  = -999;
+
 void setup() {
   // for clock in
-  // attachInterrupt(6, readTime, RISING);
+  //attachInterrupt(1, readTime, RISING);
 
   // mozzi start
   startMozzi(CONTROL_RATE);
@@ -169,12 +176,13 @@ void setup() {
 
 }
 
-/* unused, might go there when we set up the layout differently.
-  void readTime() {
+/* unused, might go there when we set up the layout differently.*/
+
+void readTime() {
     unsigned long t = millis();
     // calculate speed basing on t - lastTime
-    lastTime = t;
-  } */
+    lastTime = t - lastTime;
+}
 
 byte randomGain(int amount) {
   //return lowByte(xorshift96())<<1;
@@ -193,7 +201,12 @@ struct gainstruct {
 
 
 void updateControl() {
-
+  long newPos = myEnc.read();
+  if (newPos != position) {
+    position = newPos;
+    Serial.println(position);
+  }
+   if (lastTime > 0)   Serial.println(lastTime);
 
   int offsetT;
   offsetT = map(mozziAnalogRead(A2), 0, 1023, 1, 8);
@@ -257,15 +270,11 @@ void updateControl() {
   int beatval;
   //cout << currentbeats << endl;
 
-
-
-
-
   static int previous;
   int current = digitalRead(BPIN);
   if (previous == LOW && current == HIGH && currentbeats < 11) {
     currentbeats += 1;
-    //Serial.println(currentbeats);
+    Serial.println(currentbeats);
   }
   previous = current;
 

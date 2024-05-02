@@ -20,7 +20,7 @@
 */
 
 //#include <ADC.h>  // Teensy 3.0/3.1 uncomment this line and install http://github.com/pedvide/ADC
-#include <MozziGuts.h>
+#include <Mozzi.h>
 #include <Oscil.h>
 #include <tables/cos2048_int8.h> // table for Oscils to play
 #include <mozzi_midi.h>
@@ -69,7 +69,8 @@ void setup(){
   note_lower_limit = Q7n0_to_Q7n8(32);
   note0 = note_lower_limit;
   note1 = note_lower_limit + Q7n0_to_Q7n8(5);
-
+  envelope.setADLevels(0,80);
+  envelope.setTimes(0,500,100,100);  
   randSeed(); // fresh random      
   startMozzi(CONTROL_RATE);
 }
@@ -97,35 +98,12 @@ void updateControl(){
     // change direction
     if(note0>note_upper_limit) note_change_step = Q7n0_to_Q7n8(-3);
     if(note0<note_lower_limit) note_change_step = Q7n0_to_Q7n8(3);
-    
-    // choose envelope levels
-      byte attack_level = rand(128)+127;
-      byte decay_level = rand(255);
-      envelope.setADLevels(attack_level,decay_level);
-      unsigned int new_value = rand(300) +100;
-          // randomly choose one of the adsr parameters and set the new value
-     switch (rand(4)){
-       case 0:
-       attack = new_value;
-       break;
-       
-       case 1:
-       decay = new_value;
-       break;
-       
-       case 2:
-       sustain = new_value;
-       break;
-       
-       case 3:
-       release_ms = new_value;
-       break;
-     }
-     envelope.setTimes(attack,decay,sustain,release_ms);    
+
+  
      envelope.noteOn();
 
     // reset eventdelay
-    kNoteChangeDelay.start(attack+decay+sustain+release_ms);
+    kNoteChangeDelay.start(700);//attack+decay+sustain+release_ms);
   }
   envelope.update();
   // vary the modulation index
@@ -138,7 +116,7 @@ void updateControl(){
 }
 
 
-int updateAudio(){
+AudioOutput_t updateAudio(){
   Q15n16 modulation = deviation * aModulator.next() >> 8;
   return ((int)envelope.next()*(int)aCarrier.phMod(modulation))>>8;
 }

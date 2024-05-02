@@ -40,6 +40,27 @@ EventDelay endNote;
 #include <Oscil.h>
 #include <tables/cos2048_int8.h> // table for Oscils to play
 
+#define ENCODER_DO_NOT_USE_INTERRUPTS
+#include <EncoderButton.h>
+// encoder
+// the a and b + the button pin
+EncoderButton eb1(6, 5, 4);
+
+int encoder_pos_last = 0;
+long encoder_delta = 0;
+int enc_offset = 1; // changes direction
+int enc_delta; // which direction
+int prog = 1;
+int bank = 1;
+int pb1 = 1;
+int pb1total = 16;
+int pb2 = 1;
+int pb2total = 21;
+int pb3 = 1;
+int pb3total = 21;
+int numProg = 52;
+
+
 // Reso! analog joystick for controlling speed of modulation: assigned to attack, decay times and sustain level
 #define X A0
 #define Y A1
@@ -59,9 +80,9 @@ const IntMap kmapY(0, 1023, 0, 1000); //D
 #define M1_PIN 7
 #define FLT_PIN 3
 
-// button pins digita
-#define B2_PIN 2
-#define B3_PIN 3
+// Button handling
+const int BPIN = 4;
+const int BPIN2 = 3;
 
 // Map Analogue channels
 #define SYNC_CONTROL         (4)
@@ -79,7 +100,7 @@ RollingAverage <int, 32> kAverageM3;
 WavePacket <SINGLE> wavey; // <DOUBLE> wavey; // DOUBLE selects 2 overlapping streams
 
 
-
+bool debug = true;
 
 
 // variables will change: 1-3
@@ -90,10 +111,15 @@ void setup(){
   
   Serial.begin(9600);
   // initialize the pushbutton pin as an input:
-  pinMode(B2_PIN, INPUT);
-  pinMode(B3_PIN, INPUT);
+  pinMode(BPIN2, INPUT);
   pinMode(13, OUTPUT);
-
+  
+  //Link the event(s) to your function
+  eb1.setClickHandler(onEb1Clicked);
+  eb1.setEncoderHandler(onEb1Encoder);
+  eb1.setLongPressHandler(onEb1LongPress, true);
+  eb1.setEncoderPressedHandler(onEb1PressTurn);
+  
   startMozzi(CONTROL_RATE);
 }
 
@@ -103,7 +129,7 @@ void updateControl(){
   //int knob = mozziAnalogRead(FLT_PIN);
   //byte cutoff_freq = knob>>2;
   static int previous2;
-  int current2 = digitalRead(B2_PIN);
+  int current2 = digitalRead(BPIN2);
   if (previous2 == LOW && current2 == HIGH) {
     if(buttonState == 1) {
        buttonState = 0;
@@ -131,6 +157,7 @@ void updateControl(){
     digitalWrite(13, HIGH);
   }
   
+   eb1.update(); 
 }
 
 
@@ -146,6 +173,8 @@ void updateReso() {
   //fakeMidiRead(target_note);
   fakeMidiRead(target_note,x_axis);
   voice.update();
+
+
 }
 
 void fakeMidiRead(int target, int velocity){
@@ -219,4 +248,139 @@ AudioOutput_t updateAudio(){
 
 void loop(){
   audioHook(); // required here
+}
+
+
+/**
+   handle encoder button long press event
+*/
+void onEb1LongPress(EncoderButton& eb) {
+
+  if (debug) {
+    Serial.print("button1 longPressCount: ");
+    Serial.println(eb.longPressCount());
+  }
+}
+/**
+   handle encoder turn with  button pressed
+   offsets OCR2A
+*/
+void onEb1PressTurn(EncoderButton& eb) {
+  enc_delta = eb.increment();
+
+  int dir = enc_offset + eb.increment();
+  dir = constrain(dir, -7, 7 );
+
+  enc_offset = dir;
+  if (debug) {
+    Serial.print("eb1 press inc by: ");
+    Serial.println(eb.increment());
+    Serial.print("enc_offset is: ");
+    Serial.println(enc_offset);
+  }
+}
+
+/**
+   handle encoder turn with  button pressed
+*/
+void onEb1Clicked(EncoderButton& eb) {
+
+  // set which bank to select formulas from
+  bank = eb.clickCount();
+
+  if (debug) {
+    Serial.print("bank: ");
+    Serial.println(eb.clickCount());
+  }
+  // displayUpdate();
+}
+
+/**
+    handle left button short release
+*/
+void onLeftReleased(EncoderButton& left) {
+
+  if (bank == 1)
+  {
+    if (pb1 > 1) {
+      pb1--;
+    } else if (pb1 == 1) {
+      pb1 = pb1total;
+    }
+    prog = pb1;
+  } 
+  else if (bank == 2) {
+    if (pb2 > 1) {
+      pb2--;
+    } else if (pb2 == 1) {
+      pb2 = pb2total;
+    }
+    prog = pb2;
+  } 
+  else if (bank == 3) {
+    if (pb3 > 1) {
+      pb3--;
+    } else if (pb3 == 1) {
+      pb3 = pb3total;
+    }
+    prog = pb3;
+  }
+
+  if (debug) {
+    Serial.print("PROGRAM: ");
+    Serial.println(prog);
+  }
+}
+
+/**
+    handle right button short release
+*/
+void onRightReleased(EncoderButton& right) {
+  
+  if (bank == 1)
+  {
+    if (pb1 < pb1total) {
+      pb1++;
+    } else if (pb1 == pb1total) {
+      pb1 = 1;
+    }
+    prog = pb1;
+  } 
+  else if (bank == 2) {
+    if (pb2 < pb2total) {
+      pb2++;
+    } else if (pb2 == pb2total) {
+      pb2 = 1;
+    }
+    prog = pb2;
+  } 
+  else if (bank == 3) {
+    if (pb3 < pb2total) {
+      pb3++;
+    } else if (pb3 == pb3total) {
+      pb3 = 1;
+    }
+    prog = pb3;
+  }
+  if (debug) {
+    Serial.print("PROGRAM: ");
+    Serial.println(prog);
+  }
+}
+
+/**
+   A function to handle the 'encoder' event without button
+*/
+void onEb1Encoder(EncoderButton& eb) {
+
+  //displayUpdate();
+  encoder_delta = eb.increment();
+  long cstep = eb.increment() * 64;
+
+  if (debug) {
+    Serial.print("eb1 incremented by: ");
+    Serial.println(eb.increment());
+    Serial.print("eb1 position is: ");
+    Serial.println(cstep);
+  }
 }
