@@ -3,7 +3,7 @@ An arduino semi-modular synth companion to keep, moat and bastl's kastle.
 
 The prototype uses an Arduino Nano. The Mozzi library is used for synthesis.
 
-![V3 top pcb](rampartV3_pcb.jpg)
+![V3 top pcb](rampartv3_pcb.jpg)
 
 ## Hardware
 
@@ -36,7 +36,9 @@ There are two Fritzing files used, one for the main pcb and one for the top (pic
 
 ## Arduino Sketches
 
-A number of Arduino sketches include 2 synths (switch with button 3 on digital pin 2) which have 3 to 4 variable parts of the signal. Both sketches share the wavepacket object as 1st synth. One has PDResonant as second, one an FM synth as second synth.
+The currently most complete sketch is the rampart3-bytebeat sketch. 
+
+A number of Arduino sketches being updated include 2 synths (switch with button 3 on digital pin 2) which have 3 to 4 variable parts of the signal. Both sketches share the wavepacket object as 1st synth. One has PDResonant as second, one an FM synth as second synth.
 
 So, Patch 1 is always a wavelet (based on the wavelet example with mozzi) synth and Patch 2 is an FM synth or PDResonant. Also still rough ideas.
 
