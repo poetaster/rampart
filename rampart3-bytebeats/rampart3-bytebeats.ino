@@ -11,10 +11,6 @@
 
 
 #include <EncoderButton.h>
-//#include <Bounce2.h>
-//#include <Adafruit_SSD1306.h> // conflicts with timer.
-#include <EncoderButton.h>
-
 // for pwm init functions
 const unsigned int TOP = 0x07FF; // 11-bit resolution.  7812 Hz PWM
 
@@ -29,9 +25,9 @@ int d = 0; // hmm?
 int prog = 1;
 int bank = 1;
 int pb1 = 1;
-int pb1total = 13;
+int pb1total = 16;
 int pb2 = 1;
-int pb2total = 19;
+int pb2total = 21;
 int pb3 = 1;
 int pb3total = 21;
 int numProg = 52;
@@ -59,27 +55,6 @@ int enc_delta; // which direction
 
 
 #include "bytebeats.h" // forwards
-
-// unused screen stuff. keep for now.
-
-#define SCREEN_WIDTH 128 // OLED display width, in pixels
-#define SCREEN_HEIGHT 64 // OLED display height, in pixels
-// Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
-// The pins for I2C are defined by the Wire-library.
-// On an arduino UNO:       A4(SDA), A5(SCL)
-// On an arduino MEGA 2560: 20(SDA), 21(SCL)
-// On an arduino LEONARDO:   2(SDA),  3(SCL), ...
-
-#define OLED_RESET     -1 // Reset pin # (or -1 if sharing Arduino reset pin)
-#define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
-
-//Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
-//#include "font.h"
-//#define myfont Org_01  // sigh
-const int oled_sda_pin = 20;
-const int oled_scl_pin = 21;
-const int oled_i2c_addr = 0x3C;
-
 
 // some constants for sound production these are the old ones.
 //counter for sound
@@ -259,7 +234,6 @@ void setup() {
   right.setReleasedHandler(onRightReleased);
   right.setRateLimit(6);
 
-
 }
 
 
@@ -313,96 +287,3 @@ void display_value(int16_t value) {
   }
   //display_timer = millis();
 }
-
-
-// additional display methods (these don't clear)
-//
-// --- display details
-//
-typedef struct {
-  int x;
-  int y;
-  const char* str;
-} pos_t;
-/*
-  //// {x,y} locations of play screen items
-  const int step_text_pos[] = { 0, 15, 16, 15, 32, 15, 48, 15, 64, 15, 80, 15, 96, 15, 112, 15 };
-  const pos_t bpm_text_pos    = {.x=0,  .y=15, .str="bpm:%3d" };
-  const pos_t trans_text_pos  = {.x=35, .y=15, .str="trs:%+2d" };
-  const pos_t seqno_text_pos  = {.x=75, .y=15, .str="seq:%d" };
-  const pos_t seq_info_pos    = {.x=60, .y=45, .str="" };
-  const pos_t play_text_pos   = {.x=110,.y=57, .str="" };
-
-  const pos_t oct_text_offset = { .x=3, .y=10,  .str="" };
-  const pos_t gate_bar_offset = { .x=0, .y=-15, .str="" };
-  const pos_t edit_text_offset= { .x=3, .y=22,  .str="" };
-  const int gate_bar_width = 14;
-  const int gate_bar_height = 4;
-
-  void displayUpdate() {
-  display.clearDisplay();
-  //display.setFont(&myfont);
-  display.setFont(u8g2_font_ncenB14_tr);
-  //display.setTextColor(WHITE, 0);
-  //display.setFont(&myfont2);
-  // bpm
-  display.setCursor(bpm_text_pos.x, bpm_text_pos.y);
-  display.print("inc: ");
-  display.print(eb1.increment());
-
-  // transpose
-  display.setCursor(trans_text_pos.x, trans_text_pos.y);
-    display.print("pos: ");
-  display.print(eb1.position());
-
-  // seqno
-  display.setCursor(seqno_text_pos.x, seqno_text_pos.y);
-  display.print("clks: ");
-  display.print(eb1.clickCount());  // user sees 1-8
-  // seq info / meta
-  display.setCursor(seq_info_pos.x, seq_info_pos.y);
-  display.print((String) a);
-
-  // play/pause
-  //display.setCursor(play_text_pos.x, play_text_pos.y);
-  //display.print(seqr.playing ? " >" : "[]");
-
-  display.display();
-  }
-
-
-
-  void testscrolltext(void) {
-  display.clearDisplay();
-
-  display.setTextSize(2); // Draw 2X-scale text
-  display.setTextColor(SSD1306_WHITE);
-  display.setCursor(10, 0);
-  display.println(F("scroll"));
-  display.display();      // Show initial text
-  delay(100);
-
-  // Scroll in various directions, pausing in-between:
-  display.startscrollright(0x00, 0x0F);
-  delay(2000);
-  display.stopscroll();
-  delay(1000);
-  display.startscrollleft(0x00, 0x0F);
-  delay(2000);
-  display.stopscroll();
-  delay(1000);
-  display.startscrolldiagright(0x00, 0x07);
-  delay(2000);
-  display.startscrolldiagleft(0x00, 0x07);
-  delay(2000);
-  display.stopscroll();
-  delay(1000);
-  }
-
-  void print_cur(String Bytes, String Bytes2) {
-  display.setCursor(seq_info_pos.x, seq_info_pos.y);
-  display.print(Bytes);
-  display.print(Bytes2);  // user sees 1-8
-  display.display();
-  }
-*/

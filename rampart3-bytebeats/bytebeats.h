@@ -2,8 +2,38 @@
 
 #include "nyblybyte.h"
 
-void pwmSetup()
-{
+/* CTC PWM on pin 9 
+ * to keep it consistant with mozzi  
+ * sadly, seems to collide with the encoder button library?
+ */
+   
+void pwmSetupPin9(){
+
+  ASSR &= ~(_BV(EXCLK) | _BV(AS2));
+  TCCR1A |= _BV(WGM21) | _BV(WGM20);
+  TCCR1B &= ~_BV(WGM22);
+  TCCR1A = (TCCR1A | _BV(COM1A1)) & ~_BV(COM1A0);
+  TCCR1A &= ~(_BV(COM1B1) | _BV(COM1B0));
+  TCCR1B = (TCCR1B & ~(_BV(CS12) | _BV(CS11))) | _BV(CS10);
+  
+  // Set initial pulse width to the first sample.
+  OCR1A = 0;
+  // Set up Timer 1 to send a sample every interrupt.
+  cli();
+  TCCR2B = (TCCR2B & ~_BV(WGM13)) | _BV(WGM12 );
+  TCCR2A = TCCR2A & ~(_BV(WGM11) | _BV(WGM10) );
+  TCCR2B = (TCCR2B & ~(_BV(CS22) | _BV(CS21))) | _BV(CS20);
+  OCR1B = F_CPU / SRATE;    // 16e6 / 8000 = 2000
+  TIMSK1 |= _BV(OCIE1B);
+  sei();
+  pinMode(9, OUTPUT);
+  
+}
+
+/* CTC PWM on pin 1
+ * http://neilmb.github.io/cheapnewham/2015/07/21/Arduino-IQ-Audio-Frequency-DDS.html 
+ */
+void pwmSetup() {
   
   ASSR &= ~(_BV(EXCLK) | _BV(AS2));
   
@@ -13,7 +43,6 @@ void pwmSetup()
   // Do non-inverting PWM on pin OC2A (p.155), p11
   TCCR2A = (TCCR2A | _BV(COM2A1)) & ~_BV(COM2A0);
   TCCR2A &= ~(_BV(COM2B1) | _BV(COM2B0));
-  // No prescaler (p.158)
   TCCR2B = (TCCR2B & ~(_BV(CS12) | _BV(CS11))) | _BV(CS10);
   
   // Set initial pulse width to the first sample.
@@ -38,63 +67,7 @@ void pwmSetup()
   sei();
   
 }
-void PWM2Begin() 
-{
 
-
-  
-}
-/* 
- *  these methods not yet used. searching an available timer is what we should aim for 
- *  for now, limited to the original on pin 11/timer 2
-*/
-
-void PWM16Begin()
-{
-  // Stop Timer/Counter1
-  TCCR1A = 0;  // Timer/Counter1 Control Register A
-  TCCR1B = 0;  // Timer/Counter1 Control Register B
-  TIMSK1 = 0;   // Timer/Counter1 Interrupt Mask Register
-  TIFR1 = 0;   // Timer/Counter1 Interrupt Flag Register
-  ICR1 = TOP;
-  OCR1A = 0;  // Default to 0% PWM
-  OCR1B = 0;  // Default to 0% PWM
-
-
-  // Set clock prescale to 1 for maximum PWM frequency
-  TCCR1B |= (1 << CS10);
-  // Set to Timer/Counter1 to Waveform Generation Mode 14: Fast PWM with TOP set by ICR1
-  TCCR1A |= (1 << WGM11);
-  TCCR1B |= (1 << WGM13) | (1 << WGM12) ;
-}
-
-
-void PWM16EnableA()
-{
-  // Enable Fast PWM on Pin 9: Set OC1A at BOTTOM and clear OC1A on OCR1A compare
-  TCCR1A |= (1 << COM1A1);
-  pinMode(9, OUTPUT);
-}
-
-
-void PWM16EnableB()
-{
-  // Enable Fast PWM on Pin 10: Set OC1B at BOTTOM and clear OC1B on OCR1B compare
-  TCCR1A |= (1 << COM1B1);
-  pinMode(10, OUTPUT);
-}
-
-
-inline void PWM16A(unsigned int PWMvalue)
-{
-  OCR1A = constrain(PWMvalue, 0, TOP);
-}
-
-
-inline void PWM16B(unsigned int PWMvalue)
-{
-  OCR1B = constrain(PWMvalue, 0, TOP);
-}
 
 inline void setLimits(byte a1, byte a2, byte b1, byte b2, byte c1, byte c2) {
       aMax = a2; aMin = a1; 
@@ -136,7 +109,7 @@ void rythmical(int pb1) {
       //setLimits(1,8,1,8,1,8); // aMin, aMax, etc
       setLimits(1,32,1,16,1,9); // aMin, aMax, etc
       //result = ( ~t >>7? ~t>>3:~t>>5) * ( (127 & t * ( b & t >> 9) ) < (254 & t * ( 2 + ( c & t >> a ) ) ) );
-      result = t >> c ^ t & 1 | t + (t ^ t >> 13) - t * ( (t >> 5 ? b : a) & t >> ( 8 - ( a >> 1 )  ) ); 
+      result = t >> c ^ t & 1 | t + (t ^ t >> 13) - t * ( (t >> 5 ? b : a) & t >> ( 8 - ( a >> 1 )  ) );  // ( t%8 ? ~t >> 9 & b: ~t >>11 & c )
       break;
     case 2:  
       setLimits(1,16,1,16,1,16); 
@@ -145,13 +118,15 @@ void rythmical(int pb1) {
       break;
     case 3:
       setLimits(1,16,1,16,1,16);
-      result = t >> 4 ^ t & c | t + (t ^ t >> 21) - t * ((t >> 8 ? b : a) & t >> ( 8 - ( b >> 5 )  ) ); 
+      result = t >> (2*a) ^ t & c | t + (t ^ t >> 21) - t * ((t % 8 ? b : a) & t >> ( 8 - ( b >> 5 )  ) ); 
       break; 
 
-    case 4: //  poetaster click mouth harp and hum and other chaos, clicky too :)
-      setLimits(0,15,0,15,0,5);
+    case 4: //  poetaster 
+      setLimits(0,16,0,16,0,16);
       //if (t > 65536) t = -65536;
-      result= ((t >> 6 ? 2 : 3) & t * (t >> a) | (a+b+c) - (t >> b)) % (t >> a) + ( a << t | (t >> c) );
+      result= ((t%32 ? ~t>>2 : t>>3) & t + (t >> a) + ( ~ (t ^ b/2| t >> c) )  );
+      
+      //result=  ((t%4 ? c : b) & ((t<<1)^-(t>>a&1) &  ( 127 << (t+ b) | (t >> c)));
       break;
             
     case 5:  // always sirens noisy based on https://www.pouet.net/topic.php?post=388938
@@ -163,18 +138,18 @@ void rythmical(int pb1) {
       setLimits(1,30,1,15,1,30);
       result = t *  t << 1 & (t & 7 ? t >> 3 : t >> c) ^ ((t >> 7 ? 2 : b) & t >> (c + a)) | t + ((t ^ t >> 13)) | a * t >> b ^ t & c ;
       break;
-    case 7:  // poetaster, noisy bassline , arps with tight snare  ... evolves.
+    case 7:  // poetaster, noisy bassline , arps with tight snare  ... evolves. needs work? 
       setLimits(1,16,1,41,1,30);
       result = t * ((t >> 7 ? a : c ) & t >> a ) ^ t << 1 & (t & 7 ? t >> 5 : t >> c) - b * t >> 3 ^ t & (42 - b) ;
       break;
     case 8: // started with vizmut paper pp. 6 https://arxiv.org/pdf/1112.1368.pdf // modified to keep from crashing :) divisions replaced with multiplication :)
-      setLimits(1,7,1,7,2,7);
-      result = t >> c | t & (( t >> 5 )/( t >> b*4 - ( t >> a*3 ) & - t >> b*4 - ( t >> a*3 ) ) );
+      setLimits(0,32,0,32,0,32);
+      result = t >> c |  t & (  ( t >> 5 ) / ( t >> b*4 - ( t >> a/3 ) & - t >> b/4 - ( t >> a/3 ) ) );
       // t >>4 | t &(( t >> 5 )/( t >> 7 − ( t >> 15 ) & − t >> 7 − ( t >> 15 ) ) )
       break;
 
     case 9:  // variation t+(t&1)+(t>>5)*(t>>1)/1|t>>4|t>>8  nice bass drones with whirring open hats? or damped cymbals https://dollchan.net/btb/res/3.html#258
-      setLimits(4,37,1,5,5,12);
+      setLimits(4,37,0,16,5,12);
       result = ( t + ( t & b) + ( t >> a ) * ( t >> b ) / 1 | t >> b | t >> c );
       break;
     case 10: // scratch percussion on th extreme (try * c)
@@ -195,6 +170,19 @@ void rythmical(int pb1) {
       setLimits(2,64,2,8,0,16);      
       result = t >> b + t % a | t >> c + t - ( t ^ (t / 31108 & 1 ? (46 -c) : (43 - c )) ) | t / b | t / c % a; // % a crashes
       break;   
+    case 14:  // poetaster this is great with a modulator like the kastle.
+      setLimits(0,8,0,8,0,8);
+      result = ( t%16 ? t >> a & t >> 7 : t>> 11 & t >> b ) * ( t%8 ? ~t >> 9 & b: ~t >>11 & c ) & 64 ; 
+      break;
+    case 15:  // https://forum.arduino.cc/t/one-line-algorithmic-music/73409
+      // (t*(4|t>>13&3)>>(~t>>11&1)&128|t*(t>>11&t>>13)*(~t>>9&3)&127)^(t&4096?(t*(t^t%255)|t>>4)>>1:t>>3|(t&8192?t<<2:t))
+      setLimits(0,16,0,16,0,16);
+      result =  ( t & (a*16) ? ( t * ( t ^ t % (b*8) ) | t >> a ) >> 127 : t >> b |( t & (c*32) ? t << c : t ) )   ;
+      break;
+    case 16: // started with vizmut paper pp. 6 https://arxiv.org/pdf/1112.1368.pdf // modified to keep from crashing :) divisions replaced with multiplication :)
+      setLimits(0,16,0,16,0,16);
+      result = t >> c | t | (( t >> 5 )/( t%2 ? t >> b/2: t>> b)) | ( t%3 ? t >> a/3: t>> a ); 
+      break;
   }
 }
 
@@ -206,12 +194,17 @@ void melodious(int pb2){
       setLimits(4,19,0,7,0,14);
       result = (t * (4 | t >> 13 & b ) >> ( ~t >> 11 & 1 ) & 128 | t * ( t >> a & t >> 13 ) * ( ~t >> c & 3 ) & 127 ) ^ ( t & 4096 ? ( t * ( t ^ t % 255 ) | t >> 4 ) >> 1 : t >> 3 |( t & 8192 ? t << 2 : t ) );
       break;
-    case 2:  // xpansive 2011-09-29 https://www.pouet.net/topic.php?which=8357&page=3#c388375
+    case 2:  // FIX this is actually rythm https://forum.arduino.cc/t/one-line-algorithmic-music/73409
+      // (t*(4|t>>13&3)>>(~t>>11&1)&128|t*(t>>11&t>>13)*(~t>>9&3)&127)^(t&4096?(t*(t^t%255)|t>>4)>>1:t>>3|(t&8192?t<<2:t))
+      setLimits(0,16,0,16,0,16);
+      result =  ( t & 64 ? ( t * ( t ^ t % 128 ) | t >> a ) >> 127 : t >> b |( t & 32 ? t << c : t ) )   ;
+      break;
+    case 29:  // xpansive 2011-09-29 https://www.pouet.net/topic.php?which=8357&page=3#c388375
       // t * (t >> 8 | t >> 9) & 46 & t >> 8 ^ (t & t >> 13 | t >> 6);
       setLimits(40,56,1,9,0,16);
       result = t * (t >> 8 | t >> 9) & a & t >> 8 ^ (t & t >> c | t >> b);
       break;
-    case 3: // straight rythmic, great range! // tejeez 2011-10-05 #countercomplex  
+    case 3: // FIX rythm straight rythmic, great range! // tejeez 2011-10-05 #countercomplex  
       setLimits(1,16,1,16,0,16);
       result = ( ~t >> 2) * ((127 & t * (b & t >> 10)) < (245 & t * (2 + (c & t >> a))));
       break;
@@ -223,7 +216,7 @@ void melodious(int pb2){
       setLimits(0,32,0,32,0,32); // aMin, aMax, etc
       result = ( ~t >>7? ~t>>3:~t>>4) * ( (245 & t * ( b & t >> 10) ) < (127 & t * ( 2 + ( c & t >> a ) ) ) );
       break;
-    case 6:       //Street Surfer by skurk, raer (2011-09-30) https://www.pouet.net/topic.php?which=8357&page=4#c388479
+    case 6:  //  FIX rythm? Street Surfer by skurk, raer (2011-09-30) https://www.pouet.net/topic.php?which=8357&page=4#c388479
       setLimits(1,16,1,16,0,16);
       result  = t & (4096) ? t / 2 * (t ^ t % (a << 1)) | t >> 5 : t / (a << 1) | (t & (b << 7) ? 4 * t : t);
       break;
@@ -240,9 +233,9 @@ void melodious(int pb2){
       setLimits(1,16,1,16,0,32);
       result =   ( t * ( ( a + ( 1 ^ t >> 10 & b ) ) * ( b + ( a & t >> 14 ) ) ) ) | ( t >> c  );
       break;
-    case 10: // poetaster fast to slow arps + staccato noise and robot voice = breaks with 9 o'clock, 5 to 12 o'clock, 3 o'clock
-      setLimits(1,30,1,30,1,30);
-      result = (( t >> c | b ) & (a + 1))  * (( t >> (b + 1) ) | t >> ( t >> 21)) ;
+    case 10: // FIX rythm, broken poetaster fast to slow arps + staccato noise and robot voice = breaks with 9 o'clock, 5 to 12 o'clock, 3 o'clock
+      setLimits(0,64,0,16,0,16);
+      result = (( t >> c | t << b ) & (a + 1))  * (( t >> (b + 1) ) | t >> ( t << 21)) ;
       break;    
     case 11:  // poetaster pulse drone // seems to kill the nano after all?
       setLimits(1,32,1,24,1,16);
@@ -285,6 +278,14 @@ void melodious(int pb2){
       setLimits(1,8,1,16,1,8);
       result= ( ( t * a & t >> 4 ) | ( t * b & t >> 7 ) | ( t * c &  t) ) - ( t >> b ? 13 : 8)   ;
       break;  
+    case 20: //poetaster requires 4* normal speed
+      setLimits(32,39,32,47, 32,58);
+      result = t * ( ( ( t>>11*a/27 ) & ( ( t >> 11*b/27 ) - 1 ) ^ 7) * 11*c/27);
+      //result = t * ( ( ( t%2? t>>11*a/27: t>>11*a/9 ) ^ ( ( t >> 11*b/9 ) - 1 ) ^ 7) ^ 11*c/9);
+    case 21: // http://entropedia.co.uk/generative_music/#v3b64K0otKS3KU9AoUdMosbMz09TWKLGx0QCxDQ014yAMY01tY03NGgjHRNXMBKQKxNTU1FTT0AUyTTU1rRX0tRRCihKTsxWcixLTSioVkioVAhJLcxQ8EitTixW09AE=
+      setLimits(1,8,11,16,1,24);
+      result = (t&(t>>6)+(t<<((t>>11)^((t>>b)+a))|((t>>c%64)+(t>>c)))&(-t>>5));
+      //result = (t&(t>>6)+(t<<((t>>11)^((t>>13)+3))|((t>>14%64)+(t>>14)))&(-t>>5));
   }
   
 }
