@@ -66,7 +66,7 @@ Oscil<COS2048_NUM_CELLS, CONTROL_RATE> kModIndex(COS2048_DATA);
 
 Q8n8 mod_index;// = float_to_Q8n8(2.0f); // constant version
 Q16n16 deviation;
-Q16n16 carrier_freq, mod_freq;
+Q16n16 carrier_freq, mod_freq, fundemental, bandwidth, centre;
 
 // FM ratio between oscillator frequencies, stays the same through note range
 Q8n8 mod_to_carrier_ratio = float_to_Q8n8(3.f);
@@ -156,23 +156,13 @@ void updateFM() {
   //kAverageF.next( mozziAnalogRead(FUNDAMENTAL_PIN)>>1 ) + kAverageM1.next(mozziAnalogRead(A5)>>1 ) / 2  ,
   note0 = map(mozziAnalogRead(FUNDAMENTAL_PIN), 0, 1023,1024, 6144);
   note1 = map(mozziAnalogRead(M1P), 0, 1023, 1024, 6144);
-  
-  if (note1 > 10) {
+
+  // make sure we only mix if we have a signal on mod pin
+  if (note1 > 1024) {
     target_note = note0 + note1 / 2;
   } else {
     target_note = note0;
   }
-/*
-  if (kNoteChangeDelay.ready()) {
-    //envelope.start(attack, decay);
-    // reset eventdelay
-    
-    kNoteChangeDelay.start(256);
-    envelope.noteOn();
-  } else{
-    //envelope.noteOff();
-  }
-*/
   //Serial.println(mozziAnalogRead(CENTREFREQ_PIN));
   //Serial.println('-');
   //Serial.println(mozziAnalogRead(BANDWIDTH_PIN));
@@ -184,14 +174,25 @@ void updateFM() {
   int modulate, modI;
   int bw = mozziAnalogRead(BANDWIDTH_PIN) ;
   int mw = mozziAnalogRead(M2P);
-  if ( mw > 10 ) {
+  
+  // make sure we only mix if we have a signal on mod pin
+  if ( mw > 50 ) {
     modulate = ( bw + mw  ) / 2;
     modI = map(modulate, 0, 1023, 256, 768);
   } else {
     modI = map(bw, 0, 1023, 256, 768);
   }
   
-  mod_to_carrier_ratio = (Q8n8)(map( mozziAnalogRead(CENTREFREQ_PIN), 0, 1023, 1,8));
+  int cw = mozziAnalogRead(CENTREFREQ_PIN) ;
+  int cm = mozziAnalogRead(M3P);
+    // make sure we only mix if we have a signal on mod pin
+  if ( cm > 10 ) {
+    centre = map( (( cw + cm  ) / 2 ), 0, 1023, 1, 10);
+  } else {
+    centre = map(cw, 0, 1023, 1, 10);
+  }
+  mod_to_carrier_ratio = centre;
+  //mod_to_carrier_ratio = (Q8n8)(map( mozziAnalogRead(CENTREFREQ_PIN), 0, 1023, 1,8));
   // vary the modulation index
   mod_index = (Q8n8)modI + kModIndex.next();
 
@@ -214,11 +215,35 @@ void setFreqs(Q8n8 midi_note) {
 
 void updateWavePacket() {
   
-  wavey.set(
-    (map( (mozziAnalogRead(FUNDAMENTAL_PIN) - mozziAnalogRead(M1P)),  0, 1023, 8, 254) ),
-    (map( (mozziAnalogRead(BANDWIDTH_PIN)  - mozziAnalogRead(M2P)),  0, 1023, 128, 1023) ),
-    (mozziAnalogRead(CENTREFREQ_PIN) + mozziAnalogRead(M3P)/ 2)
-  );
+  note0 = map(mozziAnalogRead(FUNDAMENTAL_PIN), 0, 1023, 8, 254);
+  note1 = map(mozziAnalogRead(M1P), 0, 1023, 8, 254);
+
+  // make sure we only mix if we have a signal on mod pin
+  if (note1 > 10) {
+    target_note = note0 + note1 / 2;
+  } else {
+    target_note = note0;
+  }
+  
+  int bw = mozziAnalogRead(BANDWIDTH_PIN) ;
+  int bm = mozziAnalogRead(M2P);
+    // make sure we only mix if we have a signal on mod pin
+  if ( bm > 133 ) {
+    bandwidth = map( (( bw + bm  ) / 2 ), 0, 1023, 128, 1023);
+  } else {
+    bandwidth = map(bw, 0, 1023, 128, 1023);
+  }
+  
+  int cw = mozziAnalogRead(CENTREFREQ_PIN) ;
+  int cm = mozziAnalogRead(M3P);
+    // make sure we only mix if we have a signal on mod pin
+  if ( cm > 10 ) {
+    centre = map( (( cw + cm  ) / 2 ), 0, 1023, 8, 512);
+  } else {
+    centre = map(cw, 0, 1023, 8, 512);
+  }
+  
+  wavey.set( target_note, bandwidth, centre );
 }
 
 AudioOutput updateAudio() {
