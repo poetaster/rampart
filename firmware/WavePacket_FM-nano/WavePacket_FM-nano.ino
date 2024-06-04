@@ -5,6 +5,8 @@
 */
 
 //#include <ADC.h>  // Teensy 3.0/3.1 uncomment this line and install http://github.com/pedvide/ADC
+#include <MozziConfigValues.h>
+#define MOZZI_AUDIO_MODE MOZZI_OUTPUT_2PIN_PWM
 
 #include <Mozzi.h>
 #include <mozzi_analog.h>

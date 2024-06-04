@@ -52,6 +52,12 @@ I've included a granular synth without mozzi as an example and two versions of a
 
 A note on -/+ located to the left below the volume knob ... these can also be used as input ;) If you take an internal signal (say my moat or a korg micromodular) you can use the filter to simply 'mix' the signals.
 
+## Sales :)
+
+I sell the latest versions of these as kits and completeed build at https://poetaster.org, on https://tonetoys.etsy.com and on Tindie:
+<a href="https://www.tindie.com/stores/poetaster/?ref=offsite_badges&utm_source=sellers_poetaster&utm_medium=badges&utm_campaign=badge_small"><img src="https://d2ss6ovg47m0r5.cloudfront.net/badges/tindie-smalls.png" alt="I sell on Tindie" width="200" height="55"></a>
+
+
 # Historical versions
 
 ![laser cut and etched prototype, v2](rampart_v2.jpg)

@@ -183,6 +183,11 @@ void rythmical(int pb1) {
       setLimits(0,16,0,16,0,16);
       result = t >> c | t | (( t >> 5 )/( t%2 ? t >> b/2: t>> b)) | ( t%3 ? t >> a/3: t>> a ); 
       break;
+    case 17: // nice
+      setLimits(1,68,1,68,1,32);
+      bb34_set(a,b); 
+      result =  bb34() * c; // or - c
+      break;
   }
 }
 
@@ -381,11 +386,7 @@ void noisy(int pb3){
       setLimits(0,15,0,11,0,9);
       result = ( ( (t >> 9 ? a : b) & t * (t >> b) % (t >> c) - (t >> b) ) * (t >> a) ) ;
       break;
-    case 21: // nice
-      setLimits(1,68,1,68,1,32);
-      bb34_set(a,b); 
-      result =  bb34() * c; // or - c
-      break;
+
   }
 }
 

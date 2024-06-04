@@ -25,11 +25,11 @@ int d = 0; // hmm?
 int prog = 1;
 int bank = 1;
 int pb1 = 1;
-int pb1total = 16;
+int pb1total = 17;
 int pb2 = 1;
 int pb2total = 21;
 int pb3 = 1;
-int pb3total = 21;
+int pb3total = 20;
 int numProg = 52;
 
 // these ranges are provisional and in schollz equations need to be reset
@@ -41,8 +41,8 @@ int SRATE = 8192; // 16384;
 bool debug = true;
 
 // encoder
-// the a and b + the button pin
-EncoderButton eb1(6, 5, 4);
+// the a and b + the button pin large encoders are 6,5,4
+EncoderButton eb1(5, 6, 4);
 
 // the library has nice button handling and uses bounce2
 EncoderButton left(3); // pin 3 rampart
@@ -266,9 +266,10 @@ void loop() {
 // used for mapping adc input on pins 5 - 7 to a - c
 void adc() {
   // this is just very wrong ;)
-  // take the average on the input on pin 7
-  b =  ( b + map(analogRead(6), 0, 1023, bMin, bMax) ) / 2;
-  c =  ( c + map(analogRead(7), 0, 1023, cMin, cMax) ) / 2;
+  // take the average on the input on pin 3,6,7
+  a =  ( a + map(analogRead(3), 0, 1023, aMin, aMax) ) ;
+  b =  ( b + map(analogRead(6), 0, 1023, bMin, bMax) ) ;
+  c =  ( c + map(analogRead(7), 0, 1023, cMin, cMax) ) ;
 }
 
 // pot inputs
