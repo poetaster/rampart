@@ -188,6 +188,12 @@ void rythmical(int pb1) {
       bb34_set(a,b); 
       result =  bb34() * c; // or - c
       break;
+    case 18: // drums
+      setLimits(0,36,0,16,10,20);
+      // a 18, b 6, c 10
+      int u=0;
+      result= ((((u=t&0xfff)&0+((u+1<<(a+(t>>c&1*b)))/u)&255)/(u>>8))&240-128)*3;
+      break;
   }
 }
 
