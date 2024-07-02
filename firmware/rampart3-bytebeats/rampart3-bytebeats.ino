@@ -25,9 +25,9 @@ int d = 0; // hmm?
 int prog = 1;
 int bank = 1;
 int pb1 = 1;
-int pb1total = 18;
+int pb1total = 19;
 int pb2 = 1;
-int pb2total = 21;
+int pb2total = 22;
 int pb3 = 1;
 int pb3total = 20;
 int numProg = 52;
@@ -213,7 +213,7 @@ void onEb1Encoder(EncoderButton& eb) {
 void setup() {
 
   if (debug) {
-    Serial.begin(9600);
+    Serial.begin(57600);
     Serial.println(F("Started"));
   }
 
@@ -259,7 +259,7 @@ void updateControl() {
 
 void loop() {
   knobs();
-  adc();
+  //adc();
   updateControl(); // required here
 }
 
