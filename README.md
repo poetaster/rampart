@@ -52,6 +52,40 @@ I've included a granular synth without mozzi as an example and two versions of a
 
 A note on -/+ located to the left below the volume knob ... these can also be used as input ;) If you take an internal signal (say my moat or a korg micromodular) you can use the filter to simply 'mix' the signals.
 
+
+## Upgrading firmware:
+
+First you need to make sure you have drivers installed. A good reference for the usb drivers (which work form most arduino boards or the lgt in rampart):
+https://learn.sparkfun.com/tutorials/how-to-install-ch340-drivers/all
+
+The most current firmware hex files will be included in this directory and can be flashed  as follows
+
+
+linux: the device will most probably be ttyUSB0 as below:
+
+* install avrdude using package manager 
+* attach the rampart  to usb
+* execute: avrdude -c arduino -b 57600 -F -P /dev/ttyUSB0 -p atmega328p -U flash:w:rampart3-bytebeats.ino.hex
+
+windows:
+After step one, we find where the device lives (using the command prompt) you need to install avrdude: 
+* install avrdude from https://github.com/avrdudes/avrdude/releases (windows x64, x86 or arm64)
+* attach the rampart  to usb
+* execute command: "wmic path Win32_SerialPort Where "Caption LIKE '%%COM%%'" Get Description, DeviceID" 
+* note the DeviceID of the "USB Serial Device" which will  be something like: "COM5" 
+* using the DeviceID you've noted, adapt the following command (here -PCOM5).
+* execute from the directory where you placed the hex file (dir command to get there): "avrdude.exe -patmega328p -carduino -D -PCOM5 -b57600 -Uflash:w:rampart3-bytebeats.ino.hex" 
+
+macintosh:
+* install the usb driver for the rampart using instructions from : https://github.com/WCHSoftGroup/ch34xser_macos has a .pkg file you can install.
+* install avrdude through MacPorts or Homebrew. (with home-brew it: $brew install avrdude).
+* attach the rampart  to usb
+* in a terminal execute: "ls /dev/tty*" and note names with tty.wch in them  like : tty.wchusbserial1234
+* from the directory where you downloaded the hex file execute: avrdude -c arduino -b 57600 -F -P /dev/tty.wchusbserial1234 -p atmega328p -U flash:w:rampart3-bytebeats.ino.hex
+ 
+
+
+
 ## Sales :)
 
 I sell the latest versions of these as kits and completeed build at https://poetaster.org, on https://tonetoys.etsy.com and on Tindie:
