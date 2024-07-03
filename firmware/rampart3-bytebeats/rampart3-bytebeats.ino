@@ -27,7 +27,7 @@ int bank = 1;
 int pb1 = 1;
 int pb1total = 19;
 int pb2 = 1;
-int pb2total = 23;
+int pb2total = 28;
 int pb3 = 1;
 int pb3total = 20;
 int numProg = 52;
@@ -38,7 +38,7 @@ volatile int aMax = 99, aMin = 0, bMax = 99, bMin = 0, cMax = 99, cMin = 0;
 // default rate close to the original bytebeat speed
 int SRATE = 8192; // 16384;
 
-bool debug = false;
+bool debug = true;
 
 // encoder
 // the a and b + the button pin large encoders are 6,5,4
