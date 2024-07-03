@@ -217,18 +217,13 @@ void melodious(int pb2){
   switch (pb2) {
     case 1://https://www.pouet.net/topic.php?post=401561
        if (t > 65536) t = -65536;
-       setLimits(1,4,3,6,9,15); 
+       setLimits(1,9,1,9,9,15); 
        //8*t*t*(t>>(t>>10)%3+15)/(3+(t>>10&(t>>15&3|4)))|t/16
-       //result = 8*t*t*(t>>(t>>10)%3+c)/(3+(t>>10&(t>>c&a|b)))|t/16; 
-       result = 8*t*(t>>(t>>(a*10))%b+c); ///(3+(t>>10&(t>>15&a|b)))|t/16;  
+       //result = 8*t*t*(t>>(t>>(a*10))%3+c)/(3+(t>>(a*10)&(t>>c&a|b)))|t/16; 
+       result = 8*t*(t>>(t>>10)%3+c)/(3+(t>>10&(t>>c&a|b)))|t/16;  
        break; 
-    case 100:  https://www.pouet.net/topic.php?post=394926
-      // (t*(4|t>>13&3)>>(~t>>11&1)&128|t*(t>>11&t>>13)*(~t>>9&3)&127)^(t&4096?(t*(t^t%255)|t>>4)>>1:t>>3|(t&8192?t<<2:t))
-      setLimits(7,13,9,15,3,11);
-      result = (z=(t>>(1+(t>>a&1))) * (t>>a & 0xfd) * (t >>c& 0xdf) * (t >> 7 & 0xcc))*0+((t<<1))&z | ((t<<2))&z;
-      break;
     case 2:  // https://forum.arduino.cc/t/one-line-algorithmic-music/73409 VISMUT
-      // (t*(4|t>>13&3)>>(~t>>11&1)&128|t*(t>>11&t>>13)*(~t>>9&3)&127)^(t&4096?(t*(t^t%255)|t>>4)>>1:t>>3|(t&8192?t<<2:t))
+            // (t * (4 |t >> 13 & 3 ) >> ( ~t >> 11 & 1)  & 128  | t * ( t >> 11 & t >> 13 ) * ( ~t>> 9 & 3 ) & 127 ) ^ ( t & 4096 ? ( t * ( t ^ t % 255 ) | t >> 4 ) >> 1 : t >> 3 |( t &8192 ? t << 2 : t ) )
       setLimits(1,13,1,15,1,11);
       result = (t * (4 | t >> 13 & b ) >> ( ~t >> 11 & 1 ) & 128 | t * ( t >> a & t >> 13 ) * ( ~t >> c & 3 ) & 127 ) ^ ( t & 4096 ? ( t * ( t ^ t % 255 ) | t >> 4 ) >> 1 : t >> 3 |( t & 8192 ? t << 2 : t ) );
       break;
@@ -318,6 +313,11 @@ void melodious(int pb2){
       // t * (t >> 8 | t >> 9) & 46 & t >> 8 ^ (t & t >> 13 | t >> 6);
       setLimits(40,56,1,9,0,16);
       result = t * (t >> 8 | t >> 9) & a & t >> 8 ^ (t & t >> c | t >> b);
+      break;
+    case 23:  https://www.pouet.net/topic.php?post=394926
+      // (t*(4|t>>13&3)>>(~t>>11&1)&128|t*(t>>11&t>>13)*(~t>>9&3)&127)^(t&4096?(t*(t^t%255)|t>>4)>>1:t>>3|(t&8192?t<<2:t))
+      setLimits(7,13,9,15,3,11);
+      result = (z=(t>>(1+(t>>a&1))) * (t>>a & 0xfd) * (t >>c& 0xdf) * (t >> 7 & 0xcc))*0+((t<<1))&z | ((t<<2))&z;
       break;
   }
   

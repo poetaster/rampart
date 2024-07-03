@@ -27,7 +27,7 @@ int bank = 1;
 int pb1 = 1;
 int pb1total = 19;
 int pb2 = 1;
-int pb2total = 22;
+int pb2total = 23;
 int pb3 = 1;
 int pb3total = 20;
 int numProg = 52;
@@ -38,7 +38,7 @@ volatile int aMax = 99, aMin = 0, bMax = 99, bMin = 0, cMax = 99, cMin = 0;
 // default rate close to the original bytebeat speed
 int SRATE = 8192; // 16384;
 
-bool debug = true;
+bool debug = false;
 
 // encoder
 // the a and b + the button pin large encoders are 6,5,4
@@ -209,6 +209,10 @@ void onEb1Encoder(EncoderButton& eb) {
   }
 }
 
+// values to compare input on CV pins
+int lastA;
+int lastB;
+int lastC;
 
 void setup() {
 
@@ -219,7 +223,9 @@ void setup() {
 
   pinMode(LEDPIN, OUTPUT);
   pinMode(PWMPIN, OUTPUT);
-
+  //lastA =  analogRead(A3);
+  //lastB =  analogRead(A6);
+  //lastC =  analogRead(A7);
   pwmSetup();
 
   //Link the event(s) to your function
@@ -248,6 +254,7 @@ void updateControl() {
     //display_value(SRATE);
     if (result > 5000) digitalWrite(LEDPIN, HIGH);
     if (result < 1000) digitalWrite(LEDPIN, LOW);
+    //adc();
   }
 
   // EncoderButton object updates
@@ -259,24 +266,42 @@ void updateControl() {
 
 void loop() {
   knobs();
-  //adc();
+  adc();
   updateControl(); // required here
 }
+
+
 
 // used for mapping adc input on pins 5 - 7 to a - c
 void adc() {
   // this is just very wrong ;)
   // take the average on the input on pin 3,6,7
-  a =  ( a + map(analogRead(3), 0, 1023, aMin, aMax) ) ;
-  b =  ( b + map(analogRead(6), 0, 1023, bMin, bMax) ) ;
-  c =  ( c + map(analogRead(7), 0, 1023, cMin, cMax) ) ;
+  int A =  analogRead(A3);
+  int B =  analogRead(A4);
+  int C =  analogRead(A5);
+  if (A > 50) {
+    a = ( a + map(A, 0, 1023, aMin, aMax) ) /2;
+    lastA = A;
+    if(debug) Serial.println(A);
+  }
+  if (B > 50) {
+    b =  ( b + map(B, 0, 1023, bMin, bMax) ) /2;
+    lastB = B;
+    if(debug) Serial.println(B);
+  }
+  if (C > 50) {
+    c =  ( c + map(C, 0, 1023, cMin, cMax) )/2 ;
+    lastC = C;
+    if(debug) Serial.println(C);
+  }
 }
+
 
 // pot inputs
 void knobs() {
-  a = map(analogRead(0), 0, 1023, aMin, aMax);
-  b = map(analogRead(1), 0, 1023, bMin, bMax);
-  c = map(analogRead(2), 0, 1023, cMin, cMax);
+  a = map(analogRead(A0), 0, 1023, aMin, aMax);
+  b = map(analogRead(A1), 0, 1023, bMin, bMax);
+  c = map(analogRead(A2), 0, 1023, cMin, cMax);
 }
 
 
