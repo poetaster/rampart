@@ -198,11 +198,11 @@ void rythmical(int pb1) {
       int u = 0;
       result = ((((u = t & 0xfff) & 0 + ((u + 1 << (a + (t >> c & 1 * b))) / u) & 255) / (u >> 8)) & 240 - 128) * 3;
       break;
-    case 19:// https://www.pouet.net/topic.php?post=589098
+    case 89:// https://www.pouet.net/topic.php?post=589098
       setLimits(1, 11, 1, 11, 1, 11);
       result = t*(0xC298C298C298>>(t>>a)&t>>b)&t>>c;
       break;
-    case 99:  // FIX this is actually rythm https://forum.arduino.cc/t/one-line-algorithmic-music/73409
+    case 19:  // FIX this is actually rythm https://forum.arduino.cc/t/one-line-algorithmic-music/73409
       // (t*(4|t>>13&3)>>(~t>>11&1)&128|t*(t>>11&t>>13)*(~t>>9&3)&127)^(t&4096?(t*(t^t%255)|t>>4)>>1:t>>3|(t&8192?t<<2:t))
       setLimits(0, 16, 0, 16, 0, 16);
       result =  ( t & 64 ? ( t * ( t ^ t % 128 ) | t >> a ) >> 127 : t >> b | ( t & 32 ? t << c : t ) )   ;
@@ -219,11 +219,11 @@ void rythmical(int pb1) {
 void melodious(int pb2) {
 
   switch (pb2) {
-    case 1://https://www.pouet.net/topic.php?post=587236 (115|t)* (256 - (t>>(9 - 2*((t>>14)%2) )) ) * ((256-(t>>4)%256))/256
+    case 100://https://www.pouet.net/topic.php?post=587236 (115|t)* (256 - (t>>(9 - 2*((t>>14)%2) )) ) * ((256-(t>>4)%256))/256
       setLimits(1, 11, 1, 11, 1, 11);
       result = t*(0xC298C298C298>>(t>>a)&t>>b)&t>>c;
       break;
-    case 100://https://www.pouet.net/topic.php?post=401561
+    case 1://https://www.pouet.net/topic.php?post=401561
       if (t > 65536) t = -65536;
       setLimits(1, 9, 1, 9, 9, 15);
       //8*t*t*(t>>(t>>10)%3+15)/(3+(t>>10&(t>>15&3|4)))|t/16
@@ -313,10 +313,12 @@ void melodious(int pb2) {
       setLimits(32, 39, 32, 47, 32, 58);
       result = t * ( ( ( t >> 11 * a / 27 ) & ( ( t >> 11 * b / 27 ) - 1 ) ^ 7) * 11 * c / 27);
     //result = t * ( ( ( t%2? t>>11*a/27: t>>11*a/9 ) ^ ( ( t >> 11*b/9 ) - 1 ) ^ 7) ^ 11*c/9);
+       break;
     case 21: // http://entropedia.co.uk/generative_music/#v3b64K0otKS3KU9AoUdMosbMz09TWKLGx0QCxDQ014yAMY01tY03NGgjHRNXMBKQKxNTU1FTT0AUyTTU1rRX0tRRCihKTsxWcixLTSioVkioVAhJLcxQ8EitTixW09AE=
       setLimits(1, 8, 11, 16, 1, 24);
       result = (t & (t >> 6) + (t << ((t >> 11) ^ ((t >> b) + a)) | ((t >> c % 64) + (t >> c))) & (-t >> 5));
     //result = (t&(t>>6)+(t<<((t>>11)^((t>>13)+3))|((t>>14%64)+(t>>14)))&(-t>>5));
+      break;
     case 22:  // xpansive 2011-09-29 https://www.pouet.net/topic.php?which=8357&page=3#c388375
       // t * (t >> 8 | t >> 9) & 46 & t >> 8 ^ (t & t >> 13 | t >> 6);
       setLimits(40, 56, 1, 9, 0, 16);

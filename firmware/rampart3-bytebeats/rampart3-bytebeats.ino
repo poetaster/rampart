@@ -14,23 +14,33 @@
 // for pwm init functions
 const unsigned int TOP = 0x07FF; // 11-bit resolution.  7812 Hz PWM
 
+// noise reduction for cv reads
+uint16_t potvalue[3]; // pot readings
+uint16_t lastpotvalue[3]; // old pot readings
+#define POT_SAMPLE_TIME 30 // delay time between pot reads
+#define MIN_POT_CHANGE 25 // locked pot reading must change by this in order to register
+#define MIN_COUNTS 20  // unlocked pot must change by this in order to register
+#define POT_AVERAGING 3 // analog sample averaging count 
+#define POT_MIN 4   // A/D may not read min value of 0 so use a bit larger value for map() function
+#define POT_MAX 1019 // A/D may not read max value of 1023 so use a bit smaller value for map() function
+
 #define LEDPIN   13 // usually 13
 #define PWMPIN 11
 
 long t = 0;
-volatile int a, b, c, i;
+volatile int a, b, c, i, offA, offB, offC;
 volatile int result;
 int d = 0; // hmm?
 
 int prog = 1;
 int bank = 1;
 int pb1 = 1;
-int pb1total = 19;
+int pb1total = 18;
 int pb2 = 1;
 int pb2total = 28;
 int pb3 = 1;
 int pb3total = 20;
-int numProg = 52;
+int numProg = 67;
 
 // these ranges are provisional and in schollz equations need to be reset
 volatile int aMax = 99, aMin = 0, bMax = 99, bMin = 0, cMax = 99, cMin = 0;
@@ -38,7 +48,7 @@ volatile int aMax = 99, aMin = 0, bMax = 99, bMin = 0, cMax = 99, cMin = 0;
 // default rate close to the original bytebeat speed
 int SRATE = 8192; // 16384;
 
-bool debug = true;
+bool debug = false;
 
 // encoder
 // the a and b + the button pin large encoders are 6,5,4
@@ -210,9 +220,9 @@ void onEb1Encoder(EncoderButton& eb) {
 }
 
 // values to compare input on CV pins
-int lastA;
-int lastB;
-int lastC;
+int lastA = 0;
+int lastB = 0;
+int lastC = 0;
 
 void setup() {
 
@@ -223,9 +233,11 @@ void setup() {
 
   pinMode(LEDPIN, OUTPUT);
   pinMode(PWMPIN, OUTPUT);
+  
   //lastA =  analogRead(A3);
   //lastB =  analogRead(A6);
   //lastC =  analogRead(A7);
+  
   pwmSetup();
 
   //Link the event(s) to your function
@@ -248,26 +260,30 @@ void updateControl() {
   // this was old code from the midi-boy bytebeats sketch
   // tempo = map( analogRead(TEMPO), 0, 1023, 1, 256);
   // iterations = map( analogRead(ITERATIONS), 0, 1023, 16, 256);
-
+  
+  // EncoderButton object updates
+  eb1.update();
+  left.update();
+  right.update();
+  
   if (millis() > timeoffset + 50 ) {
     timeoffset = millis();
     //display_value(SRATE);
     if (result > 5000) digitalWrite(LEDPIN, HIGH);
     if (result < 1000) digitalWrite(LEDPIN, LOW);
-    //adc();
+
   }
 
-  // EncoderButton object updates
-  eb1.update();
-  left.update();
-  right.update();
+
 
 }
 
 void loop() {
-  knobs();
-  adc();
   updateControl(); // required here
+  adc();
+  knobs();
+
+  
 }
 
 
@@ -276,32 +292,68 @@ void loop() {
 void adc() {
   // this is just very wrong ;)
   // take the average on the input on pin 3,6,7
-  int A =  analogRead(A3);
-  int B =  analogRead(A4);
-  int C =  analogRead(A5);
-  if (A > 50) {
-    a = ( a + map(A, 0, 1023, aMin, aMax) ) /2;
-    lastA = A;
-    if(debug) Serial.println(A);
-  }
-  if (B > 50) {
-    b =  ( b + map(B, 0, 1023, bMin, bMax) ) /2;
-    lastB = B;
-    if(debug) Serial.println(B);
-  }
-  if (C > 50) {
-    c =  ( c + map(C, 0, 1023, cMin, cMax) )/2 ;
-    lastC = C;
-    if(debug) Serial.println(C);
-  }
+  uint16_t A =  map(readcv(0), 0, 1023, aMin, aMax);
+  uint16_t B =  map(readcv(1), 0, 1023, aMin, aMax);
+  uint16_t C =  map(readcv(2), 0, 1023, aMin, aMax);
+  
+    if (lastA != A) {
+      lastA = A;
+      offA = lastA / 2;
+      if(debug) Serial.print("A: ");
+      if(debug) Serial.println(a);
+    }
+
+    if (lastB != B) {
+      lastB = B;
+      offB = lastB / 2;
+      if(debug) Serial.print("B: ");
+      if(debug) Serial.println(b);
+    }
+
+    if (lastC != C) {
+      lastC = C;
+      offC = lastC / 2 ;
+      if(debug) Serial.print("C: ");
+      if(debug) Serial.println(c);
+    }
+
 }
 
+uint16_t readcv(uint8_t potnum) {
+  int val = 0;
+  int input;
+  switch (potnum) { // map potnum to pin
+    case 0:
+      input = 3;
+      break;
+    case 1:
+      input = 6;
+      break;
+    case 2:
+      input = 7;
+      break;
+  }
+  // note that Pikocore pots are wired "backwards" - max voltage is full ccw
+  for (int j = 0; j < POT_AVERAGING; ++j) val += (analogRead(input)); // read the A/D a few times and average for a more stable value
+  val = val / POT_AVERAGING;
+ 
+  if (abs(lastpotvalue[potnum] - val) > MIN_COUNTS ) { 
+    lastpotvalue[potnum] = val; // even if pot is unlocked, make sure pot has moved at least MIN_COUNT counts so values don't jump around
+  }  else {
+    val = lastpotvalue[potnum];
+  }
+    
+ potvalue[potnum] = val; // pot is unlocked so save the reading
+  //if(debug) Serial.print("readcv: ");
+ //if(debug) Serial.println(val);
+  return val;
+}
 
 // pot inputs
 void knobs() {
-  a = map(analogRead(A0), 0, 1023, aMin, aMax);
-  b = map(analogRead(A1), 0, 1023, bMin, bMax);
-  c = map(analogRead(A2), 0, 1023, cMin, cMax);
+  a = map(analogRead(A0), 0, 1023, aMin, aMax) + offA;
+  b = map(analogRead(A1), 0, 1023, bMin, bMax) + offB;
+  c = map(analogRead(A2), 0, 1023, cMin, cMax) + offC;
 }
 
 
