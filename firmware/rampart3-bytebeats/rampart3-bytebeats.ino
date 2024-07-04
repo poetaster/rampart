@@ -324,13 +324,13 @@ uint16_t readcv(uint8_t potnum) {
   int input;
   switch (potnum) { // map potnum to pin
     case 0:
-      input = 3;
+      input = A3;
       break;
     case 1:
-      input = 6;
+      input = A6;
       break;
     case 2:
-      input = 7;
+      input = A7;
       break;
   }
   // note that Pikocore pots are wired "backwards" - max voltage is full ccw
@@ -339,13 +339,14 @@ uint16_t readcv(uint8_t potnum) {
  
   if (abs(lastpotvalue[potnum] - val) > MIN_COUNTS ) { 
     lastpotvalue[potnum] = val; // even if pot is unlocked, make sure pot has moved at least MIN_COUNT counts so values don't jump around
+    if(debug) Serial.print("readcv: ");
+    if(debug) Serial.println(val);
   }  else {
     val = lastpotvalue[potnum];
   }
     
  potvalue[potnum] = val; // pot is unlocked so save the reading
-  //if(debug) Serial.print("readcv: ");
- //if(debug) Serial.println(val);
+
   return val;
 }
 
