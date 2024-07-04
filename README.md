@@ -43,6 +43,13 @@ A note on -/+ located to the left below the volume knob ... these can also be us
 
 ## Arduino Sketches
 
+To edit the sketches you can use the arduino ide. 
+* install the ide from https://www.arduino.cc/en/software (I still use the 1.8.19 version)
+* install the board support https://github.com/dbuezas/lgt8fx#how-to-install
+* install the support library EncoderButton from Philip Fletcher (-> Tools -> Manage Libraries)
+* download the lates source code from https://github.com/poetaster/rampart/releases (or do a git clone if you use git)
+* open up a sketch in the firmware directory ( for instance rampart3-bytebeat)
+
 The currently most complete sketch is the rampart3-bytebeat sketch. 
 
 A number of Arduino sketches being updated include 2 synths (switch with button 3 on digital pin 2) which have 3 to 4 variable parts of the signal. Both sketches share the wavepacket object as 1st synth. One has PDResonant as second, one an FM synth as second synth.
@@ -53,7 +60,7 @@ This synth works well with Keep (moat), my analog synth and also with Bastl's Ka
 
 I've included a granular synth without mozzi as an example and two versions of a 'glitch synth' from other sources modified to work with rampart.
 
-## Upgrading firmware, hex files
+## Upgrading firmware with hex files
 
 First ensure you have drivers installed if you're on windows or mac. On linux you should not need to install a driver. A good reference for the usb drivers (which work form most arduino boards or the lgt in rampart):
 https://learn.sparkfun.com/tutorials/how-to-install-ch340-drivers/all
