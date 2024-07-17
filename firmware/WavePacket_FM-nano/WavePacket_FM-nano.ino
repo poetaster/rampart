@@ -41,14 +41,8 @@ bool debug = true;
 #define M3P 7
 #define FLT_PIN 5
 
-// button pins digita
-#define B2_PIN 2
-#define B3_PIN 3
-
 // Map Analogue channels
-#define SYNC_CONTROL         (4)
 #define CONTROL_RATE 256 // powers of 2 please
-
 
 
 // from PDresonant
@@ -57,20 +51,23 @@ bool debug = true;
 // wavetable for oscillator:
 #include <tables/sin2048_int8.h>
 PDResonant voice;
+
 // Reso! analog joystick for controlling speed of modulation: assigned to attack, decay times and sustain level
 #define X A0
 #define Y A1
+
 unsigned int x_axis = 512; // give a static value for test without midi
 unsigned int y_axis = 512;
+
+
+// Intmap is a pre-calculated faster version of Arduino's map, OK for pots
+const IntMap kMapF(0,1023,18,84);
 const IntMap kmapX(0, 1023, 0, 500); // A
 const IntMap kmapY(0, 1023, 0, 1000); //D
 
-// Intmap is a pre-calculated faster version of Arduino's map, OK for pots
-IntMap kMapF(0,1023,18,84);
-
 // AutoMap adapts to range of input as it arrives, useful for LDR's
-//AutoMap kMapBw(0,1023,MIN_BW,MAX_BW);
-//AutoMap kMapCf(0,1023,MIN_CF,MAX_CF);
+AutoMap kMapBw(0,1023,1,600);
+AutoMap kMapCf(0,1023,60,600);
 
 // for fake midi
 EventDelay startNote; 
@@ -78,13 +75,13 @@ EventDelay endNote;
 
 // for smoothing the control signals
 // use: RollingAverage <number_type, how_many_to_average> myThing
-RollingAverage <int, 24> kAverageF;
-//RollingAverage <int, 20> kAverageBw;
-//RollingAverage <int, 20> kAverageCf;
+RollingAverage <int, 32> kAverageF;
+//RollingAverage <int, 32> kAverageBw;
+//RollingAverage <int, 32> kAverageCf;
 
-RollingAverage <int, 10> kAverageM1;
-RollingAverage <int, 10> kAverageM2;
-RollingAverage <int, 10> kAverageM3;
+//RollingAverage <int, 10> kAverageM1;
+//RollingAverage <int, 10> kAverageM2;
+//RollingAverage <int, 10> kAverageM3;
 
 WavePacket <SINGLE> wavey; // <DOUBLE> wavey; // DOUBLE selects 2 overlapping streams
 
@@ -190,18 +187,11 @@ void updateFM() {
   //byte cutoff_freq = knob>>4;
   //kAverageF.next( mozziAnalogRead(FUNDAMENTAL_PIN)>>1 ) + kAverageM1.next(mozziAnalogRead(A5)>>1 ) / 2  ,
   int note0 = map(mozziAnalogRead<10>(FUNDAMENTAL_PIN), 0, 1023, 1024, 6144);
-  int note1;
+  int note1 = map(mozziAnalogRead<10>(M1P), 0, 1023, 1024, 6144);
   int target_note;
-  int nw = mozziAnalogRead<10>(M1P);
-  if (nw > 200) { 
-    note1 = map( nw, 0, 1023, 1024, 6144); 
-  } else {
-    note1 = 0;
-  }
-
-  // make sure we only mix if we have a signal on mod pin
-  if (note1 > 1024) {
-    target_note = note0 + note1 / 2;
+  
+  if (note1 > note0) { 
+    target_note = note1;
   } else {
     target_note = note0;
   }
@@ -219,7 +209,7 @@ void updateFM() {
   int mw = mozziAnalogRead<10>(M2P);
   
   // make sure we only mix if we have a signal on mod pin
-  if ( mw > 50 ) {
+  if ( bw - mw < 200 ) {
     modulate = ( bw + mw  ) / 2;
     modI = map(modulate, 0, 1023, 256, 768);
   } else {
@@ -229,7 +219,7 @@ void updateFM() {
   int cw = mozziAnalogRead<10>(CENTREFREQ_PIN) ;
   int cm = mozziAnalogRead<10>(M3P);
     // make sure we only mix if we have a signal on mod pin
-  if ( cm > 10 ) {
+  if ( cw - cm < 200 ) {
     centre = map( (( cw + cm  ) / 2 ), 0, 1023, 1, 10);
   } else {
     centre = map(cw, 0, 1023, 1, 10);
@@ -263,32 +253,38 @@ void updateWavePacket() {
     kAverageBw.next(mozziAnalogRead<10>(BANDWIDTH_PIN)), // (0 -1023)
     kAverageCf.next(mozziAnalogRead<11>(CENTREFREQ_PIN))); // 0 - 2047
   */
-  int note0 = map(mozziAnalogRead<10>(FUNDAMENTAL_PIN), 0, 1023, 8, 254);
-  int note1 = map(mozziAnalogRead<10>(M1P), 0, 1023, 8, 254);
+  int noteA = map(mozziAnalogRead<7>(FUNDAMENTAL_PIN), 0, 512, 8, 256);  
+  //int noteB = map(mozziAnalogRead<7>(M1P), 0, 512, 0, 256);
   int target_note;
-  // make sure we only mix if we have a signal on mod pin
-  if (note1 > 10) {
-    target_note = note0 + note1 / 2;
-  } else {
-    target_note = note0;
-  }
-  target_note = note0;
-  int bw = mozziAnalogRead<10>(BANDWIDTH_PIN) ;
-  int bm = mozziAnalogRead<10>(M2P);
-    // make sure we only mix if we have a signal on mod pin
-  if ( bm > 133 ) {
-    bandwidth = map( (( bw + bm  ) / 2 ), 0, 1023, 128, 1023);
-  } else {
-    bandwidth = map(bw, 0, 1023, 128, 1023);
-  }
+
+  target_note = noteA;
   
-  int cw = mozziAnalogRead<10>(CENTREFREQ_PIN) ;
-  int cm = mozziAnalogRead<10>(M3P);
-    // make sure we only mix if we have a signal on mod pin
-  if ( cm > 10 ) {
-    centre = map( (( cw + cm  ) / 2 ), 0, 1023, 8, 512);
+  /*if (noteB > noteA+20) {
+    target_note = noteB;
   } else {
-    centre = map(cw, 0, 1023, 8, 512);
+    target_note = noteA;
+  }*/
+
+  int bw = mozziAnalogRead(BANDWIDTH_PIN) ;
+  int bm = mozziAnalogRead(M2P);
+  bandwidth = map(bw,0,1023,10,600);
+    // make sure we only mix if we have a signal on mod pin
+  /*
+  if ( bm > bw ) {
+    bandwidth = map(bm,0,1023,10,600);
+  } else {
+    bandwidth = map(bw,0,1023,10,600);
+  }*/
+
+  int cw = mozziAnalogRead(CENTREFREQ_PIN) ;
+  int cm = mozziAnalogRead(M3P);
+    // make sure we only mix if we have a signal on mod pin
+  //centre = map(cw,0,1023,60,600);
+   
+  if ( cm > cw ) {
+    centre = map(cm,0,1023, 60,600);
+  } else {
+    centre = map(cw,0,1023,60,600);
   }
   
   wavey.set( target_note, bandwidth, centre );
@@ -311,37 +307,29 @@ void updateReso() {
     target_note = noteA;
   }
   
-  x_axis = ( kmapX(mozziAnalogRead<10>(CENTREFREQ_PIN)) ) ; // + kAverageM3.next(mozziAnalogRead<10>(A6)) / 2 );
-  y_axis = ( kmapY(mozziAnalogRead<10>(BANDWIDTH_PIN) ) ) ; // + kAverageM2.next(mozziAnalogRead<10>(A7)) ) / 2;
+  //x_axis = ( kmapX(mozziAnalogRead<10>(CENTREFREQ_PIN)) ) ; // + kAverageM3.next(mozziAnalogRead<10>(A6)) / 2 );
+  //y_axis = ( kmapY(mozziAnalogRead<10>(BANDWIDTH_PIN) ) ) ; // + kAverageM2.next(mozziAnalogRead<10>(A7)) ) / 2;
 
-    if (debug == true) {
-    Serial.print(noteA);
-    Serial.print("  ");
-    Serial.println(noteB);
-    Serial.print(x_axis);
-    Serial.print("  ");
-    Serial.println(y_axis);
-  }
+
   
-  /*
   int bw = mozziAnalogRead(BANDWIDTH_PIN) ;
   int bm = mozziAnalogRead(M2P);
     // make sure we only mix if we have a signal on mod pin
-  if ( bm > 133 ) {
-    y_axis = kAverageCf.next( ( ( bw + bm  ) / 2 ) );
+  if ( bm > bw ) {
+    y_axis = kmapX( ( bw + bm  ) / 2 );
   } else {
-    y_axis = kAverageCf.next(bw);
+    y_axis = kmapX(bw);
   }
   
   int cw = mozziAnalogRead(CENTREFREQ_PIN) ;
   int cm = mozziAnalogRead(M3P);
     // make sure we only mix if we have a signal on mod pin
-  if ( cm > 10 ) {
-    x_axis = kAverageBw.next( ( ( cw + cm  ) / 2  ) );
+  if ( cm > cw ) {
+    x_axis = kmapY( ( cw + cm  ) / 2  );
   } else {
-    x_axis = kAverageBw.next(cw);
+    x_axis = kmapY(cw);
   }
-  */
+  
   //fakeMidiRead();
   
   fakeMidiRead(target_note,x_axis);
@@ -371,9 +359,9 @@ void fakeMidiRead(int target, int velocity){
   if(startNote.ready()){
     //
     HandleNoteOn(1,curr_note,velocity);
-    startNote.set(kmapX(x_axis)*2); // startNote.set(mozziAnalogRead(A6));
+    startNote.set(x_axis); // startNote.set(mozziAnalogRead(A6));
     startNote.start();
-    endNote.set(kmapY(y_axis)*2); //endNote.set(mozziAnalogRead(A7));
+    endNote.set(y_axis); //endNote.set(mozziAnalogRead(A7));
     endNote.start();
   }
   if(endNote.ready()){
@@ -399,8 +387,8 @@ void HandleNoteOn(byte channel, byte pitch, byte velocity){
   if (velocity > 0)
   {
     voice.noteOn(channel, pitch, velocity);
-    unsigned int attack = kmapX(x_axis);
-    unsigned int decay = kmapY(y_axis);
+    unsigned int attack = x_axis;
+    unsigned int decay = y_axis;
     voice.setPDEnv(attack,decay);
     digitalWrite(13,HIGH);
   }
