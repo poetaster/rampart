@@ -1,4 +1,4 @@
-#define ENCODER_DO_NOT_USE_INTERRUPTS
+
 #include <EncoderButton.h>
 // encoder
 // the a and b + the button pin
@@ -7,26 +7,24 @@ EncoderButton eb1(6, 5, 4);
 EncoderButton left(3); // pin 3 rampart
 EncoderButton right(2); // pin 2 rampart
 
-bool debug = true;
+
 int encoder_pos_last = 0;
 long encoder_delta = 0;
 int enc_offset = 1; // changes direction
 int enc_delta; // which direction
-int prog = 1;
-int bank = 1;
-int pb1 = 1;
-int pb1total = 16;
-int pb2 = 1;
-int pb2total = 21;
-int pb3 = 1;
-int pb3total = 21;
-int numProg = 52;
+
 
 /**
    handle encoder button long press event
 */
 void onEb1LongPress(EncoderButton& eb) {
-  buttonState = !buttonState;
+
+  if (buttonState < 2 ) {
+     buttonState = buttonState+1;
+  } else {
+    buttonState = 0;
+  }
+  
   if (debug) {
     Serial.print("button1 longPressCount: ");
     Serial.println(eb.longPressCount());
@@ -58,8 +56,6 @@ void onEb1PressTurn(EncoderButton& eb) {
 */
 void onEb1Clicked(EncoderButton& eb) {
 
-  // set which bank to select formulas from
-  bank = eb.clickCount();
 
   if (debug) {
     Serial.print("bank: ");
@@ -72,36 +68,12 @@ void onEb1Clicked(EncoderButton& eb) {
     handle left button short release
 */
 void onLeftReleased(EncoderButton& left) {
-
-  if (bank == 1)
-  {
-    if (pb1 > 1) {
-      pb1--;
-    } else if (pb1 == 1) {
-      pb1 = pb1total;
-    }
-    prog = pb1;
-  } 
-  else if (bank == 2) {
-    if (pb2 > 1) {
-      pb2--;
-    } else if (pb2 == 1) {
-      pb2 = pb2total;
-    }
-    prog = pb2;
-  } 
-  else if (bank == 3) {
-    if (pb3 > 1) {
-      pb3--;
-    } else if (pb3 == 1) {
-      pb3 = pb3total;
-    }
-    prog = pb3;
-  }
+  //buttonState = 0;
 
   if (debug) {
     Serial.print("PROGRAM: ");
-    Serial.println(prog);
+    Serial.println(buttonState);
+    Serial.println("left");
   }
 }
 
@@ -109,35 +81,11 @@ void onLeftReleased(EncoderButton& left) {
     handle right button short release
 */
 void onRightReleased(EncoderButton& right) {
-  
-  if (bank == 1)
-  {
-    if (pb1 < pb1total) {
-      pb1++;
-    } else if (pb1 == pb1total) {
-      pb1 = 1;
-    }
-    prog = pb1;
-  } 
-  else if (bank == 2) {
-    if (pb2 < pb2total) {
-      pb2++;
-    } else if (pb2 == pb2total) {
-      pb2 = 1;
-    }
-    prog = pb2;
-  } 
-  else if (bank == 3) {
-    if (pb3 < pb2total) {
-      pb3++;
-    } else if (pb3 == pb3total) {
-      pb3 = 1;
-    }
-    prog = pb3;
-  }
+  //buttonState = 1;
   if (debug) {
     Serial.print("PROGRAM: ");
-    Serial.println(prog);
+    Serial.println("right");
+    Serial.println(buttonState);
   }
 }
 

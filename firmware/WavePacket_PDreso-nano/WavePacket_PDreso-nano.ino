@@ -16,7 +16,8 @@
 //#include <VS1053Driver.h>
 //#include <ADC.h>  // Teensy 3.0/3.1 uncomment this line and install http://github.com/pedvide/ADC
 #include <MozziConfigValues.h>
-#define MOZZI_AUDIO_MODE MOZZI_OUTPUT_2PIN_PWM
+//#define MOZZI_AUDIO_MODE MOZZI_OUTPUT_2PIN_PWM
+
 #include <Mozzi.h>
 #include <mozzi_analog.h>
 #include <WavePacket.h>
@@ -42,25 +43,6 @@ EventDelay endNote;
 #include <Oscil.h>
 #include <tables/cos2048_int8.h> // table for Oscils to play
 
-#define ENCODER_DO_NOT_USE_INTERRUPTS
-#include <EncoderButton.h>
-// encoder
-// the a and b + the button pin
-EncoderButton eb1(6, 5, 4);
-
-int encoder_pos_last = 0;
-long encoder_delta = 0;
-int enc_offset = 1; // changes direction
-int enc_delta; // which direction
-int prog = 1;
-int bank = 1;
-int pb1 = 1;
-int pb1total = 16;
-int pb2 = 1;
-int pb2total = 21;
-int pb3 = 1;
-int pb3total = 21;
-int numProg = 52;
 
 
 // Reso! analog joystick for controlling speed of modulation: assigned to attack, decay times and sustain level
@@ -106,14 +88,17 @@ bool debug = true;
 
 
 // variables will change: 1-3
-int buttonState = 0; 
+int buttonState = 0;
+
+#include "encoder.h"
 
 
 void setup(){
   
   Serial.begin(9600);
   // initialize the pushbutton pin as an input:
-  pinMode(BPIN2, INPUT);
+  Serial.println("hi there");
+  // initialize the pushbutton pin as an input:
   pinMode(13, OUTPUT);
   
   //Link the event(s) to your function
@@ -121,6 +106,12 @@ void setup(){
   eb1.setEncoderHandler(onEb1Encoder);
   eb1.setLongPressHandler(onEb1LongPress, true);
   eb1.setEncoderPressedHandler(onEb1PressTurn);
+
+  // program up/down buttons
+  left.setReleasedHandler(onLeftReleased);
+  left.setRateLimit(7);
+  right.setReleasedHandler(onRightReleased);
+  right.setRateLimit(6);
   
   startMozzi(CONTROL_RATE);
 }
@@ -130,36 +121,25 @@ void updateControl(){
   
   //int knob = mozziAnalogRead(FLT_PIN);
   //byte cutoff_freq = knob>>2;
-  static int previous2;
-  int current2 = digitalRead(BPIN2);
-  if (previous2 == LOW && current2 == HIGH) {
-    if(buttonState == 1) {
-       buttonState = 0;
-    } else {
-      buttonState = 1;
-    }
-  }
-  previous2 = current2;  
-
+  // EncoderButton object updates
+  eb1.update();
+  left.update();
+  right.update();
   
-  
-  //Serial.println(buttonState);
-  //Serial.println(digitalRead(B2_PIN));
   if ( buttonState == 0 ) {
-    updateWavePacket();   
+    updateWavePacket();
   } else if ( buttonState == 1 ) {
     updateReso();
   }
-
-   if (buttonState == 1) {
+  if (buttonState == 1) {
     // turn LED on:
-    digitalWrite(13, LOW);
+    digitalWrite(13, HIGH);
   } else {
     // turn LED off:
-    digitalWrite(13, HIGH);
+    digitalWrite(13, LOW);
   }
   
-   eb1.update(); 
+
 }
 
 
@@ -250,139 +230,4 @@ AudioOutput_t updateAudio(){
 
 void loop(){
   audioHook(); // required here
-}
-
-
-/**
-   handle encoder button long press event
-*/
-void onEb1LongPress(EncoderButton& eb) {
-
-  if (debug) {
-    Serial.print("button1 longPressCount: ");
-    Serial.println(eb.longPressCount());
-  }
-}
-/**
-   handle encoder turn with  button pressed
-   offsets OCR2A
-*/
-void onEb1PressTurn(EncoderButton& eb) {
-  enc_delta = eb.increment();
-
-  int dir = enc_offset + eb.increment();
-  dir = constrain(dir, -7, 7 );
-
-  enc_offset = dir;
-  if (debug) {
-    Serial.print("eb1 press inc by: ");
-    Serial.println(eb.increment());
-    Serial.print("enc_offset is: ");
-    Serial.println(enc_offset);
-  }
-}
-
-/**
-   handle encoder turn with  button pressed
-*/
-void onEb1Clicked(EncoderButton& eb) {
-
-  // set which bank to select formulas from
-  bank = eb.clickCount();
-
-  if (debug) {
-    Serial.print("bank: ");
-    Serial.println(eb.clickCount());
-  }
-  // displayUpdate();
-}
-
-/**
-    handle left button short release
-*/
-void onLeftReleased(EncoderButton& left) {
-
-  if (bank == 1)
-  {
-    if (pb1 > 1) {
-      pb1--;
-    } else if (pb1 == 1) {
-      pb1 = pb1total;
-    }
-    prog = pb1;
-  } 
-  else if (bank == 2) {
-    if (pb2 > 1) {
-      pb2--;
-    } else if (pb2 == 1) {
-      pb2 = pb2total;
-    }
-    prog = pb2;
-  } 
-  else if (bank == 3) {
-    if (pb3 > 1) {
-      pb3--;
-    } else if (pb3 == 1) {
-      pb3 = pb3total;
-    }
-    prog = pb3;
-  }
-
-  if (debug) {
-    Serial.print("PROGRAM: ");
-    Serial.println(prog);
-  }
-}
-
-/**
-    handle right button short release
-*/
-void onRightReleased(EncoderButton& right) {
-  
-  if (bank == 1)
-  {
-    if (pb1 < pb1total) {
-      pb1++;
-    } else if (pb1 == pb1total) {
-      pb1 = 1;
-    }
-    prog = pb1;
-  } 
-  else if (bank == 2) {
-    if (pb2 < pb2total) {
-      pb2++;
-    } else if (pb2 == pb2total) {
-      pb2 = 1;
-    }
-    prog = pb2;
-  } 
-  else if (bank == 3) {
-    if (pb3 < pb2total) {
-      pb3++;
-    } else if (pb3 == pb3total) {
-      pb3 = 1;
-    }
-    prog = pb3;
-  }
-  if (debug) {
-    Serial.print("PROGRAM: ");
-    Serial.println(prog);
-  }
-}
-
-/**
-   A function to handle the 'encoder' event without button
-*/
-void onEb1Encoder(EncoderButton& eb) {
-
-  //displayUpdate();
-  encoder_delta = eb.increment();
-  long cstep = eb.increment() * 64;
-
-  if (debug) {
-    Serial.print("eb1 incremented by: ");
-    Serial.println(eb.increment());
-    Serial.print("eb1 position is: ");
-    Serial.println(cstep);
-  }
 }
