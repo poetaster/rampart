@@ -42,7 +42,7 @@ bool debug = true;
 #define FLT_PIN 5
 
 // Map Analogue channels
-#define CONTROL_RATE 256 // powers of 2 please
+#define CONTROL_RATE 512 // powers of 2 please
 
 
 // from PDresonant
@@ -87,12 +87,14 @@ WavePacket <SINGLE> wavey; // <DOUBLE> wavey; // DOUBLE selects 2 overlapping st
 
 ADSR <CONTROL_RATE, AUDIO_RATE> envelope;
 unsigned int duration, attack, decay, sustain, release_ms;
+int lFreq = 10;
 
 // for FMsynth
 
 Oscil<COS2048_NUM_CELLS, AUDIO_RATE> aCarrier(COS2048_DATA);
 Oscil<COS2048_NUM_CELLS, AUDIO_RATE> aModulator(COS2048_DATA);
 Oscil<COS2048_NUM_CELLS, CONTROL_RATE> kModIndex(COS2048_DATA);
+Oscil<SIN2048_NUM_CELLS, AUDIO_RATE> kLfo(SIN2048_DATA);
 
 Q8n8 mod_index;// = float_to_Q8n8(2.0f); // constant version
 Q16n16 deviation;
@@ -141,6 +143,8 @@ void setup() {
   // FMsetup
   kNoteChangeDelay.set(768); // ms countdown, taylored to resolution of CONTROL_RATE
   kModIndex.setFreq(.768f); // sync with kNoteChangeDelay
+  kLfo.setFreq(lFreq);
+  
   note_change_step = Q7n0_to_Q7n8(3);
   note_upper_limit = Q7n0_to_Q7n8(64);
   note_lower_limit = Q7n0_to_Q7n8(24);
@@ -164,7 +168,10 @@ void updateControl() {
   eb1.update();
   left.update();
   right.update();
-
+  
+  analogWrite(5, map(kLfo.next(), -128, 128, 0, 255));
+  //Serial.println(map(kLfo.next(), -128, 128, 0, 255));
+  
   if ( buttonState == 0 ) {
     updateReso();
   } else if ( buttonState == 1 ) {
@@ -254,16 +261,16 @@ void updateWavePacket() {
     kAverageCf.next(mozziAnalogRead<11>(CENTREFREQ_PIN))); // 0 - 2047
   */
   int noteA = map(mozziAnalogRead<7>(FUNDAMENTAL_PIN), 0, 512, 8, 256);  
-  //int noteB = map(mozziAnalogRead<7>(M1P), 0, 512, 0, 256);
+  int noteB = map(mozziAnalogRead<10>(M1P), 0, 1023, 0, 256);
   int target_note;
 
   target_note = noteA;
   
-  /*if (noteB > noteA+20) {
+  if (noteB > noteA) {
     target_note = noteB;
   } else {
     target_note = noteA;
-  }*/
+  }
 
   int bw = mozziAnalogRead(BANDWIDTH_PIN) ;
   int bm = mozziAnalogRead(M2P);
@@ -337,7 +344,11 @@ void updateReso() {
 }
 
 AudioOutput updateAudio() {
+  //I wonder
+  
+  // write out lfo value
 
+  
   if ( buttonState == 0 ) {
     return  MonoOutput::from8Bit( voice.next() )  ;
   } else if ( buttonState == 1 ) {

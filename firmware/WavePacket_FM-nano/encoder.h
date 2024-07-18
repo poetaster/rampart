@@ -2,7 +2,7 @@
 #include <EncoderButton.h>
 // encoder
 // the a and b + the button pin
-EncoderButton eb1(6, 5, 4);
+EncoderButton eb1(5, 6, 4);
 // the library has nice button handling and uses bounce2
 EncoderButton left(3); // pin 3 rampart
 EncoderButton right(2); // pin 2 rampart
@@ -96,12 +96,13 @@ void onEb1Encoder(EncoderButton& eb) {
 
   //displayUpdate();
   encoder_delta = eb.increment();
-  long cstep = eb.increment() * 64;
-
+  int cstep = eb.increment() * 2;
+  lFreq = lFreq + cstep;
+  kLfo.setFreq(constrain(lFreq,0,200));
   if (debug) {
     Serial.print("eb1 incremented by: ");
     Serial.println(eb.increment());
     Serial.print("eb1 position is: ");
-    Serial.println(cstep);
+    Serial.println(lFreq);
   }
 }
