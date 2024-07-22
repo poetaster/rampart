@@ -61,7 +61,7 @@ unsigned int y_axis = 512;
 
 
 // Intmap is a pre-calculated faster version of Arduino's map, OK for pots
-const IntMap kMapF(0,1023,18,84);
+const IntMap kMapF(0,1023,20,60);
 const IntMap kmapX(0, 1023, 0, 500); // A
 const IntMap kmapY(0, 1023, 0, 1000); //D
 
@@ -76,12 +76,12 @@ EventDelay endNote;
 // for smoothing the control signals
 // use: RollingAverage <number_type, how_many_to_average> myThing
 RollingAverage <int, 32> kAverageF;
-//RollingAverage <int, 32> kAverageBw;
-//RollingAverage <int, 32> kAverageCf;
+RollingAverage <int, 24> kAverageBw;
+RollingAverage <int, 24> kAverageCf;
 
-//RollingAverage <int, 10> kAverageM1;
-//RollingAverage <int, 10> kAverageM2;
-//RollingAverage <int, 10> kAverageM3;
+RollingAverage <int, 8> kAverageM1;
+RollingAverage <int, 8> kAverageM2;
+RollingAverage <int, 8> kAverageM3;
 
 WavePacket <SINGLE> wavey; // <DOUBLE> wavey; // DOUBLE selects 2 overlapping streams
 
@@ -192,8 +192,8 @@ void updateFM() {
 
   //byte cutoff_freq = knob>>4;
   //kAverageF.next( mozziAnalogRead(FUNDAMENTAL_PIN)>>1 ) + kAverageM1.next(mozziAnalogRead(A5)>>1 ) / 2  ,
-  int note0 = map(mozziAnalogRead<10>(FUNDAMENTAL_PIN), 0, 1023, 1024, 6144);
-  int note1 = map(mozziAnalogRead<10>(M1P), 0, 1023, 1024, 6144);
+  int note0 = map(mozziAnalogRead(FUNDAMENTAL_PIN), 0, 1023, 1024, 6144);
+  int note1 = map(mozziAnalogRead(M1P), 0, 1023, 1024, 6144);
   int target_note;
   
   if (note1 > note0) { 
@@ -257,6 +257,36 @@ void setFreqs(Q8n8 midi_note) {
 
 }
 
+void updateWavePacket2() {
+  
+  int noteA = kAverageF.next(mozziAnalogRead(FUNDAMENTAL_PIN));  
+  int noteB = kAverageF.next(mozziAnalogRead(M1P));
+  int target_note;
+  //target_note = noteA + noteB / 2;
+  
+  if (noteB > noteA ) {
+    target_note = noteB;
+  } else {
+    target_note = noteA;
+  }
+  
+  int bw = kAverageBw.next(mozziAnalogRead(BANDWIDTH_PIN)) ;
+  int bm = kAverageM2.next(mozziAnalogRead(M2P));
+  int bandwidth;
+  bandwidth = bw + bm / 2; //map(bw,0,1023,10,600);
+  
+  int cw = kAverageCf.next(mozziAnalogRead<11>(CENTREFREQ_PIN)) ;
+  int cm = kAverageM2.next(mozziAnalogRead<11>(M3P));
+  int center;
+  center = cw +cm /2;
+  
+
+    wavey.set(target_note+10, // 10 - 1024
+    bandwidth, // (0 -1023)
+    center); // 0 - 2047
+  
+}
+
 void updateWavePacket() {
 
 /*
@@ -264,13 +294,13 @@ void updateWavePacket() {
     kAverageBw.next(mozziAnalogRead<10>(BANDWIDTH_PIN)), // (0 -1023)
     kAverageCf.next(mozziAnalogRead<11>(CENTREFREQ_PIN))); // 0 - 2047
   */
-  int noteA = map(mozziAnalogRead(FUNDAMENTAL_PIN), 0, 1023, 8, 256);  
-  int noteB = map(mozziAnalogRead(M1P), 0, 1023, 8, 256);
+  int noteA = map(mozziAnalogRead(FUNDAMENTAL_PIN), 0, 1023, 0, 127);  
+  int noteB = map(mozziAnalogRead(M1P), 0, 1023, 0, 127);
   int target_note;
 
   target_note = noteA;
   
-  if (noteB > 10) {
+  if ((noteB + noteA / 2) > 20 ) {
     target_note = noteB + noteA / 2;
   } else {
     target_note = noteA;
@@ -306,14 +336,14 @@ void updateWavePacket() {
 
 void updateReso() {
 
-  int noteA = kMaF(mozziAnalogRead(FUNDAMENTAL_PIN));  
-  int noteB = kMapF(mozziAnalogRead(M1P)); 
+  int noteA = kMapF(mozziAnalogRead(FUNDAMENTAL_PIN));  
+  int noteB = map(mozziAnalogRead(M1P), 0, 1023, 20, 60 ); 
   int target_note;
 
   target_note = noteA;
   
-  if (noteB > 18) {
-    target_note = noteB + noteA/2;
+  if (noteB > noteA ) {
+    target_note = noteB ;
   } else {
     target_note = noteA;
   }
