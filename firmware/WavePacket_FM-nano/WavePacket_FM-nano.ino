@@ -125,8 +125,8 @@ void setup() {
   // initialize the pushbutton pin as an input:
   pinMode(13, OUTPUT);
   
-  analogReference(INTERNAL4V096);
-  analogReadResolution(10); // Resolution = 10, 11 or 12 Bit
+  analogReference(INTERNAL2V56);
+  //analogReadResolution(10); // Resolution = 10, 11 or 12 Bit
   
   //Link the event(s) to your function
   eb1.setClickHandler(onEb1Clicked);
@@ -136,9 +136,9 @@ void setup() {
 
   // program up/down buttons
   left.setReleasedHandler(onLeftReleased);
-  left.setRateLimit(7);
+  //left.setRateLimit(7);
   right.setReleasedHandler(onRightReleased);
-  right.setRateLimit(6);
+  //right.setRateLimit(6);
   
   // FMsetup
   kNoteChangeDelay.set(768); // ms countdown, taylored to resolution of CONTROL_RATE
@@ -169,8 +169,7 @@ void updateControl() {
   left.update();
   right.update();
   
-  analogWrite(5, map(kLfo.next(), -128, 128, 0, 255));
-  //Serial.println(map(kLfo.next(), -128, 128, 0, 255));
+
   
   if ( buttonState == 0 ) {
     updateReso();
@@ -210,24 +209,29 @@ void updateFM() {
   //gain = (int) envelope.next();
 
   last_note = target_note;
+  
   //Serial.println(target_note);
   int modulate, modI;
-  int bw = mozziAnalogRead<10>(BANDWIDTH_PIN) ;
-  int mw = mozziAnalogRead<10>(M2P);
+  int bw = mozziAnalogRead(BANDWIDTH_PIN) ;
+  int mw = mozziAnalogRead(M2P);
+  
+  
   
   // make sure we only mix if we have a signal on mod pin
-  if ( bw - mw < 200 ) {
-    modulate = ( bw + mw  ) / 2;
+  if ( mw > 1 ) {
+    //Serial.println(mw);
+    modulate = ( bw + mw );
     modI = map(modulate, 0, 1023, 256, 768);
   } else {
     modI = map(bw, 0, 1023, 256, 768);
   }
-  
-  int cw = mozziAnalogRead<10>(CENTREFREQ_PIN) ;
-  int cm = mozziAnalogRead<10>(M3P);
+    
+  int cw = mozziAnalogRead(CENTREFREQ_PIN) ;
+  int cm = mozziAnalogRead(M3P);
     // make sure we only mix if we have a signal on mod pin
-  if ( cw - cm < 200 ) {
-    centre = map( (( cw + cm  ) / 2 ), 0, 1023, 1, 10);
+  if ( cw > 1 ) {
+    //Serial.println(cw);
+    centre = map( ( cw + cm ), 0, 1023, 1, 10);
   } else {
     centre = map(cw, 0, 1023, 1, 10);
   }
@@ -260,14 +264,14 @@ void updateWavePacket() {
     kAverageBw.next(mozziAnalogRead<10>(BANDWIDTH_PIN)), // (0 -1023)
     kAverageCf.next(mozziAnalogRead<11>(CENTREFREQ_PIN))); // 0 - 2047
   */
-  int noteA = map(mozziAnalogRead<7>(FUNDAMENTAL_PIN), 0, 512, 8, 256);  
-  int noteB = map(mozziAnalogRead<10>(M1P), 0, 1023, 0, 256);
+  int noteA = map(mozziAnalogRead(FUNDAMENTAL_PIN), 0, 1023, 8, 256);  
+  int noteB = map(mozziAnalogRead(M1P), 0, 1023, 8, 256);
   int target_note;
 
   target_note = noteA;
   
-  if (noteB > noteA) {
-    target_note = noteB;
+  if (noteB > 10) {
+    target_note = noteB + noteA / 2;
   } else {
     target_note = noteA;
   }
@@ -302,14 +306,14 @@ void updateWavePacket() {
 
 void updateReso() {
 
-  int noteA = map(mozziAnalogRead<7>(FUNDAMENTAL_PIN), 0, 512, 16, 84);  
-  int noteB = kMapF(mozziAnalogRead<7>(M1P)); 
+  int noteA = kMaF(mozziAnalogRead(FUNDAMENTAL_PIN));  
+  int noteB = kMapF(mozziAnalogRead(M1P)); 
   int target_note;
 
   target_note = noteA;
   
-  if (noteB > noteA) {
-    target_note = noteB;
+  if (noteB > 18) {
+    target_note = noteB + noteA/2;
   } else {
     target_note = noteA;
   }
@@ -347,7 +351,8 @@ AudioOutput updateAudio() {
   //I wonder
   
   // write out lfo value
-
+  analogWrite(11, map(kLfo.next(), -128, 128, 0, 255));
+  //Serial.println(map(kLfo.next(), -128, 128, 0, 255));
   
   if ( buttonState == 0 ) {
     return  MonoOutput::from8Bit( voice.next() )  ;

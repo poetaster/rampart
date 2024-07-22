@@ -96,9 +96,12 @@ void onEb1Encoder(EncoderButton& eb) {
 
   //displayUpdate();
   encoder_delta = eb.increment();
-  int cstep = eb.increment() * 2;
-  lFreq = lFreq + cstep;
-  kLfo.setFreq(constrain(lFreq,0,200));
+  int cstep = eb.increment() + lFreq;
+  if (cstep != lFreq ) {
+    lFreq = cstep;
+    kLfo.setFreq(constrain(lFreq,0,100));
+  }
+  
   if (debug) {
     Serial.print("eb1 incremented by: ");
     Serial.println(eb.increment());
