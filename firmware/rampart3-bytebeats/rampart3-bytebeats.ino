@@ -48,7 +48,7 @@ volatile int aMax = 99, aMin = 0, bMax = 99, bMin = 0, cMax = 99, cMin = 0;
 // default rate close to the original bytebeat speed
 int SRATE = 8192; // 16384;
 
-bool debug = false;
+bool debug = true;
 
 // encoder
 // the a and b + the button pin large encoders are 6,5,4
@@ -296,25 +296,23 @@ void adc() {
   uint16_t B =  map(readcv(1), 0, 1023, aMin, aMax);
   uint16_t C =  map(readcv(2), 0, 1023, aMin, aMax);
   
-    if (lastA != A) {
+    if (abs(lastA - A) > 1) {
       lastA = A;
       offA = lastA / 2;
-      if(debug) Serial.print("A: ");
-      if(debug) Serial.println(a);
+      Serial.println(A);
+
     }
 
-    if (lastB != B) {
+    if (abs(lastB - B) > 1) {
       lastB = B;
       offB = lastB / 2;
-      if(debug) Serial.print("B: ");
-      if(debug) Serial.println(b);
+
     }
 
-    if (lastC != C) {
+    if (abs(lastC - C) > 1) {
       lastC = C;
       offC = lastC / 2 ;
-      if(debug) Serial.print("C: ");
-      if(debug) Serial.println(c);
+
     }
 
 }
@@ -339,8 +337,6 @@ uint16_t readcv(uint8_t potnum) {
  
   if (abs(lastpotvalue[potnum] - val) > MIN_COUNTS ) { 
     lastpotvalue[potnum] = val; // even if pot is unlocked, make sure pot has moved at least MIN_COUNT counts so values don't jump around
-    if(debug) Serial.print("readcv: ");
-    if(debug) Serial.println(val);
   }  else {
     val = lastpotvalue[potnum];
   }
