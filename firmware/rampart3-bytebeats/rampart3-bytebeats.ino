@@ -27,6 +27,15 @@ uint16_t lastpotvalue[3]; // old pot readings
 #define LEDPIN   13 // usually 13
 #define PWMPIN 11
 
+
+// for the sine waves
+unsigned int Acc[3];
+unsigned long freq[3];
+unsigned int tune, pitch;
+byte pot[] = {A1, A2, A3};
+// from levitation osc.
+
+
 long t = 0;
 volatile int a, b, c, i, offA, offB, offC;
 volatile int result;
@@ -35,12 +44,13 @@ int d = 0; // hmm?
 int prog = 1;
 int bank = 1;
 int pb1 = 1;
-int pb1total = 18;
+int pb1total = 20;
 int pb2 = 1;
-int pb2total = 28;
+int pb2total = 29;
 int pb3 = 1;
 int pb3total = 20;
-int numProg = 67;
+
+int numProg = 68;
 
 // these ranges are provisional and in schollz equations need to be reset
 volatile int aMax = 99, aMin = 0, bMax = 99, bMin = 0, cMax = 99, cMin = 0;
@@ -273,6 +283,12 @@ void updateControl() {
     if (result < 1000) digitalWrite(LEDPIN, LOW);
 
   }
+  // for the wave synth
+
+
+  //if ( debug ) Serial.println(freq[0]);
+  //if ( debug ) Serial.println(pgm_read_byte(&sine256[Acc[0] >> 8]) + pgm_read_byte(&sine256[Acc[1] >> 8]) + pgm_read_byte(&sine256[Acc[2] >> 8]));//Acc[0]>>8);
+
 
 
 

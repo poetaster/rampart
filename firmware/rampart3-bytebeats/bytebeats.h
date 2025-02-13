@@ -68,6 +68,14 @@ void pwmSetup() {
 
 }
 
+// for wavetable voice
+const byte sine256[] PROGMEM = { // sine wavetable
+  0, 0, 0, 0, 0, 0, 1, 1, 1, 2, 2, 3, 4, 5, 5, 6, 7, 9, 10, 11, 12, 14, 15, 17, 18, 20, 21, 23, 25, 27, 29, 31, 33, 35, 37, 40, 42, 44, 47, 49, 52, 54, 57, 59, 62, 65, 67, 70, 73, 76, 79, 82, 85, 88, 90, 93, 97, 100, 103, 106, 109, 112, 115, 118, 121, 124, 128,
+  128, 131, 134, 137, 140, 143, 146, 149, 152, 155, 158, 162, 165, 167, 170, 173, 176, 179, 182, 185, 188, 190, 193, 196, 198, 201, 203, 206, 208, 211, 213, 215, 218, 220, 222, 224, 226, 228, 230, 232, 234, 235, 237, 238, 240, 241, 243, 244, 245, 246,
+  248, 249, 250, 250, 251, 252, 253, 253, 254, 254, 254, 255, 255, 255, 255, 255, 255, 255, 254, 254, 254, 253, 253, 252, 251, 250, 250, 249, 248, 246, 245, 244, 243, 241, 240, 238, 237, 235, 234, 232, 230, 228, 226, 224, 222, 220, 218, 215, 213, 211,
+  208, 206, 203, 201, 198, 196, 193, 190, 188, 185, 182, 179, 176, 173, 170, 167, 165, 162, 158, 155, 152, 149, 146, 143, 140, 137, 134, 131, 128, 124, 121, 118, 115, 112, 109, 106, 103, 100, 97, 93, 90, 88, 85, 82, 79, 76, 73, 70, 67, 65,
+  62, 59, 57, 54, 52, 49, 47, 44, 42, 40, 37, 35, 33, 31, 29, 27, 25, 23, 21, 20, 18, 17, 15, 14, 12, 11, 10, 9, 7, 6, 5, 5, 4, 3, 2, 2, 1, 1, 1, 0
+};
 
 inline void setLimits(byte a1, byte a2, byte b1, byte b2, byte c1, byte c2) {
   aMax = a2; aMin = a1;
@@ -114,6 +122,7 @@ void rythmical(int pb1) {
       setLimits(1, 32, 1, 16, 1, 9); // aMin, aMax, etc
       //result = ( ~t >>7? ~t>>3:~t>>5) * ( (127 & t * ( b & t >> 9) ) < (254 & t * ( 2 + ( c & t >> a ) ) ) );
       result = t >> c ^ t & 1 | t + (t ^ t >> 13) - t * ( (t >> 5 ? b : a) & t >> ( 8 - ( a >> 1 )  ) );  // ( t%8 ? ~t >> 9 & b: ~t >>11 & c )
+      // if (debug) Serial.println(result);
       break;
     case 2:
       setLimits(1, 16, 1, 16, 1, 16);
@@ -166,15 +175,17 @@ void rythmical(int pb1) {
       bb22_set(a, b);
       result =  bb22() - c ;
       break;
-    case 12:     // Nightmachines https://forum.aemodular.com/post/235
-      setLimits(1, 16, 1, 16, 0, 16);
-      result  = (t * 4 | t | t >> 3 & t + t / 4 & t * a | t * 8 >> b | t / c & t + 140) & t >> 4;
+    case 12:     // Nightmachines https://forum.aemodular.com/post/235 ( t*4|t|t>>3&t+t/4&t*12|t*8>>10|t/20&t+140)&t>>4 
+      setLimits(3, 8, 8, 16, 20, 30);
+      result  = (t * 4 | t | t >> a & t + t / 4 & t * 12 | t * 8 >> b | t / c & t + 140) & t >> 4;
       break;
-    case 13: // http://arhivach.ng/thread/28592/#71678984 // crashes??? this is not the original, but, still :)
-      setLimits(2, 64, 2, 8, 0, 16);
-      result = t >> b + t % a | t >> c + t - ( t ^ (t / 31108 & 1 ? (46 - c) : (43 - c )) ) | t / b | t / c % a; // % a crashes
+    case 13: // droid http://www.pouet.net/topic.php?which=8357&page=10#c388999
+      setLimits(3, 8, 3, 8, 3, 8);
+      result = t >> a & 1 ? t >> b : -t >> c;
+      enc_offset = 4; // set speed :)
       break;
     case 14:  // poetaster this is great with a modulator like the kastle.
+    // belongs in musical
       setLimits(0, 8, 0, 8, 0, 8);
       result = ( t % 16 ? t >> a & t >> 7 : t >> 11 & t >> b ) * ( t % 8 ? ~t >> 9 & b : ~t >> 11 & c ) & 64 ;
       break;
@@ -184,6 +195,7 @@ void rythmical(int pb1) {
       result =  ( t & (a * 16) ? ( t * ( t ^ t % (b * 8) ) | t >> a ) >> 127 : t >> b | ( t & (c * 32) ? t << c : t ) )   ;
       break;
     case 16: // started with vizmut paper pp. 6 https://arxiv.org/pdf/1112.1368.pdf // modified to keep from crashing :) divisions replaced with multiplication :)
+    // belongs in musical
       setLimits(0, 16, 0, 16, 0, 16);
       result = t >> c | t | (( t >> 5 ) / ( t % 2 ? t >> b / 2 : t >> b)) | ( t % 3 ? t >> a / 3 : t >> a );
       break;
@@ -198,15 +210,20 @@ void rythmical(int pb1) {
       int u = 0;
       result = ((((u = t & 0xfff) & 0 + ((u + 1 << (a + (t >> c & 1 * b))) / u) & 255) / (u >> 8)) & 240 - 128) * 3;
       break;
-    case 89:// https://www.pouet.net/topic.php?post=589098
+    case 19:// https://www.pouet.net/topic.php?post=589098
       setLimits(1, 11, 1, 11, 1, 11);
-      result = t*(0xC298C298C298>>(t>>a)&t>>b)&t>>c;
+      result = t * (0xC298C298C298 >> (t >> a)&t >> b)&t >> c;
       break;
-    case 19:  // FIX this is actually rythm https://forum.arduino.cc/t/one-line-algorithmic-music/73409
+      //case 20:  // FIX this is actually rythm https://forum.arduino.cc/t/one-line-algorithmic-music/73409
       // (t*(4|t>>13&3)>>(~t>>11&1)&128|t*(t>>11&t>>13)*(~t>>9&3)&127)^(t&4096?(t*(t^t%255)|t>>4)>>1:t>>3|(t&8192?t<<2:t))
-      setLimits(0, 16, 0, 16, 0, 16);
-      result =  ( t & 64 ? ( t * ( t ^ t % 128 ) | t >> a ) >> 127 : t >> b | ( t & 32 ? t << c : t ) )   ;
-      break;
+      // setLimits(0, 16, 0, 16, 0, 16);
+      //result =  ( t & 64 ? ( t * ( t ^ t % 128 ) | t >> a ) >> 127 : t >> b | ( t & 32 ? t << c : t ) )   ;
+      //break;
+      //case 13: // http://arhivach.ng/thread/28592/#71678984 // crashes??? this is not the original, but, still :)
+      //setLimits(2, 64, 2, 8, 0, 16);
+      //result = t >> b + t % a | t >> c + t - ( t ^ (t / 31108 & 1 ? (46 - c) : (43 - c )) ) | t / b | t / c % a; // % a crashes
+      //break;
+
   }
 }
 
@@ -221,7 +238,7 @@ void melodious(int pb2) {
   switch (pb2) {
     case 100://https://www.pouet.net/topic.php?post=587236 (115|t)* (256 - (t>>(9 - 2*((t>>14)%2) )) ) * ((256-(t>>4)%256))/256
       setLimits(1, 11, 1, 11, 1, 11);
-      result = t*(0xC298C298C298>>(t>>a)&t>>b)&t>>c;
+      result = t * (0xC298C298C298 >> (t >> a)&t >> b)&t >> c;
       break;
     case 1://https://www.pouet.net/topic.php?post=401561
       if (t > 65536) t = -65536;
@@ -280,11 +297,13 @@ void melodious(int pb2) {
       // ( ( t >> 10 | t * 5 ) & ( t >> 8 | t * 4 ) & ( t >> 4 | t * 6 ) );
       setLimits(0, 16, 0, 8, 0, 16);
       result = ( ( t >> a | t * 5 ) & ( t >> ( a + 2 ) | t * b ) & ( t >> b | t * c ) );
+      enc_offset = 2;
       break;
     case 14: // try * c?
       setLimits(1, 68, 1, 68, 0, 32);
       bb32_set(a, b);
       result =  bb32() | t >> c;
+      enc_offset = -3;
       break;
     case 15:
       setLimits(1, 68, 1, 68, 0, 32);
@@ -295,36 +314,40 @@ void melodious(int pb2) {
       setLimits(1, 68, 1, 68, 0, 32);
       bb35_set(a, b);
       result =  bb35() - c ;
+      enc_offset = 2;
       break;
     case 17:      // from http://xifeng.weebly.com/bytebeats.html we have someting similar already
       setLimits(1, 16, 1, 16, 0, 16);
       result  = ((((((((t >> a) | t) | (t >> a)) * c) & ((5 * t) | (t >> c))) | (t ^ (t % b))) & 0xFF));
+      enc_offset = 3;
       break;
     case 18: // same as 49 origin. more 4/4 tech qwowloon wow.
       setLimits(1, 32, 1, 32, 1, 32);
       result =   (t * ((3 + ( 1 ^ t >> a & 5 ) ) * ( 5 + ( 3 & t >> b ) ) ) ) >> ( t >> c & 3 );
+      enc_offset = 2;
       //result = t >> c ^ t & 1 | t + (t ^ t >> 13) - t * ((t >> 5 ? b : a) & t >> ( 8 - ( a >> 1 )  ) );
       break;
     case 19:   // poetaster drone, organ, perc
       setLimits(1, 8, 1, 16, 1, 8);
       result = ( ( t * a & t >> 4 ) | ( t * b & t >> 7 ) | ( t * c &  t) ) - ( t >> b ? 13 : 8)   ;
+      enc_offset = 3;
       break;
-    case 20: //poetaster requires 4* normal speed
+    case 20: //poetaster requires 4* normal speed // does not seem to work
       setLimits(32, 39, 32, 47, 32, 58);
       result = t * ( ( ( t >> 11 * a / 27 ) & ( ( t >> 11 * b / 27 ) - 1 ) ^ 7) * 11 * c / 27);
-    //result = t * ( ( ( t%2? t>>11*a/27: t>>11*a/9 ) ^ ( ( t >> 11*b/9 ) - 1 ) ^ 7) ^ 11*c/9);
-       break;
+      //result = t * ( ( ( t%2? t>>11*a/27: t>>11*a/9 ) ^ ( ( t >> 11*b/9 ) - 1 ) ^ 7) ^ 11*c/9);
+      break;
     case 21: // http://entropedia.co.uk/generative_music/#v3b64K0otKS3KU9AoUdMosbMz09TWKLGx0QCxDQ014yAMY01tY03NGgjHRNXMBKQKxNTU1FTT0AUyTTU1rRX0tRRCihKTsxWcixLTSioVkioVAhJLcxQ8EitTixW09AE=
       setLimits(1, 8, 11, 16, 1, 24);
       result = (t & (t >> 6) + (t << ((t >> 11) ^ ((t >> b) + a)) | ((t >> c % 64) + (t >> c))) & (-t >> 5));
-    //result = (t&(t>>6)+(t<<((t>>11)^((t>>13)+3))|((t>>14%64)+(t>>14)))&(-t>>5));
+      //result = (t&(t>>6)+(t<<((t>>11)^((t>>13)+3))|((t>>14%64)+(t>>14)))&(-t>>5));
       break;
     case 22:  // xpansive 2011-09-29 https://www.pouet.net/topic.php?which=8357&page=3#c388375
       // t * (t >> 8 | t >> 9) & 46 & t >> 8 ^ (t & t >> 13 | t >> 6);
       setLimits(40, 56, 1, 9, 0, 16);
       result = t * (t >> 8 | t >> 9) & a & t >> 8 ^ (t & t >> c | t >> b);
       break;
-    case 23:  https://www.pouet.net/topic.php?post=394926
+case 23:  https://www.pouet.net/topic.php?post=394926
       // (t*(4|t>>13&3)>>(~t>>11&1)&128|t*(t>>11&t>>13)*(~t>>9&3)&127)^(t&4096?(t*(t^t%255)|t>>4)>>1:t>>3|(t&8192?t<<2:t))
       setLimits(7, 13, 9, 15, 3, 11);
       result = (z = (t >> (1 + (t >> a & 1))) * (t >> a & 0xfd) * (t >> c & 0xdf) * (t >> 7 & 0xcc)) * 0 + ((t << 1))&z | ((t << 2))&z;
@@ -339,15 +362,29 @@ void melodious(int pb2) {
       break;
     case 26://https://www.pouet.net/ ((t>>6)&(t<<3)/(t*(t>>11)%(3+((t>>16)%22))))
       setLimits(1, 9, 1, 5, 8, 16);
-      result = ((t>>a)&(t<<3)/(t*(t>>11)%(3+((t>>c)%(b*11)))));
+      result = ((t >> a) & (t << 3) / (t * (t >> 11) % (3 + ((t >> c) % (b * 11)))));
+      enc_offset =2; // set speed
       break;
     case 27://https://www.pouet.net/topic.php?post=587236 ((t*((t>>12)^((t>>12)-1)))&(t>>5)^(t>>6))+t+128
       setLimits(1, 5, 1, 9, 8, 16);
-      result = ((t*((t>>c)^((t>>c)-1)))&(t>>a)^(t>>b))+t+128;
+      result = ((t * ((t >> c) ^ ((t >> c) - 1))) & (t >> a) ^ (t >> b)) + t + 128;
       break;
     case 28://https://www.pouet.net/topic.php?post=587236 (t>>(4+(1&t>>(5*(1+(t>>(11-(1&t>>(11+(1&t>>13))))))))))
       setLimits(1, 5, 11, 22, 11, 16);
-      result = (t>>(4+(a&t>>(5*(a+(t>>(11-(1&t>>(b+(a&t>>c))))))))));
+      result = (t >> (4 + (a & t >> (5 * (a + (t >> (11 - (1 & t >> (b + (a & t >> c))))))))));
+      break;
+    case 29:
+      // wavetable sine.
+      setLimits(1023, 0, 1023, 0, 1023, 0);
+      tune = 404 - a;
+      tune = tune << 3;
+      freq[0] = a + tune;
+      freq[1] = b + tune;
+      freq[2] = c + tune;
+      for (int i = 0; i <= 3; i++) {
+        Acc[i] += freq[i];
+      }
+      result = ( pgm_read_byte(&sine256[Acc[1] >> 8]) + pgm_read_byte(&sine256[Acc[2] >> 8]) ) / 2;
       break;
   }
 
