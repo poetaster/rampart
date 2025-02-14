@@ -9,8 +9,20 @@
    Many contributions from the internet :) See nyblybyte.h for many equations origins and original form.
 */
 
+//#include <EEPROM.h>
+//#define USE_LGT_EEPROM_API
 
+//#include <util/crc16.h>
 #include <EncoderButton.h>
+
+// Define EEPROM addresses to store variables, , 4 bytes per float (freq_target1, freq_target2)
+//#define PROG_PB1_ADR       0
+//#define PROG_PB2_ADR       4
+//#define PROG_PB3_ADR       8
+//#define BANK_ADR           9
+//#define EEPROM_CRC_ADR     11
+//#define EEPROM_DATA_LENGTH 10  // 10 bytes of EEPROM written (without crc)
+
 // for pwm init functions
 const unsigned int TOP = 0x07FF; // 11-bit resolution.  7812 Hz PWM
 
@@ -37,20 +49,22 @@ byte pot[] = {A1, A2, A3};
 
 
 long t = 0;
-volatile int a, b, c, i, offA, offB, offC;
+volatile int a, b, c, i;
+volatile int offA, offB, offC;
 volatile int result;
 int d = 0; // hmm?
 
 int prog = 1;
 int bank = 1;
+int banktotal = 3;
 int pb1 = 1;
-int pb1total = 20;
+int pb1total = 24;
 int pb2 = 1;
 int pb2total = 29;
 int pb3 = 1;
 int pb3total = 20;
 
-int numProg = 68;
+int numProg = 73;
 
 // these ranges are provisional and in schollz equations need to be reset
 volatile int aMax = 99, aMin = 0, bMax = 99, bMin = 0, cMax = 99, cMin = 0;
@@ -58,7 +72,7 @@ volatile int aMax = 99, aMin = 0, bMax = 99, bMin = 0, cMax = 99, cMin = 0;
 // default rate close to the original bytebeat speed
 int SRATE = 8192; // 16384;
 
-bool debug = true;
+bool debug = false;
 
 // encoder
 // the a and b + the button pin large encoders are 6,5,4
@@ -93,7 +107,15 @@ long timeoffset = 0;
    handle encoder button long press event
 */
 void onEb1LongPress(EncoderButton& eb) {
-
+  
+  // SAVE all selected registers to EEPROM
+  /*
+  EEPROM.write(PROG_PB1_ADR, pb1);
+  EEPROM.write(PROG_PB2_ADR, pb2);
+  EEPROM.write(PROG_PB3_ADR, pb3);
+  EEPROM.write(BANK_ADR, bank);
+  */
+  
   if (debug) {
     Serial.print("button1 longPressCount: ");
     Serial.println(eb.longPressCount());
@@ -193,13 +215,14 @@ void onRightReleased(EncoderButton& right) {
     prog = pb2;
   } 
   else if (bank == 3) {
-    if (pb3 < pb2total) {
+    if (pb3 < pb3total) {
       pb3++;
     } else if (pb3 == pb3total) {
       pb3 = 1;
     }
     prog = pb3;
   }
+
   if (debug) {
     Serial.print("PROGRAM: ");
     Serial.println(prog);
@@ -240,7 +263,23 @@ void setup() {
     Serial.begin(57600);
     Serial.println(F("Started"));
   }
+  /*
+  // Load selected registers from EEPROM
+  EEPROM.get(PROG_PB1_ADR, pb1);
+  EEPROM.get(PROG_PB2_ADR, pb2);
+  EEPROM.get(PROG_PB3_ADR, pb3);
+  EEPROM.get(BANK_ADR, bank);
+  
+  Serial.println(F("pb1"));
+  Serial.println(pb1);
+  
+  if (pb1 < 1) pb1 = 1;
+  if (pb2 < 1) pb2 = 1;
+  if (pb3 < 1) pb3 = 1;
+  if (bank < 1) bank = 1;
+  */
 
+  
   pinMode(LEDPIN, OUTPUT);
   pinMode(PWMPIN, OUTPUT);
   
@@ -315,7 +354,7 @@ void adc() {
     if (abs(lastA - A) > 1) {
       lastA = A;
       offA = lastA / 2;
-      Serial.println(A);
+      if (debug) Serial.println(A);
 
     }
 

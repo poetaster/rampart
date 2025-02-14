@@ -26,18 +26,21 @@
 
 // These are from : https://raw.githubusercontent.com/schollz/nyblcore/main/bytebeat/bytebeat.ino
 
-
+                
+                  
 // <bb>
 // {"description": "frequency dancer", "author": "ANON256-64", "url":
 // "https://www.reddit.com/r/bytebeat/comments/11krrl8/frequency_dancer/",
 // "date": "2023-03-07", "codeOriginal": "(t%125&t>>8)|t>>4|t*t>>8&t>>8",
 // "codeMinified": "t%125&t>>8|t>>4|t*t>>8&t>>8"}
+/*
 byte bb0_vals[] = {125, 8, 4, 8, 8};
 byte bb0_set(byte a, byte b) { bb0_vals[a * 5 / 255] = b * 249 / 255; }
 byte bb0() {
   return (t % bb0_vals[0] & t >> bb0_vals[1]) | t >> bb0_vals[2] |
          t * t >> bb0_vals[3] & t >> bb0_vals[4];
-}
+}*/
+
 // {"author": "ryg", "children": [{"description": "triangle waves", "url":
 // "http://www.pouet.net/topic.php?which=8357&page=11#c389010", "date":
 // "2011-10-05", "codeOriginal": "(t<<5)^-(t>>3&1)"}, {"description": "the
@@ -49,9 +52,11 @@ byte bb0() {
 // "(t*(t>>12)*64+(t>>1)*(t>>10)*(t>>11)*48)>>(((t>>16)|(t>>17))&1)",
 // "codeMinified":
 // "t*(t>>12)*64+(t>>1)*(t>>10)*(t>>11)*48>>((t>>16|t>>17)&1)"}]}
+/*
 byte bb1_vals[] = {4, 4, 1};
 byte bb1_set(byte a, byte b) { bb1_vals[a * 3 / 255] = b * 7 / 255; }
 byte bb1() { return (t << bb1_vals[0]) ^ -(t >> bb1_vals[bb1_vals[2]] & 1); }
+*/
 // {"author": "viznut", "children": [{"url":
 // "http://viznut.fi/demos/unix/bytebeat_formulas.txt", "date": "2011-09-18",
 // "codeOriginal": "t*(((t>>12)|(t>>8))&(63&(t>>4)))", "codeMinified":
@@ -71,12 +76,14 @@ byte bb1() { return (t << bb1_vals[0]) ^ -(t >> bb1_vals[bb1_vals[2]] & 1); }
 // "url": "http://viznut.fi/demos/unix/bytebeat_formulas.txt", "date":
 // "2011-10-06", "codeOriginal": "((t>>5&t)-(t>>5)+(t>>5&t))+(t*((t>>14)&14))",
 // "codeMinified": "2*(t>>5&t)-(t>>5)+t*(t>>14&14)", "starred": 1}]}
+/*
 byte bb2_vals[] = {7, 6, 10, 4, 13, 6};
 byte bb2_set(byte a, byte b) { bb2_vals[a * 6 / 255] = b * 25 / 255; }
 byte bb2() {
   return (t >> bb2_vals[0] | t | t >> bb2_vals[1]) * bb2_vals[2] +
          bb2_vals[3] * (t & t >> bb2_vals[4] | t >> bb2_vals[5]);
 }
+*/
 // {"author": "GDPlayer_1035", "children": [{"description": "test3", "url":
 // "https://www.reddit.com/r/bytebeat/comments/q6ar3c/test3/", "date":
 // "2021-10-12", "sampleRate": 44100, "codeOriginal":
@@ -84,9 +91,11 @@ byte bb2() {
 // "thing", "url": "https://www.reddit.com/r/bytebeat/comments/q8cqdv/thing/",
 // "date": "2021-10-15", "sampleRate": 44100, "codeOriginal":
 // "(t&t/2&t/4)*t/4E3", "starred": 1}]}
+/*
 byte bb3_vals[] = {2, 4};
 byte bb3_set(byte a, byte b) { bb3_vals[a * 2 / 255] = b * 7 / 255; }
 byte bb3() { return (t & t / bb3_vals[0] & t / bb3_vals[1]) * t / 4E3; }
+*/
 // {"author": "Unknown", "url":
 // "https://www.reddit.com/r/bytebeat/comments/20km9l/cool_equations/", "date":
 // "2014-03-16", "children": [{"description": "Wip", "codeOriginal":
@@ -104,18 +113,21 @@ byte bb3() { return (t & t / bb3_vals[0] & t / bb3_vals[1]) * t / 4E3; }
 // "(t*t)/(t>>13 ^ t>>8)", "codeMinified": "t*t/(t>>13^t>>8)"}, {"description":
 // "Plucker v2", "codeOriginal": "((t/4)>>t/4)|(t>>2)", "codeMinified":
 // "t/4>>t/4|t>>2"}]}
+/*
 byte bb4_vals[] = {8, 9, 13};
 byte bb4_set(byte a, byte b) { bb4_vals[a * 3 / 255] = b * 25 / 255; }
 byte bb4() {
   return (t * (-(t >> bb4_vals[0] | t | t >> bb4_vals[1] | t >> bb4_vals[2]))) ^
          t;
 }
+*/
 // {"author": "xpansive", "children": [{"description": "Lost in Space", "url":
 // "http://www.pouet.net/topic.php?which=8357&page=3#c388375", "date":
 // "2011-09-29", "codeOriginal": "((t*(t>>8|t>>9)&46&t>>8)) ^ (t&t>>13|t>>6)",
 // "codeMinified": "t*(t>>8|t>>9)&46&t>>8^(t&t>>13|t>>6)"}, {"url":
 // "http://www.pouet.net/topic.php?which=8357&page=21#c401775", "date":
 // "2012-02-25", "codeOriginal": "t%(t/(t>>9|t>>13))"}]}
+/*
 byte bb5_vals[] = {8, 9, 46, 8, 13, 6};
 byte bb5_set(byte a, byte b) { bb5_vals[a * 6 / 255] = b * 91 / 255; }
 byte bb5() {
@@ -123,6 +135,7 @@ byte bb5() {
            t >> bb5_vals[3])) ^
          (t & t >> bb5_vals[4] | t >> bb5_vals[5]);
 }
+*/
 // {"author": "SArpnt", "children": [{"description": "pwm serpinski harmony",
 // "url":
 // "https://www.reddit.com/r/bytebeat/comments/g9106h/pwm_serpinski_harmony/",
@@ -152,6 +165,7 @@ byte bb6() { return (t * bb6_vals[0] & t >> bb6_vals[1]) % bb6_vals[2]; }
 // "(t*(t>>12)*64+(t>>1)*(t>>10)*(t>>11)*48)>>(((t>>16)|(t>>17))&1)",
 // "codeMinified":
 // "t*(t>>12)*64+(t>>1)*(t>>10)*(t>>11)*48>>((t>>16|t>>17)&1)"}]}
+/*
 byte bb7_vals[] = {12, 64, 1, 10, 11, 48, 16, 17, 1};
 byte bb7_set(byte a, byte b) { bb7_vals[a * 9 / 255] = b * 127 / 255; }
 byte bb7() {
@@ -160,6 +174,7 @@ byte bb7() {
               bb7_vals[5]) >>
          (((t >> bb7_vals[6]) | (t >> bb7_vals[7])) & 1);
 }
+*/
 // {"author": "tangent128", "url":
 // "http://countercomplex.blogspot.com/2011/10/algorithmic-symphonies-from-one-line-of.html?showComment=1317761042403#c4044676811126652266",
 // "date": "2011-10-04", "codeOriginal": "t * ( ((t>>9)&10) | ((t>>11)&24)
@@ -191,6 +206,7 @@ byte bb8() {
 // "(((t>>((t>>12)%4))+t*(1+(1+(t>>16)%6)*((t>>10))*(t>>11)%8))^(t>>13))^((t>>6))",
 // "codeMinified":
 // "(t>>(t>>12)%4)+t*(1+(1+(t>>16)%6)*(t>>10)*(t>>11)%8)^t>>13^t>>6"}]}
+/*
 byte bb9_vals[] = {4, 11, 16, 3, 16, 3};
 byte bb9_set(byte a, byte b) { bb9_vals[a * 6 / 255] = b * 31 / 255; }
 byte bb9() {
@@ -199,7 +215,8 @@ byte bb9() {
           ((t >> (bb9_vals[1] + (t >> bb9_vals[2]) % bb9_vals[bb9_vals[5]])) %
            bb9_vals[4])) ^
          t * 3;
-}
+}*/
+
 // {"author": "ryg", "children": [{"description": "triangle waves", "url":
 // "http://www.pouet.net/topic.php?which=8357&page=11#c389010", "date":
 // "2011-10-05", "codeOriginal": "(t<<5)^-(t>>3&1)"}, {"description": "the
@@ -211,11 +228,13 @@ byte bb9() {
 // "(t*(t>>12)*64+(t>>1)*(t>>10)*(t>>11)*48)>>(((t>>16)|(t>>17))&1)",
 // "codeMinified":
 // "t*(t>>12)*64+(t>>1)*(t>>10)*(t>>11)*48>>((t>>16|t>>17)&1)"}]}
+/*
 byte bb10_vals[] = {5, 3, 1};
 byte bb10_set(byte a, byte b) { bb10_vals[a * 3 / 255] = b * 9 / 255; }
 byte bb10() {
   return (t << bb10_vals[0]) ^ -(t >> bb10_vals[bb10_vals[2]] & 1);
 }
+*/
 // {"description": "Sierpinski harmony", "children": [{"author": "miiro", "url":
 // "https://youtu.be/qlrs2Vorw2Y?t=2m14s", "date": "2011-09-30", "codeOriginal":
 // "t*5&(t>>7)|t*3&(t*4>>10)", "codeMinified": "5*t&t>>7|3*t&4*t>>10",
@@ -243,6 +262,7 @@ byte bb10() {
 // "minimal sierpinski harmony", "author": "viznut", "url":
 // "http://viznut.fi/demos/unix/bytebeat_formulas.txt", "codeOriginal":
 // "t&t>>8"}]}
+/*
 byte bb11_vals[] = {2, 8, 5, 7, 9, 4, 15, 4};
 byte bb11_set(byte a, byte b) { bb11_vals[a * 8 / 255] = b * 29 / 255; }
 byte bb11() {
@@ -251,10 +271,12 @@ byte bb11() {
          bb11_vals[bb11_vals[5]] * t & (t >> bb11_vals[7]) |
          bb11_vals[6] * t & (t >> 4);
 }
+*/
 // {"description": "chaotic craziness", "author": "T_yknow", "url":
 // "https://www.reddit.com/r/bytebeat/comments/120dijk/chaotic_craziness/",
 // "date": "2023-03-24", "sampleRate": 22050, "codeOriginal": "(t^t>>12)*t>>8",
 // "starred": 1}
+/*
 byte bb12_vals[] = {12, 8};
 byte bb12_set(byte a, byte b) { bb12_vals[a * 2 / 255] = b * 23 / 255; }
 byte bb12() { return (t ^ t >> bb12_vals[0]) * t >> bb12_vals[1]; }
@@ -265,6 +287,7 @@ byte bb13_set(byte a, byte b) { bb13_vals[a * 3 / 255] = b * 9 / 255; }
 byte bb13() {
   return t >> bb13_vals[0] | (t >> bb13_vals[1]) * (t >> bb13_vals[2]);
 }
+*/
 // {"description": "Modem melody", "children": [{"author": "krcko", "url":
 // "http://viznut.fi/demos/unix/bytebeat_formulas.txt", "date": "2011-10-04",
 // "codeOriginal": "(t&t>>12)*(t>>4|t>>8)", "starred": 1}, {"description": "The
@@ -274,9 +297,11 @@ byte bb13() {
 // "19-character dubstep", "author": "SthephanShi", "url":
 // "https://dollchan.net/btb/res/55.html#359", "date": "2023-01-18",
 // "sampleRate": 44100, "codeOriginal": "t&t>>12|t/(t&t>>12)"}]}
+/*
 byte bb14_vals[] = {12, 12};
 byte bb14_set(byte a, byte b) { bb14_vals[a * 2 / 255] = b * 23 / 255; }
 byte bb14() { return t & t >> bb14_vals[0] | t / (t & t >> bb14_vals[1]); }
+*/
 // {"author": "Unknown", "url":
 // "https://www.reddit.com/r/bytebeat/comments/20km9l/cool_equations/", "date":
 // "2014-03-16", "children": [{"description": "Wip", "codeOriginal":
@@ -294,11 +319,13 @@ byte bb14() { return t & t >> bb14_vals[0] | t / (t & t >> bb14_vals[1]); }
 // "(t*t)/(t>>13 ^ t>>8)", "codeMinified": "t*t/(t>>13^t>>8)"}, {"description":
 // "Plucker v2", "codeOriginal": "((t/4)>>t/4)|(t>>2)", "codeMinified":
 // "t/4>>t/4|t>>2"}]}
+/*
 byte bb15_vals[] = {4, 4, 2};
 byte bb15_set(byte a, byte b) { bb15_vals[a * 3 / 255] = b * 7 / 255; }
 byte bb15() {
   return ((t / bb15_vals[0]) >> t / bb15_vals[1]) | (t >> bb15_vals[2]);
 }
+*/
 // {"author": "Niklas_Roy", "url":
 // "http://countercomplex.blogspot.com/2011/10/algorithmic-symphonies-from-one-line-of.html?showComment=1318497618021#c332012386255047591",
 // "date": "2011-10-13", "children": [{"description": "Arcade game",
@@ -306,6 +333,7 @@ byte bb15() {
 // "t*((t>>9|t>>13)&15)&129"}, {"description": "Clean melody", "codeOriginal":
 // "t*(t>>9|t>>13)&16"}, {"description": "Louder clean melody", "codeOriginal":
 // "9*(t*((t>>9|t>>13)&15)&16)"}]}
+/*
 byte bb16_vals[] = {9, 9, 13, 15, 16};
 byte bb16_set(byte a, byte b) { bb16_vals[a * 5 / 255] = b * 31 / 255; }
 byte bb16() {
@@ -313,6 +341,7 @@ byte bb16() {
          (t * ((t >> bb16_vals[1] | t >> bb16_vals[2]) & bb16_vals[3]) &
           bb16_vals[4]);
 }
+*/
 // {"author": "Chasyxx", "children": [{"description": "Electrohouse2",
 // "remixed": {"description": "Electrohouse", "author": "Anonymous from russian
 // imageboards", "url": "http://arhivach.ng/thread/28592/"}, "url":
@@ -463,6 +492,7 @@ byte bb23() {
 // "2022-05-26", "codeOriginal":
 // "(t>>10^t>>11)%5*((t>>14&3^t>>15&1)+1)*t%99+((3+(t>>14&3)-(t>>16&1))/3*t%99&64)",
 // "starred": 2}]}
+/*
 byte bb24_vals[] = {6, 9, 12, 6, 4, 13, 128, 1};
 byte bb24_set(byte a, byte b) { bb24_vals[a * 8 / 255] = b * 255 / 255; }
 byte bb24() {
@@ -472,6 +502,7 @@ byte bb24() {
                  bb24_vals[6] ^
              -t >> 1;
 }
+*/
 // {"author": "SArpnt", "children": [{"description": "pwm serpinski harmony",
 // "url":
 // "https://www.reddit.com/r/bytebeat/comments/g9106h/pwm_serpinski_harmony/",
@@ -487,9 +518,11 @@ byte bb24() {
 // "starred": 1}, {"description": "i don't have a name for this", "url":
 // "https://www.reddit.com/r/bytebeat/comments/ns22lb/i_dont_have_a_name_for_this/",
 // "date": "2021-06-04", "codeOriginal": "(t*3&t>>6)%76"}]}
+/*
 byte bb25_vals[] = {7, 8};
 byte bb25_set(byte a, byte b) { bb25_vals[a * 2 / 255] = b * 15 / 255; }
 byte bb25() { return t & (t >> bb25_vals[0]) - t & t >> bb25_vals[1]; }
+*/
 // {"author": "Unknown", "url":
 // "https://www.reddit.com/r/bytebeat/comments/20km9l/cool_equations/", "date":
 // "2014-03-16", "children": [{"description": "Wip", "codeOriginal":
@@ -516,6 +549,7 @@ byte bb26() { return (t * t) / (t >> bb26_vals[0] ^ t >> bb26_vals[1]); }
 // "https://www.reddit.com/r/bytebeat/comments/s4oi7c/11025_hz_duck_hunt/",
 // "date": "2022-01-15", "sampleRate": 11025, "codeOriginal":
 // "((t>>9^(t>>9)-1^1)%13*t&31)*(2+(t>>4))", "starred": 1}
+/*
 byte bb27_vals[] = {9, 9, 1, 1, 13, 31, 2, 4};
 byte bb27_set(byte a, byte b) { bb27_vals[a * 8 / 255] = b * 61 / 255; }
 byte bb27() {
@@ -525,10 +559,12 @@ byte bb27() {
           bb27_vals[5]) *
          (2 + (t >> 4));
 }
+*/
 // {"author": "visy", "url":
 // "http://viznut.fi/demos/unix/bytebeat_formulas.txt", "date": "2011-09-18",
 // "codeOriginal": "t*(t>>8*((t>>15)|(t>>8))&(20|(t>>19)*5>>t|(t>>3)))",
 // "codeMinified": "t*(t>>8*(t>>15|t>>8)&(20|5*(t>>19)>>t|t>>3))"}
+
 byte bb28_vals[] = {8, 15, 8, 20, 19, 5, 3};
 byte bb28_set(byte a, byte b) { bb28_vals[a * 7 / 255] = b * 39 / 255; }
 byte bb28() {
@@ -536,6 +572,7 @@ byte bb28() {
               (bb28_vals[bb28_vals[6]] |
                (t >> bb28_vals[4]) * bb28_vals[5] >> t | (t >> 3)));
 }
+
 // {"author": "Unknown", "url":
 // "https://www.reddit.com/r/bytebeat/comments/20km9l/cool_equations/", "date":
 // "2014-03-16", "children": [{"description": "Wip", "codeOriginal":
@@ -553,12 +590,14 @@ byte bb28() {
 // "(t*t)/(t>>13 ^ t>>8)", "codeMinified": "t*t/(t>>13^t>>8)"}, {"description":
 // "Plucker v2", "codeOriginal": "((t/4)>>t/4)|(t>>2)", "codeMinified":
 // "t/4>>t/4|t>>2"}]}
+/*
 byte bb29_vals[] = {1, 9, 8, 128};
 byte bb29_set(byte a, byte b) { bb29_vals[a * 4 / 255] = b * 255 / 255; }
 byte bb29() {
   return (t * t / (bb29_vals[0] + (t >> bb29_vals[1] & t >> bb29_vals[2]))) &
          bb29_vals[3];
 }
+*/
 // {"author": "Devan Wolf", "url": "https://dollchan.net/btb/res/3.html#224",
 // "date": "2022-10-18", "children": [{"description": "Stand, Back, You...",
 // "codeOriginal": "(t>>(t>>(t>>12&15)))>>t", "codeMinified":
@@ -576,6 +615,7 @@ byte bb29() {
 // "codeOriginal":
 // "(t*(4|t>>13&3)>>(~t>>11&1)&128|t*(t>>11&t>>13)*(~t>>9&3)&127)^(t&4096?(t*(t^t%255)|t>>4)>>1:t>>3|(t&8192?t<<2:t))",
 // "starred": 1}]}
+/*
 byte bb30_vals[] = {12, 10, 7, 2};
 byte bb30_set(byte a, byte b) { bb30_vals[a * 4 / 255] = b * 23 / 255; }
 byte bb30() {
@@ -583,6 +623,7 @@ byte bb30() {
           << (-t >> bb30_vals[1] & bb30_vals[bb30_vals[3]])) &
          -t >> 2;
 }
+*/
 // {"author": "Devan Wolf", "url": "https://dollchan.net/btb/res/3.html#224",
 // "date": "2022-10-18", "children": [{"description": "Stand, Back, You...",
 // "codeOriginal": "(t>>(t>>(t>>12&15)))>>t", "codeMinified":
