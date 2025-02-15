@@ -58,9 +58,9 @@ int prog = 1;
 int bank = 1;
 int banktotal = 3;
 int pb1 = 1;
-int pb1total = 24;
+int pb1total = 25;
 int pb2 = 1;
-int pb2total = 29;
+int pb2total = 28;
 int pb3 = 1;
 int pb3total = 20;
 

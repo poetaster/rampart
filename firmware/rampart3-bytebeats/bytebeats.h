@@ -236,7 +236,11 @@ void rythmical(int pb1) {
       result  = a * ((t >> b) + 20) * t >> 14 * t >> c >> t;
       //enc_offset = 1;
       break;
-    case 24: // drums where did this come from?
+    case 24:// RYTHM !https://www.pouet.net/topic.php?post=587236 (115|t)* (256 - (t>>(9 - 2*((t>>14)%2) )) ) * ((256-(t>>4)%256))/256
+      setLimits(1, 11, 1, 11, 1, 11);
+      result = t * (0xC298C298C298 >> (t >> a)&t >> b)&t >> c;
+      break;
+    case 25: // drums where did this come from? THIS must come at the end of the list.
       setLimits(0, 36, 0, 16, 10, 20);
       // a 18, b 6, c 10
       int u = 0;
@@ -276,9 +280,9 @@ void melodious(int pb2) {
       setLimits(1, 13, 1, 15, 1, 11);
       result = (t * (4 | t >> 13 & b ) >> ( ~t >> 11 & 1 ) & 128 | t * ( t >> a & t >> 13 ) * ( ~t >> c & 3 ) & 127 ) ^ ( t & 4096 ? ( t * ( t ^ t % 255 ) | t >> 4 ) >> 1 : t >> 3 | ( t & 8192 ? t << 2 : t ) );
       break;
-    case 5:// RYTHM !https://www.pouet.net/topic.php?post=587236 (115|t)* (256 - (t>>(9 - 2*((t>>14)%2) )) ) * ((256-(t>>4)%256))/256
-      setLimits(1, 11, 1, 11, 1, 11);
-      result = t * (0xC298C298C298 >> (t >> a)&t >> b)&t >> c;
+    case 5: // glitch https://www.reddit.com/r/bytebeat/comments/ufvuio/electricity/ 12 / 16 / 12
+      setLimits(8, 24, 8, 32, 8, 24);
+      result = (t>>12&3?((t>>a)%((t>>b)%6/(3&t>>c)+1)+1)*t&-t>>4:((t>>1)%((t>>b)%6/(3&t>>a)+1)+1)*t&t);// +5E3/(t/4&4095);
       break;
     case 6: // variation on 45 MAKE this TWO
       setLimits(0, 32, 0, 32, 0, 32); // aMin, aMax, etc
@@ -385,11 +389,7 @@ void melodious(int pb2) {
       //result = 8*t*t*(t>>(t>>(a*10))%3+c)/(3+(t>>(a*10)&(t>>c&a|b)))|t/16;
       result = 8 * t * (t >> (t >> 10) % 3 + c) / (3 + (t >> 10 & (t >> c & a | b))) | t / 16;
       break;
-    case 27: // glitch https://www.reddit.com/r/bytebeat/comments/ufvuio/electricity/ 12 / 16 / 12
-      setLimits(8, 24, 8, 32, 8, 24);
-      result = (t>>12&3?((t>>a)%((t>>b)%6/(3&t>>c)+1)+1)*t&-t>>4:((t>>1)%((t>>b)%6/(3&t>>a)+1)+1)*t&t);// +5E3/(t/4&4095);
-      break;
-    case 28:
+    case 27:
       // wavetable sine. could probably add a bunch of (t&15)*(-t&15)*(((t&16)/8)-1)*128/65+128
       setLimits(1023, 0, 1023, 0, 1023, 0);
       tune = 404 - a;
@@ -402,7 +402,7 @@ void melodious(int pb2) {
       }
       result = ( pgm_read_byte(&sine256[Acc[1] >> 8]) + pgm_read_byte(&sine256[Acc[2] >> 8]) ) / 2;
       break;
-    case 29: //saw phase in honour of https://ressources.labomedia.org/_media/bytebeats_beginners_guide_ttnm_v1-5.pdf
+    case 28: //saw phase in honour of https://ressources.labomedia.org/_media/bytebeats_beginners_guide_ttnm_v1-5.pdf
       setLimits(48, 72, 32, 64, 8, 48);
       result = t % a | t % b | t % c;
       break;
