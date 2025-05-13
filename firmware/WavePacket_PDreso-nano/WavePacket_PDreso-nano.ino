@@ -95,7 +95,7 @@ int buttonState = 0;
 
 void setup(){
   
-  Serial.begin(9600);
+  Serial.begin(115200);
   // initialize the pushbutton pin as an input:
   Serial.println("hi there");
   // initialize the pushbutton pin as an input:

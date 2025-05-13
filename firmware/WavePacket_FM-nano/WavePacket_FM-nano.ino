@@ -61,8 +61,8 @@ unsigned int y_axis = 512;
 
 
 // Intmap is a pre-calculated faster version of Arduino's map, OK for pots
-const IntMap kMapF(0,1023,20,60);
-const IntMap kmapX(0, 1023, 0, 500); // A
+const IntMap kMapF(0,1023,0,20);
+const IntMap kmapX(0, 1023, 0, 15); // A
 const IntMap kmapY(0, 1023, 0, 1000); //D
 
 // AutoMap adapts to range of input as it arrives, useful for LDR's
@@ -381,7 +381,7 @@ AudioOutput updateAudio() {
   //I wonder
   
   // write out lfo value
-  analogWrite(11, map(kLfo.next(), -128, 128, 0, 255));
+  //analogWrite(11, map(kLfo.next(), -128, 128, 0, 255));
   //Serial.println(map(kLfo.next(), -128, 128, 0, 255));
   
   if ( buttonState == 0 ) {

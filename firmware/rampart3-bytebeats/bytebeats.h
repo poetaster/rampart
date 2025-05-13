@@ -248,7 +248,7 @@ void rythmical(int pb1) {
       enc_offset = 2;
       break;
 
-
+// (t>>(t>>13&31)&128)+((t&t>>12)*t>>12)+3e5/(t%16384)
 
   }
 }
