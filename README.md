@@ -43,6 +43,14 @@ A note on -/+ located to the left below the volume knob ... these can also be us
 
 ## Arduino Sketches
 
+Of the sketches in the Firmware directory, those I use often and are well tested:
+1. rampart3-bytebeats
+2. DUAL_LFO
+3. shepard-FM-chord 3 synths in one.
+
+These can be flashed using the webflasher at https://poetater.org/webflasher 
+
+
 To edit the sketches you can use the arduino ide. 
 * install the ide from https://www.arduino.cc/en/software (I still use the 1.8.19 version)
 * install the board support https://github.com/dbuezas/lgt8fx#how-to-install
