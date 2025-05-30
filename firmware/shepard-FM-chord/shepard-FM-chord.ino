@@ -6,7 +6,6 @@
 
 //#include <ADC.h>  // Teensy 3.0/3.1 uncomment this line and install http://github.com/pedvide/ADC
 #include <MozziConfigValues.h>
-#define MOZZI_AUDIO_MODE MOZZI_OUTPUT_2PIN_PWM
 #include <Mozzi.h>
 #include <mozzi_analog.h>
 // for FMsynth
@@ -22,7 +21,7 @@
 #include <ADSR.h>
 #include <Midier.h>
 
-//#define MOZZI_AUDIO_RATE 32768
+#define MOZZI_AUDIO_RATE 32768
 #define MOZZI_CONTROL_RATE 256
 //#define MOZZI_PWM_RATE 32768
 // Envelopes
@@ -34,20 +33,18 @@ bool debug = false;
 // analog freq pins
 #define FUNDAMENTAL_PIN A0
 #define BANDWIDTH_PIN A1
-#define CENTREFREQ_PIN A3
+#define CENTREFREQ_PIN A2
 
 // modulation pins analog
-#define VOCT A7
-#define P1CV A4
-#define P2CV A5
+#define VOCT A3
+#define P1CV A6
+#define P2CV A7
 #define FLT_PIN 5
 #define SW_PIN_1 4
 #define SW_PIN_2 5
-#define LED_1_PIN 6
-#define LED_2_PIN 7
-#define LED_3_PIN 8
-#define GAIN_CV_PIN A6
-#define MODE_CV_PIN A2
+
+#define GAIN_CV_PIN A4
+#define MODE_CV_PIN A5
 // Map Analogue channels
 
 //shepard tone
@@ -154,21 +151,29 @@ unsigned int notesPlaying;
 bool notePlaying = false;
 bool noteReset = true;
 
+#include "encoder.h"
 
 void setup() {
   if (debug) {
     Serial.begin(57600);
     Serial.println("hi there");
   }
+  //Link the encoder event(s) functions in encoder.h
+  eb1.setClickHandler(onEb1Clicked);
+  eb1.setEncoderHandler(onEb1Encoder);
+  eb1.setLongPressHandler(onEb1LongPress, true);
+  eb1.setEncoderPressedHandler(onEb1PressTurn);
+
+  // program up/down buttons
+  left.setReleasedHandler(onLeftReleased);
+  //left.setRateLimit(7);
+  right.setReleasedHandler(onRightReleased);
+  //right.setRateLimit(6);
   // initialize the pushbutton pin as an input:
-  pinMode(13, OUTPUT);
-  pinMode(LED_1_PIN, OUTPUT);
-  pinMode(LED_2_PIN, OUTPUT);
-  pinMode(LED_3_PIN, OUTPUT);
-  pinMode(SW_PIN_1, INPUT_PULLUP);
-  pinMode(SW_PIN_2, INPUT_PULLUP);
-  digitalWrite(SW_PIN_1, HIGH);
-  digitalWrite(SW_PIN_2, HIGH);
+  
+
+
+
   // wavepacket sample
   //   wavey.setTable(RAVEN_ARH_DATA);
   // chordsynth
@@ -212,42 +217,7 @@ void setup() {
   startMozzi(CONTROL_RATE);
 }
 
-// mode 0: FM mode 1: chord, mode 2: add
-void check_modes() {
-  if (digitalRead(SW_PIN_1)) {
-    if (digitalRead(SW_PIN_2)) {
-      mode = 1;
-    }
-    else {
-      mode = 2;
-    }
-  }
-  else {
-    mode = 0;
-  }
-  //mode = (mode + mode_val)%3;
 
-  if (mode == 2) {
-    digitalWrite(LED_1_PIN, HIGH);
-    digitalWrite(LED_2_PIN, LOW);
-    digitalWrite(LED_3_PIN, LOW);
-    return;
-  }
-  else if (mode == 1) {
-    digitalWrite(LED_2_PIN, HIGH);
-    digitalWrite(LED_1_PIN, LOW);
-    digitalWrite(LED_3_PIN, LOW);
-    return;
-  }
-  else if (mode == 0) {
-    digitalWrite(LED_3_PIN, HIGH);
-    digitalWrite(LED_2_PIN, LOW);
-    digitalWrite(LED_1_PIN, LOW);
-    return;
-  }
-  if (debug) Serial.print("mode:");
-  if (debug) Serial.println(mode);
-}
 
 void read_inputs() {
   gain_val = mozziAnalogRead(GAIN_CV_PIN); // using for trigger
@@ -272,7 +242,12 @@ void read_inputs() {
 
 void updateControl() {
   read_inputs();
-  check_modes();
+  // EncoderButton object updates
+  eb1.update();
+  left.update();
+  right.update();
+  // mode 0: FM mode 1: chord, mode 2: add
+    
   if ( mode == 0 ) {
     updateChords();
   } else if ( mode == 1 ) {
