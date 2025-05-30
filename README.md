@@ -1,7 +1,9 @@
 # rampart
 An arduino semi-modular synth companion to keep, moat and bastl's kastle.
 
-The prototype uses an Arduino Nano. The Mozzi library is used for synthesis.
+Rampart can use an Arduino Nano or an LGT8F238. I sell them with the latter chip since it's twice as fast and has on more 16 bit timer:
+
+ The Mozzi library is used for some synthesis sketches and some are just direct PWM with timers.
 
 ![V3 top pcb](rampartv3_pcb.jpg)
 
