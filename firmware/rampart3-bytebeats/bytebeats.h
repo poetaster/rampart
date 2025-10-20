@@ -240,6 +240,10 @@ void rythmical(int pb1) {
       setLimits(1, 11, 1, 11, 1, 11);
       result = t * (0xC298C298C298 >> (t >> a)&t >> b)&t >> c;
       break;
+    case 26: // https://www.reddit.com/r/bytebeat/comments/1gwe43y/the_new_unnamed_bytebeat_by_george_on_blogspot/
+      setLimits(1, 7, 9, 20, 5, 11);
+      result = (t * a) | (t ^ t >> b * (t >> c)) ;
+      break;
     case 25: // drums where did this come from? THIS must come at the end of the list.
       setLimits(0, 36, 0, 16, 10, 20);
       // a 18, b 6, c 10
@@ -247,8 +251,7 @@ void rythmical(int pb1) {
       result = ((((u = t & 0xfff) & 0 + ((u + 1 << (a + (t >> c & 1 * b))) / u) & 255) / (u >> 8)) & 240 - 128) * 3;
       enc_offset = 2;
       break;
-
-// (t>>(t>>13&31)&128)+((t&t>>12)*t>>12)+3e5/(t%16384)
+      // (t>>(t>>13&31)&128)+((t&t>>12)*t>>12)+3e5/(t%16384)
 
   }
 }
@@ -282,7 +285,7 @@ void melodious(int pb2) {
       break;
     case 5: // glitch https://www.reddit.com/r/bytebeat/comments/ufvuio/electricity/ 12 / 16 / 12
       setLimits(8, 24, 8, 32, 8, 24);
-      result = (t>>12&3?((t>>a)%((t>>b)%6/(3&t>>c)+1)+1)*t&-t>>4:((t>>1)%((t>>b)%6/(3&t>>a)+1)+1)*t&t);// +5E3/(t/4&4095);
+      result = (t >> 12 & 3 ? ((t >> a) % ((t >> b) % 6 / (3 & t >> c) + 1) + 1) * t & -t >> 4 : ((t >> 1) % ((t >> b) % 6 / (3 & t >> a) + 1) + 1) * t & t); // +5E3/(t/4&4095);
       break;
     case 6: // variation on 45 MAKE this TWO
       setLimits(0, 32, 0, 32, 0, 32); // aMin, aMax, etc
@@ -364,7 +367,7 @@ void melodious(int pb2) {
       result = (t & (t >> 6) + (t << ((t >> 11) ^ ((t >> b) + a)) | ((t >> c % 64) + (t >> c))) & (-t >> 5));
       //result = (t&(t>>6)+(t<<((t>>11)^((t>>13)+3))|((t>>14%64)+(t>>14)))&(-t>>5));
       break;
-    case 22:  https://www.pouet.net/topic.php?post=394926
+case 22:  https://www.pouet.net/topic.php?post=394926
       // (t*(4|t>>13&3)>>(~t>>11&1)&128|t*(t>>11&t>>13)*(~t>>9&3)&127)^(t&4096?(t*(t^t%255)|t>>4)>>1:t>>3|(t&8192?t<<2:t))
       setLimits(7, 13, 9, 15, 3, 11);
       result = (z = (t >> (1 + (t >> a & 1))) * (t >> a & 0xfd) * (t >> c & 0xdf) * (t >> 7 & 0xcc)) * 0 + ((t << 1))&z | ((t << 2))&z;
@@ -391,7 +394,7 @@ void melodious(int pb2) {
       break;
     case 27:
       // wavetable sine. could probably add a bunch of (t&15)*(-t&15)*(((t&16)/8)-1)*128/65+128
-      setLimits(1023, 0, 1023, 0, 1023, 0);
+      setLimits(0, 1023, 0, 1023, 0, 1023);
       tune = 404 - a;
       tune = tune << 3;
       freq[0] = a + tune;
@@ -400,12 +403,34 @@ void melodious(int pb2) {
       for (int i = 0; i <= 3; i++) {
         Acc[i] += freq[i];
       }
-      result = ( pgm_read_byte(&sine256[Acc[1] >> 8]) + pgm_read_byte(&sine256[Acc[2] >> 8]) ) / 2;
+      result = ( pgm_read_byte(&sine256[Acc[0] >> 8]) + pgm_read_byte(&sine256[Acc[1] >> 8]) + pgm_read_byte(&sine256[Acc[2] >> 8]) ) / 3;
       break;
-    case 28: //saw phase in honour of https://ressources.labomedia.org/_media/bytebeats_beginners_guide_ttnm_v1-5.pdf
-      setLimits(48, 72, 32, 64, 8, 48);
-      result = t % a | t % b | t % c;
+    case 28:
+      setLimits(0, 1023, 0, 1023, 0, 1023);
+      tune = 404 - a;
+      freq[0] = a * a ;
+      freq[1] = (b + 64) * a;
+      freq[2] = (c + 64) * a;
+      for (int i = 0; i <= 3; i++) {
+        Acc[i] += freq[i];
+      }
+      result = ( pgm_read_byte(&sine256[Acc[0] >> 8]) + pgm_read_byte(&sine256[Acc[1] >> 8]) + pgm_read_byte(&sine256[Acc[2] >> 8]) ) / 3;
       break;
+   case 29:
+      setLimits(0, 1023, 0, 1023, 0, 1023);
+      tune = 404 - a;
+      freq[0] = a * a ;
+      freq[1] = (b + 64) * a;
+      freq[2] = (c + 64) * a;
+      for (int i = 0; i <= 3; i++) {
+        Acc[i] += freq[i];
+      }
+      result =  ( ((Acc[0] >> 8) & 0x80 ) + ((Acc[1] >> 8) & 0x80 ) + ((Acc[2] >> 8) & 0x80 ) ) / 3;
+      break;
+//    case 29: //saw phase in honour of https://ressources.labomedia.org/_media/bytebeats_beginners_guide_ttnm_v1-5.pdf
+//      setLimits(48, 72, 32, 64, 8, 48);
+//      result = t % a | t % b | t % c;
+//      break;
 
 
 
@@ -555,9 +580,9 @@ ISR(TIMER1_COMPA_vect) {
   }
 
   //PWM16B(result);
-  
+
   OCR2A =  result;
-  
+
   if ( enc_offset != 0) {
     t += enc_offset;
   }

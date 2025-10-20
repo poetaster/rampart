@@ -9,19 +9,11 @@
    Many contributions from the internet :) See nyblybyte.h for many equations origins and original form.
 */
 
-//#include <EEPROM.h>
-//#define USE_LGT_EEPROM_API
 
-//#include <util/crc16.h>
+
+
 #include <EncoderButton.h>
 
-// Define EEPROM addresses to store variables, , 4 bytes per float (freq_target1, freq_target2)
-//#define PROG_PB1_ADR       0
-//#define PROG_PB2_ADR       4
-//#define PROG_PB3_ADR       8
-//#define BANK_ADR           9
-//#define EEPROM_CRC_ADR     11
-//#define EEPROM_DATA_LENGTH 10  // 10 bytes of EEPROM written (without crc)
 
 // for pwm init functions
 const unsigned int TOP = 0x07FF; // 11-bit resolution.  7812 Hz PWM
@@ -60,7 +52,7 @@ int banktotal = 3;
 int pb1 = 1;
 int pb1total = 25;
 int pb2 = 1;
-int pb2total = 28;
+int pb2total = 29;
 int pb3 = 1;
 int pb3total = 20;
 
@@ -107,14 +99,6 @@ long timeoffset = 0;
    handle encoder button long press event
 */
 void onEb1LongPress(EncoderButton& eb) {
-  
-  // SAVE all selected registers to EEPROM
-  /*
-  EEPROM.write(PROG_PB1_ADR, pb1);
-  EEPROM.write(PROG_PB2_ADR, pb2);
-  EEPROM.write(PROG_PB3_ADR, pb3);
-  EEPROM.write(BANK_ADR, bank);
-  */
   
   if (debug) {
     Serial.print("button1 longPressCount: ");
@@ -263,21 +247,7 @@ void setup() {
     Serial.begin(57600);
     Serial.println(F("Started"));
   }
-  /*
-  // Load selected registers from EEPROM
-  EEPROM.get(PROG_PB1_ADR, pb1);
-  EEPROM.get(PROG_PB2_ADR, pb2);
-  EEPROM.get(PROG_PB3_ADR, pb3);
-  EEPROM.get(BANK_ADR, bank);
-  
-  Serial.println(F("pb1"));
-  Serial.println(pb1);
-  
-  if (pb1 < 1) pb1 = 1;
-  if (pb2 < 1) pb2 = 1;
-  if (pb3 < 1) pb3 = 1;
-  if (bank < 1) bank = 1;
-  */
+
 
   
   pinMode(LEDPIN, OUTPUT);
