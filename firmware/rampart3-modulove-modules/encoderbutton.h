@@ -3,13 +3,13 @@ int bank = 1;
 int banktotal = 3;
 
 int pb1 = 0;
-int pb1total = 4;
+int pb1total = 3;
 
 int pb2 = 0;
 int pb2total = 4;
 
 int pb3 = 0;
-int pb3total = 4;
+int pb3total = 2;
 
 int pb5 = 0;
 int pb5total = 3;
@@ -67,25 +67,15 @@ void onEb1Clicked(EncoderButton& eb) {
 */
 void onLeftReleased(EncoderButton& left) {
 
-  if (bank == 1)
-  {
-    pb1--;
-    constrain(pb1, 0, pb1total);
-    current_poly_mode = pb1;
-    update_mode(); // from Polyrythm.h
-    if (debug) Serial.println(pb1);
-  }
-
-  else if (bank == 2) {
+ if (bank == 2) {
     pb2--;
     constrain(pb2, 0, pb2total);
     current_genseq_refrain = pb2;
   }
-
   else if (bank == 3) {
     pb3--;
     constrain(pb3, 0, pb3total);
-    current_mm_mode = pb3;
+    current_mm_curve = pb3;
   }
   else if (bank ==5) {
     pb5--;
@@ -99,22 +89,14 @@ void onLeftReleased(EncoderButton& left) {
 */
 void onRightReleased(EncoderButton& right) {
 
-  if (bank == 1)
-  {
-    pb1++;
-    constrain(pb1, 0, pb1total);
-    current_poly_mode = pb1;
-    update_mode(); // from Polyrythm.h
-    if (debug) Serial.println(pb1);
-  }
-  else if (bank == 2) {
+if (bank == 2) {
     constrain(pb2, 0, pb2total);
     current_genseq_refrain = pb2;
   }
   else if (bank == 3) {
     pb3++;
     constrain(pb3, 0, pb3total);
-    current_mm_mode = pb3;
+    current_mm_curve = pb3;
   } else if (bank == 4) { // from adsr
     val = 0;
     loop_enabled = !loop_enabled;
@@ -135,11 +117,15 @@ void onEb1Encoder(EncoderButton& eb) {
 
   //displayUpdate();
   encoder_delta = eb.increment();
-  if (bank == 3) {
-    current_mm_curve = current_mm_curve + enc_delta;
-    constrain(current_mm_curve, 0, 2);
+  if (bank == 1) {
+    current_poly_mode = current_poly_mode + enc_delta;
+    constrain (current_poly_mode, 0, 3);
+  } else if (bank == 3) {
+    current_mm_mode = current_mm_mode + enc_delta;
+    constrain(current_mm_mode, 0, 3);
   } else if (bank == 4) {
     current_release = current_release + encoder_delta;
+    constrain(current_release, 10,  1000);
   }
 
   if (debug) {
