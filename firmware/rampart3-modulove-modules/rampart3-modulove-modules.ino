@@ -138,9 +138,9 @@ void loop() {
   //knobs();
   
   if (bank == 1) {
-    loopPoly();
-  } else if (bank == 2) {
     loopGenSeq();
+  } else if (bank == 2) {
+    loopPoly();
   } else if (bank == 3) {
     loopMMenv();
   } else if (bank == 4) {

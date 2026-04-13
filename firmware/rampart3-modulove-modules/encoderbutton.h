@@ -26,6 +26,7 @@ int enc_delta; // which direction
 */
 void onEb1LongPress(EncoderButton& eb) {
 
+  bank = eb.longPressCount();
   if (debug) {
     Serial.print("button1 longPressCount: ");
     Serial.println(eb.longPressCount());
@@ -53,7 +54,7 @@ void onEb1PressTurn(EncoderButton& eb) {
 void onEb1Clicked(EncoderButton& eb) {
 
   // set which bank to select formulas from
-  bank = eb.clickCount();
+  //bank = eb.clickCount();
 
   if (debug) {
     Serial.print("bank: ");
@@ -89,7 +90,7 @@ void onLeftReleased(EncoderButton& left) {
 */
 void onRightReleased(EncoderButton& right) {
 
-if (bank == 2) {
+if (bank == 1) {
     constrain(pb2, 0, pb2total);
     current_genseq_refrain = pb2;
   }
@@ -117,7 +118,7 @@ void onEb1Encoder(EncoderButton& eb) {
 
   //displayUpdate();
   encoder_delta = eb.increment();
-  if (bank == 1) {
+  if (bank == 2) {
     current_poly_mode = current_poly_mode + enc_delta;
     constrain (current_poly_mode, 0, 3);
   } else if (bank == 3) {
