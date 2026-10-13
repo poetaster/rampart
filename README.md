@@ -1,6 +1,8 @@
 # rampart
 An arduino semi-modular synth companion to keep, moat and bastl's kastle.
 
+The current, version 2, is contained in the rampart_pico.* files, which upgrade the MUC to a pi pico in the zero form factor. The last arduion nano (or lgt) versions are in the rampart3_* files, which I no longer make....
+
 Rampart can use an Arduino Nano or an LGT8F238. I sell them with the latter chip since it's twice as fast and has on more 16 bit timer:
 
  The Mozzi library is used for some synthesis sketches and some are just direct PWM with timers.
