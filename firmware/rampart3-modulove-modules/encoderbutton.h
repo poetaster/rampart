@@ -67,7 +67,9 @@ void onEb1Clicked(EncoderButton& eb) {
     handle left button short release
 */
 void onLeftReleased(EncoderButton& left) {
-
+ if (bank == 1) {
+   
+ }
  if (bank == 2) {
     pb2--;
     constrain(pb2, 0, pb2total);
@@ -91,8 +93,10 @@ void onLeftReleased(EncoderButton& left) {
 void onRightReleased(EncoderButton& right) {
 
 if (bank == 1) {
-    constrain(pb2, 0, pb2total);
-    current_genseq_refrain = pb2;
+    //constrain(pb2, 0, pb2total);
+    //current_genseq_refrain = pb2;
+     scaleRoot = random(6);
+     cycleMode();
   }
   else if (bank == 3) {
     pb3++;

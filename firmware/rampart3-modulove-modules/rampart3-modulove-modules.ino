@@ -12,7 +12,13 @@
 */
 
 
-bool debug = false;
+bool debug = true;
+
+// let's try gen sequence with more structure
+#include "Midier.h"
+#include "midi.h"
+
+uint16_t cur_val;
 
 // slightly modified from the original
 #include "synclfo.h"
@@ -32,8 +38,6 @@ EncoderButton eb1(5, 6, 4);
 // the library has nice button handling and uses bounce2
 EncoderButton left(3); // pin 3 rampart
 EncoderButton right(2); // pin 2 rampart
-
-
 
 // encoder + button logic
 #include "encoderbutton.h"
@@ -67,7 +71,6 @@ int d = 0; // hmm?
 
 
 
-
 long timeoffset = 0;
 
 
@@ -90,6 +93,7 @@ void setup() {
 
   pinMode(LEDPIN, OUTPUT);
   pinMode(PWMPIN, OUTPUT);
+  pinMode(6, OUTPUT);
 
   //lastA =  analogRead(A3);
   //lastB =  analogRead(A6);
@@ -108,6 +112,10 @@ void setup() {
   left.setRateLimit(7);
   right.setReleasedHandler(onRightReleased);
   right.setRateLimit(6);
+
+  // initialize a mode to play
+  mmode = midier::Mode::Ionian;
+  makeScale( roots[scaleRoot], mmode);
 
 }
 
@@ -232,3 +240,26 @@ void display_value(int16_t value) {
   }
   //display_timer = millis();
 }
+
+////////////////////////////////////////////////////////////////
+//
+// Timer1 Interrupt Service
+// Frequency = 16,000,000 / 510 = 31372.5
+//
+/*
+ISR(TIMER1_OVF_vect) {
+
+  byte offset;
+
+  // Sample wave table for LFO1
+  //accumulatorA  += LFO1_TuningWord;
+  //offset         = accumulatorA >> 24; // high order byte
+  OCR1A          = cur_val; //(pgm_read_byte_near(LFO1_WaveTable + offset) * LFO1_Depth) / 1024L;
+
+  // Sample wave table for LFO2
+  //accumulatorB  += LFO2_TuningWord;
+  //offset         = accumulatorB >> 24; // high order byte
+  OCR1B          = cur_val; //(pgm_read_byte_near(LFO2_WaveTable + offset) * LFO2_Depth) / 1024L;
+
+}
+*/

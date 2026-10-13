@@ -14,7 +14,7 @@ const uint8_t P_COUNT = 3;                            // Number of knobs.
 const uint8_t KNOB_PINS[P_COUNT] = {P1, P2, P3};  // Array of knob GPIO pin identifiers.
 
 const uint8_t GATE_IN = 7;  // Digital Input
-const uint8_t CV_OUT = 9;  // CV Output for current step
+const uint8_t CV_OUT = 10;  // CV Output for current step
 
 const uint8_t LED1_PIN = 13;  // LED 1
 
@@ -291,8 +291,6 @@ class SyncLFO {
     void InitInputs();
     void InitOutputs();
 };
-
-
 
 
 

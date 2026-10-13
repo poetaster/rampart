@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Fritzing (https://fritzing.org/) -->
+
+<svg
+   height="64.336456mm"
+   version="1.2"
+   viewBox="0 0 248.38225 182.37072"
+   width="87.623764mm"
+   x="0in"
+   y="0in"
+   id="svg2749"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs2753" />
+  <g
+     id="board"
+     transform="translate(-0.6132551,-1.563441)">
+    <defs
+       id="defs1531" />
+    <rect
+       fill="#cccccc"
+       height="182.371"
+       id="boardoutline"
+       rx="9.71873"
+       ry="10.4131"
+       stroke="none"
+       stroke-dasharray="none"
+       stroke-opacity="1"
+       stroke-width="2.80986"
+       style="display:inline;stroke-miterlimit:4"
+       width="247.633"
+       x="1.36251"
+       y="1.56326" />
+  </g>
+  <g
+     partID="865907600"
+     id="g766"
+     transform="translate(-2.8148551,-19.776541)">
+    <g
+       transform="translate(229.002,180.239)"
+       id="g764">
+      <g
+         id="g762">
+        <circle
+           cx="6.1354299"
+           cy="6.1354299"
+           fill="#000000"
+           id="nonconn0"
+           r="4.53543"
+           stroke="#f9a435"
+           stroke-width="0" />
+      </g>
+    </g>
+  </g>
+  <g
+     partID="865907620"
+     id="g774"
+     transform="translate(-2.8148551,-19.776541)">
+    <g
+       transform="translate(13.2399,181.264)"
+       id="g772">
+      <g
+         id="g770">
+        <circle
+           cx="6.1354299"
+           cy="6.1354299"
+           fill="#000000"
+           id="circle768"
+           r="4.53543"
+           stroke="#f9a435"
+           stroke-width="0" />
+      </g>
+    </g>
+  </g>
+  <g
+     partID="865907480"
+     id="g782"
+     transform="translate(-2.8148551,-19.776541)">
+    <g
+       transform="translate(11.6966,27.742)"
+       id="g780">
+      <g
+         id="g778">
+        <circle
+           cx="6.1354299"
+           cy="6.1354299"
+           fill="#000000"
+           id="circle776"
+           r="4.53543"
+           stroke="#f9a435"
+           stroke-width="0" />
+      </g>
+    </g>
+  </g>
+  <g
+     partID="865907510"
+     id="g790"
+     transform="translate(-2.8148551,-19.776541)">
+    <g
+       transform="translate(228.574,29.1113)"
+       id="g788">
+      <g
+         id="g786">
+        <circle
+           cx="6.1354299"
+           cy="6.1354299"
+           fill="#000000"
+           id="circle784"
+           r="4.53543"
+           stroke="#f9a435"
+           stroke-width="0" />
+      </g>
+    </g>
+  </g>
+  <circle
+     style="display:inline;fill:#000000;stroke:none;stroke-width:0.474096;stroke-opacity:1"
+     id="path7792"
+     cx="176.19579"
+     cy="38.155926"
+     r="9.921258" />
+  <circle
+     style="display:inline;fill:#000000;stroke:none;stroke-width:0.474096;stroke-opacity:1"
+     id="circle11091"
+     cx="226.75975"
+     cy="45.49818"
+     r="9.921258" />
+  <circle
+     style="display:inline;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.474096;stroke-opacity:1"
+     id="circle11093"
+     cx="174.92516"
+     cy="147.94554"
+     r="9.921258" />
+  <circle
+     style="display:inline;fill:#000000;stroke:none;stroke-width:0.474096;stroke-opacity:1"
+     id="circle11095"
+     cx="127.14317"
+     cy="147.94554"
+     r="9.921258" />
+  <circle
+     style="display:inline;fill:#000000;stroke:none;stroke-width:0.474096;stroke-opacity:1"
+     id="circle11097"
+     cx="76.857277"
+     cy="147.94554"
+     r="9.921258" />
+  <rect
+     style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.764853;stroke-opacity:1"
+     id="rect11151"
+     width="73.700768"
+     height="28.346449"
+     x="55.52216"
+     y="41.749046" />
+  <rect
+     style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.662382;stroke-opacity:1"
+     id="rect12605"
+     width="25.511803"
+     height="36.850384"
+     x="32.999992"
+     y="91.472656" />
+  <rect
+     style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.574457;stroke-opacity:1"
+     id="rect12607"
+     width="22.677158"
+     height="31.181093"
+     x="0"
+     y="94.254684" />
+  <rect
+     style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.768436;stroke-opacity:1"
+     id="rect14787"
+     width="23.938747"
+     height="9.2447748"
+     x="1.0719144"
+     y="74.438477" />
+  <rect
+     style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.596951;stroke-opacity:1"
+     id="rect14789"
+     width="8.2161961"
+     height="16.254963"
+     x="44.350266"
+     y="142.55428" />
+  <rect
+     style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.00191;stroke-opacity:1"
+     id="rect14791"
+     width="16.264244"
+     height="23.131296"
+     x="153.20406"
+     y="104.80801" />
+  <rect
+     style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.00191;stroke-opacity:1"
+     id="rect14793"
+     width="16.264244"
+     height="23.131296"
+     x="173.46712"
+     y="104.80801" />
+  <rect
+     style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.595966;stroke-opacity:1"
+     id="rect14795"
+     width="8.1891298"
+     height="16.254963"
+     x="192.85439"
+     y="86.219681" />
+</svg>
