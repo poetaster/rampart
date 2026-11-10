@@ -107,7 +107,7 @@ int engine_in;
 float fm_mod = 0.0f ; //IN(7);
 float timb_mod = 0.0f; //IN(8);
 float morph_mod = 0.0f; //IN(9);
-float decay_in = 0.5f; // IN(10);
+float decay_mod = 0.5f; // IN(10);
 float lpg_in = 0.1f ;// IN(11);
 int pitch_in = 60;
 
@@ -138,7 +138,6 @@ const int oled_i2c_addr = 0x3C;
 const int dw = 128;
 const int dh = 32;
 
-#include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #define OLED_RESET     -1 // Reset pin # (or -1 if sharing Arduino reset pin)
 #define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
@@ -148,6 +147,10 @@ Adafruit_SSD1306 display(dw, dh, &Wire1, OLED_RESET);
 
 #include <VL53L1X.h>
 VL53L1X sensor;
+
+// the adc 4 inputs 16 bits
+#include <AlashADS1115.h>
+AlashADS1115 adc;
 
 #include "font.h"
 #include "helvnCB6pt7b.h"
@@ -196,11 +199,15 @@ int16_t avg_cv(int cv_in) {
 
 void setup() {
   Serial.begin(115200);
-
-  //Wire.setSDA(oled_sda_pin);
-  //Wire.setSCL(oled_scl_pin);
-  //Wire.begin();
-
+  // this is the ADCs I2C
+  Wire.setSDA(12);
+  Wire.setSCL(13);
+  Wire.begin();
+  // start
+  adc.begin();
+  adc.setRate(860);
+  adc.setAutoGain(true);
+  
   // DISPLAY and TOF are on this bus
   Wire1.setSDA(oled_sda_pin);
   Wire1.setSCL(oled_scl_pin);
@@ -397,32 +404,50 @@ void updateControl() {
     makeScale( roots[scaleRoot], mode);
   }
 
+  // finally, collect adc inputs
+  fm_mod =   (float)adc.voltage(0)/10.0f;
+  timb_mod = (float)adc.voltage(1)/10.0f;
+  morph_mod = (float)adc.voltage(2)/10.0f;
+  decay_mod = (float)adc.voltage(3)/10.0f;
+  if (debug) {
+  Serial.print(fm_mod);
+  Serial.print(" ");
+  Serial.print(timb_mod);
+  Serial.print(" ");
+  Serial.print(morph_mod);
+  Serial.print(" ");
+  Serial.print(decay_mod);
+  Serial.print(" ");
+  Serial.println();
+  }
 }
 
 void updateBraidsAudio() {
 
   int16_t *buffer = voices[0].pd.buffer;
   uint8_t *sync_buffer = voices[0].pd.sync_buffer;
-  //braids::Envelope *envelope = voices[0].envelope;
   size_t  size = BLOCK_SIZE;
 
   braids::MacroOscillator *osc = voices[0].pd.osc;
 
-  // TODO: check setting pitch
-  //CONSTRAIN(voct_in, 0.f, 127.f);
-  //int pit = (int)voct_in;
-  //float frac = voct_in - pit;
   //osc->set_pitch((pit << 7) + (int)(frac * 128.f));
-
   osc->set_pitch(pitch_in << 7);
 
-  // set parameters
-  CONSTRAIN(timbre_in, 0.f, 1.f);
-  int16_t timbre = timbre_in * 32767.f;
+  // cv modulation input
+  float modulation;
+  modulation = timb_mod; // timbre
+  float timbre = (timbre_in + modulation);
+  CONSTRAIN(timbre, 0.0f, 1.0f);
 
-  CONSTRAIN(morph_in, 0.f, 1.f);
-  int16_t color = morph_in * 32767.f;
-  osc->set_parameters(timbre, color);
+  modulation = morph_mod; // color
+  float morph = (morph_in + modulation);
+  CONSTRAIN(morph, 0.0f, 1.0f);
+
+  // set parameters
+  timbre = (timbre * 32767.0f);
+  morph = (morph * 32767.0f); 
+
+  osc->set_parameters(timbre, morph);
 
   // set shape/model
   uint8_t shape = (int)(engine_in);
