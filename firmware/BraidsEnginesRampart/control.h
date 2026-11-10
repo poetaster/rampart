@@ -1,7 +1,5 @@
 // the somewhat flake code from my pikobeats version
 // pot locking and sample averaging
-// button handling / led handling
-
 
 // pots
 #define NPOTS 3 // number of pots
@@ -40,8 +38,10 @@ uint16_t readpot(uint8_t potnum) {
       input = POTB;
       break;
   }
-  // note that Pikocore pots are wired "backwards" - max voltage is full ccw
-  for (int j = 0; j < POT_AVERAGING; ++j) val +=  analogRead(input); // read the A/D a few times and average for a more stable value
+  
+  // read the A/D a few times and average for a more stable value
+  for (int j = 0; j < POT_AVERAGING; ++j) val +=  analogRead(input);
+
   val = val / POT_AVERAGING;
   if (potlock[potnum]) {
     int delta = lastpotvalue[potnum] - val; // this needs to be done outside of the abs() function - see arduino abs() docs

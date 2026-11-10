@@ -405,21 +405,10 @@ void updateControl() {
   }
 
   // finally, collect adc inputs
-  fm_mod =   (float)adc.voltage(0)/10.0f;
-  timb_mod = (float)adc.voltage(1)/10.0f;
-  morph_mod = (float)adc.voltage(2)/10.0f;
-  decay_mod = (float)adc.voltage(3)/10.0f;
-  if (debug) {
-  Serial.print(fm_mod);
-  Serial.print(" ");
-  Serial.print(timb_mod);
-  Serial.print(" ");
-  Serial.print(morph_mod);
-  Serial.print(" ");
-  Serial.print(decay_mod);
-  Serial.print(" ");
-  Serial.println();
-  }
+  fm_mod =   (float)adc.voltage(0)/7.0f; // 7 is at a 1.2k to ground
+  timb_mod = (float)adc.voltage(1)/7.0f;
+  morph_mod = (float)adc.voltage(2)/7.0f;
+  decay_mod = (float)adc.voltage(3)/7.0f;
 }
 
 void updateBraidsAudio() {
