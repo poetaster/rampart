@@ -1,5 +1,5 @@
 /*
-  (c) 2025 blueprint@poetaster.de GPLv3
+  (c) 2026 blueprint@poetaster.de GPLv3
 
    Based on  mi_Ugens, Copyright (c) 2020 Volker Böhm. All rights reserved. GPLv3
    https://vboehm.net
@@ -26,17 +26,22 @@ PWMAudio DAC(PWMOUT);  // 16 bit PWM audio
 #include "Midier.h"
 
 // button inputs
-#define BUTTONL  5 // key1 input on schematic
-#define BUTTONR 6 // was 24 USR button on VCC-GND boards
-
-#define LED0 1 // LED1 output on schematic
-// analog freq pins
+#define BUTTONL  5 // these are the touch surfaces
+#define BUTTONR 6 
 
 #include <MIDI.h>
 #include <Wire.h>
 
-
 //MIDI_CREATE_DEFAULT_INSTANCE();
+
+// create ADSR envelope
+#include "ADSR.h"
+ADSR *env = new ADSR();
+float envAttack;
+float envDecay;
+int envRelease;
+float envSustain;
+long envTimer = 0;
 
 // braids dsp
 
@@ -58,14 +63,11 @@ const uint16_t bit_reduction_masks[] = {
 
 #include <STMLIB.h>
 #include <BRAIDS.h>
-#include "ADSR.h"
-// create ADSR env
-ADSR *env = new ADSR();
+#include "braids/envelope.h"
 
 typedef struct
 {
   braids::MacroOscillator *osc;
-
   float       samps[BLOCK_SIZE] ;
   int16_t     buffer[BLOCK_SIZE];
   uint8_t     sync_buffer[BLOCK_SIZE];
@@ -75,9 +77,6 @@ typedef struct
 int16_t shared_buffer[BLOCK_SIZE];
 
 
-bool envRelease = false;
-long envTimer = 0;
-
 //float a0 = (440.0 / 8.0) / kSampleRate; //48000.00;
 const size_t   kBlockSize = BLOCK_SIZE;
 
@@ -85,6 +84,7 @@ const size_t   kBlockSize = BLOCK_SIZE;
 struct Unit {
   braids::Quantizer   *quantizer;
   braids::SignatureWaveshaper *ws;
+  braids::Envelope *envelope;
   bool            last_trig;
   // resampler
   //SRC_STATE       *src_state;
@@ -97,7 +97,6 @@ static long src_input_callback(void *cb_data, float **audio);
 
 struct Unit voices[1];
 
-// Plaits modulation vars
 float morph_in = 0.7f; // IN(4);
 float trigger_in; //IN(5);
 float level_in = 0.0f; //IN(6);
@@ -112,45 +111,8 @@ float decay_in = 0.5f; // IN(10);
 float lpg_in = 0.1f ;// IN(11);
 int pitch_in = 60;
 
-
-// Braids vars
-//    float   voct_in = IN0(0);
-//    float   timbre_in = IN0(1);
-//    float   color_in = IN0(2);
-//    float   model_in = IN0(3);
-//    float   *trig_in = IN(4);
-
-// clock timer  stuff
-
-#define TIMER_INTERRUPT_DEBUG         0
-#define _TIMERINTERRUPT_LOGLEVEL_     4
-
-// Can be included as many times as necessary, without `Multiple Definitions` Linker Error
-#include "RPi_Pico_TimerInterrupt.h"
-
-//unsigned int SWPin = CLOCKIN;
-
-#define TIMER0_INTERVAL_MS 20.833333333333   // \20.833333333333running at 48Khz
-#define DEBOUNCING_INTERVAL_MS   2// 80
-#define LOCAL_DEBUG              0
-
-volatile int counter = 0;
-
-// Init RPI_PICO_Timer, can use any from 0-15 pseudo-hardware timers
-RPI_PICO_Timer ITimer0(0);
-
-bool TimerHandler0(struct repeating_timer *t) {
-  (void) t;
-  bool sync = true;
-  if ( DAC.availableForWrite() ) {
-    for (size_t i = 0; i < BLOCK_SIZE; i++) {
-      //DAC.write( voices[0].pd.buffer[i], sync);
-      DAC.write( shared_buffer[i], sync); //try using envelope
-    }
-    counter =  1;
-  }
-  return true;
-}
+float global_volume = 0.9;
+// END Braids
 
 // GPIO, pots
 const int POTA = 29; // set the analog input for fm_intensity
@@ -159,8 +121,8 @@ const int POTC = 27; // set the analog input for mod ratio
 
 // encoder related
 #include <RotaryEncoder.h>
-const int encoderA_pin = 9;
-const int encoderB_pin = 10;
+const int encoderA_pin = 10;
+const int encoderB_pin = 9;
 const int encoderSW_pin = 8;
 
 RotaryEncoder encoder(encoderB_pin, encoderA_pin, RotaryEncoder::LatchMode::FOUR3);
@@ -174,8 +136,9 @@ const int oled_sda_pin = 2;
 const int oled_scl_pin = 3;
 const int oled_i2c_addr = 0x3C;
 const int dw = 128;
-const int dh = 64;
+const int dh = 32;
 
+#include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #define OLED_RESET     -1 // Reset pin # (or -1 if sharing Arduino reset pin)
 #define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
@@ -233,21 +196,12 @@ int16_t avg_cv(int cv_in) {
 
 void setup() {
   Serial.begin(115200);
-  // pwm timing setup
-  // we're using a pseudo interrupt for the render callback since internal dac callbacks crash
-  // Frequency in float Hz
-  //ITimer0.attachInterrupt(TIMER_FREQ_HZ, TimerHandler0);
-  if (ITimer0.attachInterruptInterval(TIMER0_INTERVAL_MS, TimerHandler0)) // that's 48kHz
-  {
-    if (debug) Serial.print(F("Starting  ITimer0 OK, millis() = ")); Serial.println(millis());
-  }  else {
-    if (debug) Serial.println(F("Can't set ITimer0. Select another freq. or timer"));
-  }
-  // DISPLAY
+
   //Wire.setSDA(oled_sda_pin);
   //Wire.setSCL(oled_scl_pin);
   //Wire.begin();
 
+  // DISPLAY and TOF are on this bus
   Wire1.setSDA(oled_sda_pin);
   Wire1.setSCL(oled_scl_pin);
   Wire1.begin();
@@ -352,6 +306,9 @@ void initVoices() {
   memset(voices[0].pd.buffer, 0, sizeof(int16_t)*BLOCK_SIZE);
   memset(voices[0].pd.sync_buffer, 0, sizeof(voices[0].pd.sync_buffer));
   memset(voices[0].pd.samps, 0, sizeof(float)*BLOCK_SIZE);
+  
+  voices[0].envelope = new braids::Envelope;
+  voices[0].envelope->Init();
 
   voices[0].last_trig = false;
   // get some samples initially
@@ -388,36 +345,21 @@ void updateControl() {
   CONSTRAIN(morph_in, 0.0f, 1.0f);
   CONSTRAIN(timbre_in, 0.0f, 1.0f);
 
-  /* note in
-              digitalWrite(led[i] , HIGH);
-
-          // a track button is pressed
-          current_track = i; // keypress selects track we are working on
-
-          if ( encoder_delta == 0) {
-            aNoteOff(currentMode[i], 0);
-            //noteA = freqs[i];
-            if (button[8]) scaleRoot = i; // change scaleroot if both encoder and another button is pressed.
-            pitch_in = currentMode[i]; //freqs[i];
-            aNoteOn( pitch_in, 100 );
-            envTimer = now;
-          }
-          pressedB = i;
-  */
+  // current TOF distance measure
   sensor.read();
 
-  int currentRange = map(sensor.ranging_data.range_mm, 10, 1000, 0, 8); // distance from tofaa
-  if (currentRange < 9) {
-
+  int currentRange = map(sensor.ranging_data.range_mm, 10, 1000, 21, 0); // distance from tofaa
+  if (currentRange > 0) {
     if (debug) Serial.print("range: ");
-    if (debug) Serial.println(sensor.ranging_data.range_mm);
+    if (debug) Serial.println(currentRange);
     int newNote = currentMode[currentRange];
-    if (newNote != pitch_in) {
-      aNoteOff(pitch_in, 0);
+    if (newNote != pitch_in && newNote < 121) {
+      aNoteOff(pitch_in, 0); // second param velocity
       pitch_in = newNote;
+      trigger_in = 1.0;
       if (debug) Serial.print("note: ");
       if (debug) Serial.println(pitch_in);
-      aNoteOn( pitch_in, 100);
+      //aNoteOn( pitch_in, 100); // don't need this
     }
   }
 
@@ -461,6 +403,7 @@ void updateBraidsAudio() {
 
   int16_t *buffer = voices[0].pd.buffer;
   uint8_t *sync_buffer = voices[0].pd.sync_buffer;
+  //braids::Envelope *envelope = voices[0].envelope;
   size_t  size = BLOCK_SIZE;
 
   braids::MacroOscillator *osc = voices[0].pd.osc;
@@ -493,10 +436,12 @@ void updateBraidsAudio() {
 
   voices[0].last_trig = trigger;
 
+
   if (trigger_flag) {
     osc->Strike();
     env->gate(true);
-  } else if  ( millis() - envTimer > 1000 ) { // just a fixed fake gate
+    trigger_in = 0;
+  } else { // just a fixed fake gate
     env->gate(false);
     envTimer = 0;
   }
@@ -504,24 +449,25 @@ void updateBraidsAudio() {
   for (int count = 0; count < 32; count += size) {
     // render
     osc->Render(sync_buffer, buffer, size);
-
   }
 
   // now apply the envelope
-  for (size_t i = 0; i < 32; ++i) {
+  /*for (size_t i = 0; i < 32; ++i) {
     int16_t sample =   (int16_t) ( (float) voices[0].pd.buffer[i] * env->process() ) ;
     shared_buffer[i] = sample;
-  }
+  }*/
 }
 
 void loop() {
   // when the osc buffer has been written to PWM buffer
-  if ( counter > 0 ) {
-    updateBraidsAudio();
-    counter = 0; // increments on each pass of the timer when the timer writes
-  }
-
-
+    if ( DAC.availableForWrite()) {
+      updateBraidsAudio();
+        for (size_t i = 0; i < 32; i++) {
+          int16_t sample =   (int16_t) ( (float) voices[0].pd.buffer[i] * env->process() * global_volume  ) ;
+          DAC.write( sample );
+          DAC.write( sample );
+        }
+    }
 }
 
 // second core dedicated to display foo
@@ -592,6 +538,6 @@ void loop1() {
     pot_timer = now;
   }
 
-  displayUpdate();
+  displayBraids();
 
 }
