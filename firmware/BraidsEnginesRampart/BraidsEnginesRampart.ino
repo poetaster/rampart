@@ -9,7 +9,7 @@
    Copyright (c)  2020 (emilie.o.gillet@gmail.com)
 */
 
-bool debug = true;
+bool debug = false;
 
 #include <Arduino.h>
 #include "stdio.h"
@@ -29,10 +29,19 @@ PWMAudio DAC(PWMOUT);  // 16 bit PWM audio
 #define BUTTONL  5 // these are the touch surfaces
 #define BUTTONR 6 
 
+#include <SoftwareSerial.h>
 #include <MIDI.h>
 #include <Wire.h>
 
-//MIDI_CREATE_DEFAULT_INSTANCE();
+using Transport = MIDI_NAMESPACE::SerialMIDI<SoftwareSerial>;
+int rxPin = 1;
+int txPin = 0;
+SoftwareSerial mySerial = SoftwareSerial(rxPin, txPin); //thruActivated
+Transport serialMIDI(mySerial);
+MIDI_NAMESPACE::MidiInterface<Transport> MIDI((Transport&)serialMIDI);
+
+//MIDI_CREATE_INSTANCE(HardwareSerial, Serial, MIDI);
+
 
 // create ADSR envelope
 #include "ADSR.h"
@@ -64,7 +73,11 @@ float lpg_in = 0.1f ;// IN(11);
 int pitch_in = 60;
 
 float global_volume = 0.9;
+int lastNote;
 
+// midi related functions
+
+#include "midi.h"
 #include "braids.h"
 
 // END Braids
@@ -123,8 +136,6 @@ bool encoder_held = false;
 
 // buttons & knobs defines/functions
 #include "control.h"
-// midi related functions
-#include "midi.h"
 
 //utility
 double randomDouble( double minf, double maxf) {
@@ -226,6 +237,9 @@ void setup() {
   env->setReleaseRate(3 * SAMPLERATE);
   env->setSustainLevel(.8);
 
+  if (debug == false) {
+    MIDI.begin(MIDI_CHANNEL_OMNI);//MIDI_CHANNEL_OMNI);
+  }
 
   // init the braids voices
   initVoices();
@@ -237,8 +251,8 @@ void setup() {
   //MIDI.setHandleNoteOn(HandleNoteOn);  // Put only the name of the function
   //MIDI.setHandleNoteOff(HandleNoteOff);  // Put only the name of the function
   //MIDI.begin(MIDI_CHANNEL_OMNI);
-
-  delay(2000);
+  allOff(); // all midi off
+  delay(1000);
 
 }
 
@@ -262,22 +276,26 @@ void updateControl() {
 
   // current TOF distance measure
   sensor.read();
-
-  int currentRange = map(sensor.ranging_data.range_mm, 10, 1000, 21, 0); // distance from tofaa
+  int currentDistance = sensor.ranging_data.range_mm;
+  int currentRange = map(currentDistance, 10, 1000, 21, 0); // distance from tofaa
   if (currentRange > 0) {
     if (debug) Serial.print("range: ");
     if (debug) Serial.println(currentRange);
     int newNote = currentMode[currentRange];
+
     if (newNote != pitch_in && newNote < 121) {
-      aNoteOff(pitch_in, 0); // second param velocity
+      lastNote = pitch_in;
       pitch_in = newNote;
-      trigger_in = 1.0;
       if (debug) Serial.print("note: ");
       if (debug) Serial.println(pitch_in);
-      //aNoteOn( pitch_in, 100); // don't need this
+      aNoteOn( pitch_in, 100); // don't need this
     }
   }
-
+  if (currentDistance > 1100 && currentDistance < 1400) {
+    if (! debug) allOff();
+    env->gate(false);
+  }
+  if (trigger_in == 0) aNoteOff(lastNote,0);
 
   if (BUTTONL) { }
 

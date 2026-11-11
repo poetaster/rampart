@@ -129,13 +129,13 @@ void updateBraidsAudio() {
   voices[0].last_trig = trigger;
 
 
-  if (trigger_flag) {
+  if (trigger) {
     osc->Strike();
     env->gate(true);
     trigger_in = 0;
   } else { // just a fixed fake gate
     env->gate(false);
-    envTimer = 0;
+    //envTimer = 0;
   }
 
   for (int count = 0; count < 32; count += size) {

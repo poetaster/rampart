@@ -31,7 +31,15 @@ void makeScale(midier::Note root, midier::Mode mode) {
   }
 }
 
+int midiChannel = 1;  // Define which MIDI channel to transmit on (1 to 16).
 
+
+// need to send note offs :)
+void allOff() {
+  for (int i = 18; i < 90; i++) {
+    if ( ! debug) MIDI.sendNoteOff(i, 0, midiChannel);
+  }
+}
 
 void HandleNoteOff(byte channel, byte note, byte velocity) {
   //envelope.noteOff();
@@ -50,6 +58,7 @@ void HandleNoteOn(byte channel, byte note, byte velocity) {
 }
 
 void aNoteOff( float note, int velocity) {
+  if (! debug) MIDI.sendNoteOff(note, 0, midiChannel);
   trigger_in = 0.0;
   env->gate(false);
   //digitalWrite(LED_BUILTIN, LOW);
@@ -57,7 +66,9 @@ void aNoteOff( float note, int velocity) {
 
 void aNoteOn(float note, int velocity) {
 
+  if (! debug) MIDI.sendNoteOff(lastNote, 0, midiChannel);
+  if (! debug) MIDI.sendNoteOn(note, velocity, midiChannel);
    trigger_in = 1.0;
-   //env->gate(true);
+  // env->gate(true);
   //digitalWrite(LED, HIGH);
 }
